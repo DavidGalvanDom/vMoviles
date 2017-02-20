@@ -2,7 +2,7 @@
 //  TextDialog.swift
 //  Todo
 //
-//  Created by Pasin Suriyentrakorn on 2/25/16.
+//  Created by David Galvan on 2/25/16.
 //  Copyright © 2016 Couchbase. All rights reserved.
 //
 

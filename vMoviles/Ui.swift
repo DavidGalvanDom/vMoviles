@@ -2,7 +2,7 @@
 //  Ui.swift
 //  vMoviles
 //
-//  Created by Pasin Suriyentrakorn on 2/8/16.
+//  Created by David Galvan on 2/8/16.
 //  Copyright © 2016 Couchbase. All rights reserved.
 //
 

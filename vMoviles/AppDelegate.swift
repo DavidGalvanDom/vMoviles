@@ -16,7 +16,7 @@ let kConflictResolution = false
 
 
 @UIApplicationMain
-class AppDelegate: UIResponder, UIApplicationDelegate {
+class AppDelegate: UIResponder, UIApplicationDelegate, UISplitViewControllerDelegate {
 
     var window: UIWindow?
     
@@ -28,6 +28,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     var accessDocuments: Array<CBLDocument> = [];
     var vendedor: String!
     var compania: String!
+    var cveCompania: String!
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplicationLaunchOptionsKey: Any]?) -> Bool {
         
@@ -37,6 +38,15 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         }
         
         cargaConfiguracion()
+        
+        // Override point for customization after application launch.
+    /*    let splitViewController = self.window!.rootViewController as! UISplitViewController
+        let navigationController = splitViewController.viewControllers[splitViewController.viewControllers.count-1] as! UINavigationController
+        navigationController.topViewController!.navigationItem.leftBarButtonItem = splitViewController.displayModeButtonItem
+        splitViewController.delegate = self*/
+
+        self.showCompanias()
+        
         
         return true
     }
@@ -207,5 +217,42 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         CBLManager.enableLogging("Sync")
         CBLManager.enableLogging("SyncVerbose")
     }
+    
+    func showCompanias() {
+        guard let root = window?.rootViewController, let storyboard = root.storyboard else {
+            return
+        }
+        
+        let controller = storyboard.instantiateViewController(withIdentifier: "navCompanias")
+        window!.rootViewController = controller
+    }
+    
+    func showSplitView()
+    {
+        guard let root = window?.rootViewController, let storyboard = root.storyboard else {
+            return
+        }
+        
+        // Override point for customization after application launch.
+        let controller = storyboard.instantiateInitialViewController()
+        window!.rootViewController = controller
+    }
+    
+    // MARK: - Split view
+    func splitViewController(_ splitViewController: UISplitViewController, collapseSecondary secondaryViewController:UIViewController, onto primaryViewController:UIViewController) -> Bool {
+        
+        guard let secondaryAsNavController = secondaryViewController as? UINavigationController else { return false }
+        
+        guard let topAsDetailController = secondaryAsNavController.topViewController as? ClienteDetalleViewController else { return false }
+        
+        
+        if topAsDetailController.detailItem == nil {
+            // Return true to indicate that we have handled the collapse by doing nothing; the secondary controller will be discarded.
+            return true
+        }
+        return false
+    }
+
+
 }
 

@@ -46,7 +46,8 @@ class CompaniasViewController: UIViewController,  UITableViewDelegate, UITableVi
 
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         let app = UIApplication.shared.delegate as! AppDelegate
-        app.compania = companias[indexPath.row]._id
+        app.cveCompania = companias[indexPath.row]._id
+        app.compania = companias[indexPath.row]._descripcion
     }
     
     /*

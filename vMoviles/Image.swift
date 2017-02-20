@@ -2,7 +2,7 @@
 //  Image.swift
 //  vMoviles
 //
-//  Created by Pasin Suriyentrakorn on 2/15/16.
+//  Created by David Galvan on 2/15/16.
 //  Copyright © 2016 Couchbase. All rights reserved.
 //
 
