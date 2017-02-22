@@ -8,9 +8,9 @@
 
 import UIKit
 
-let kSyncEnabled = false
-let kSyncGatewayUrl = URL(string: "http://localhost:4984/todo/")!
-let kLoggingEnabled = false
+let kSyncEnabled = true
+let kSyncGatewayUrl = "http://192.168.0.8:4984"
+let kLoggingEnabled = true
 let kUsePrebuiltDb = false
 let kConflictResolution = false
 
@@ -26,33 +26,29 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UISplitViewControllerDele
     var syncError: NSError?
     var conflictsLiveQuery: CBLLiveQuery?
     var accessDocuments: Array<CBLDocument> = [];
+    var idAgente: String!
+    var lineaVenta: String!
     var vendedor: String!
     var compania: String!
     var cveCompania: String!
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplicationLaunchOptionsKey: Any]?) -> Bool {
         
-        // Override point for customization after application launch.
+        // Habilita el log para monitorear la replicacion
         if kLoggingEnabled {
             enableLogging()
         }
         
-        cargaConfiguracion()
-        
-        // Override point for customization after application launch.
-    /*    let splitViewController = self.window!.rootViewController as! UISplitViewController
-        let navigationController = splitViewController.viewControllers[splitViewController.viewControllers.count-1] as! UINavigationController
-        navigationController.topViewController!.navigationItem.leftBarButtonItem = splitViewController.displayModeButtonItem
-        splitViewController.delegate = self*/
-
+        self.cargaConfiguracion()
         self.showCompanias()
-        
         
         return true
     }
 
     func cargaConfiguracion () {
         vendedor = "David Galvan Dom"
+        idAgente = "5"
+        lineaVenta = "cat-1,cat-2"
     }
     
     func applicationWillResignActive(_ application: UIApplication) {
@@ -78,10 +74,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UISplitViewControllerDele
     }
 
     // Base de datos
-    func openDatabase(username:String, withKey key:String?,
-                      withNewKey newKey:String?) throws {
+    func openDatabase(compania:String) throws {
         
-        let dbname = username
+        let dbname = compania
         let options = CBLDatabaseOptions()
         options.create = true
         
@@ -93,7 +88,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UISplitViewControllerDele
 
     func closeDatabase() throws {
         //stopConflictLiveQuery()
-        try database.close()
+        if(database != nil) {
+            try database.close()
+        }
     }
     
     func observeDatabaseChange(notification: Notification) {
@@ -150,25 +147,37 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UISplitViewControllerDele
     }
     
     // David GD : - Replication
-    func startReplication(withUsername username:String, andPassword password:String? = "") {
+    func startReplication(compania:String) {
         guard kSyncEnabled else {
             return
         }
         
+        do {
+            try closeDatabase()
+            try openDatabase(compania: compania)
+        } catch let error as NSError {
+            NSLog("No se puede cerrar la base de datos: %@", error)
+        }
+
         syncError = nil
+        //se asigna la copania
+        let url = URL(string: "\(kSyncGatewayUrl)/\(compania)")
+        if(database != nil) {
+            // Inicia push/pull replications
+            pusher = database.createPushReplication(url!)
+            pusher.continuous = true  // Runs forever in background
         
-        // Inicia push/pull replications
-        pusher = database.createPushReplication(kSyncGatewayUrl)
-        pusher.continuous = true  // Runs forever in background
-        NotificationCenter.default.addObserver(self, selector: #selector(replicationProgress(notification:)),
+            NotificationCenter.default.addObserver(self, selector: #selector(replicationProgress(notification:)),
                                                name: NSNotification.Name.cblReplicationChange, object: pusher)
         
-        puller = database.createPullReplication(kSyncGatewayUrl)
-        puller.continuous = true  // Runs forever in background
-        NotificationCenter.default.addObserver(self, selector: #selector(replicationProgress(notification:)),
+            puller = database.createPullReplication(url!)
+            puller.channels = ["general",lineaVenta, "saldo-\(idAgente)","saldo2-\(idAgente)","stpedido-\(idAgente)"]
+            puller.continuous = true  // Runs forever in background
+            NotificationCenter.default.addObserver(self, selector: #selector(replicationProgress(notification:)),
                                                name: NSNotification.Name.cblReplicationChange, object: puller)
-        pusher.start()
-        puller.start()
+            pusher.start()
+            puller.start()
+        }
     }
     
     func stopReplication() {
@@ -176,13 +185,17 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UISplitViewControllerDele
             return
         }
         
+        if (pusher != nil) {
         pusher.stop()
         NotificationCenter.default.removeObserver(
             self, name: NSNotification.Name.cblReplicationChange, object: pusher)
+        }
         
+        if( puller != nil) {
         puller.stop()
         NotificationCenter.default.removeObserver(
             self, name: NSNotification.Name.cblReplicationChange, object: puller)
+        }
     }
     
     func replicationProgress(notification: NSNotification) {
@@ -246,7 +259,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UISplitViewControllerDele
         guard let topAsDetailController = secondaryAsNavController.topViewController as? ClienteDetalleViewController else { return false }
         
         
-        if topAsDetailController.detailItem == nil {
+        if topAsDetailController.detalleCliente == nil {
             // Return true to indicate that we have handled the collapse by doing nothing; the secondary controller will be discarded.
             return true
         }

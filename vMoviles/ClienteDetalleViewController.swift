@@ -10,15 +10,36 @@ import UIKit
 
 class ClienteDetalleViewController: UIViewController {
 
+    @IBOutlet weak var lblNombre: UILabel!
+    
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         self.creaNavegador()
+        self.configureView()
         // Do any additional setup after loading the view.
     }
 
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
         // Dispose of any resources that can be recreated.
+    }
+    
+    
+    func configureView() {
+        // Se actualizan los datos de la interfaz
+        if let detalle = detalleCliente {
+            if let label = self.lblNombre {
+                label.text = detalle.razonsocial as String
+            }
+        }
+    }
+    
+    var detalleCliente: Cliente? {
+        didSet {
+            // Update the view.
+            self.configureView()
+        }
     }
     
     //Se crean los opciones de navegacion
@@ -55,7 +76,6 @@ class ClienteDetalleViewController: UIViewController {
 
     func onShowCompanias() {
         let app = UIApplication.shared.delegate as! AppDelegate
-        
         app.showCompanias()
     }
     
@@ -67,33 +87,4 @@ class ClienteDetalleViewController: UIViewController {
     
     }
     
-    
-    func configureView() {
-        // Update the user interface for the detail item.
-       /* if let detail = self.detailItem {
-            if let label = self.detailDescriptionLabel {
-                label.text = detail.description
-            }
-        }*/
-    }
-
-
-    var detailItem: NSDate? {
-        didSet {
-            // Update the view.
-            self.configureView()
-        }
-    }
-
-    
-    /*
-    // MARK: - Navigation
-
-    // In a storyboard-based application, you will often want to do a little preparation before navigation
-    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        // Get the new view controller using segue.destinationViewController.
-        // Pass the selected object to the new view controller.
-    }
-    */
-
 }

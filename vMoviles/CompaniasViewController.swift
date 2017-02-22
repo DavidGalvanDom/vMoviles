@@ -18,8 +18,8 @@ class CompaniasViewController: UIViewController,  UITableViewDelegate, UITableVi
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        companias.append( Compania(id: "ozono", descripcion: "Ozono"))
-        companias.append( Compania(id: "epi", descripcion: "Episodio"))
+        companias.append( Compania(id: "vmozono", descripcion: "Ozono"))
+        companias.append( Compania(id: "vmepi", descripcion: "Episodio"))
         
         tableView.delegate = self
         tableView.dataSource = self
@@ -50,41 +50,19 @@ class CompaniasViewController: UIViewController,  UITableViewDelegate, UITableVi
         app.compania = companias[indexPath.row]._descripcion
     }
     
-    /*
-    func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
-        // cell selected code here
-    }
-    
-    override func didReceiveMemoryWarning() {
-        super.didReceiveMemoryWarning()
-        // Dispose of any resources that can be recreated.
-    }
- */
-    /*
-    override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return companias.count
-    }
-    
-    
-    override func tableView(_ tableView: UITableView,
-                            cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: "companiaCell", for: indexPath)
-        
-        let compania = companias[indexPath.row]
-        cell.textLabel?.text = compania._descripcion
-        
-        return cell
-    }
-    */
-    
-    /*
     // MARK: - Navigation
 
-    // In a storyboard-based application, you will often want to do a little preparation before navigation
+    //Secaptura la compñia seleccionada para iniciar la sincronizacion
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        // Get the new view controller using segue.destinationViewController.
-        // Pass the selected object to the new view controller.
+        
+        if segue.identifier == "segueCompania",
+            let comIndex = tableView.indexPathForSelectedRow?.row
+        {
+            let app = UIApplication.shared.delegate as! AppDelegate
+            app.stopReplication()
+            app.startReplication(compania: companias[comIndex]._id)
+        }
+
     }
-    */
 
 }
