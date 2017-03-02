@@ -23,10 +23,11 @@ class ClienteDatos
             view.setMapBlock({ (doc, emit) in
                 let type = doc["type"] as? String
                 let razonso = doc["razonsocial"] as? String
+                let id = doc["id"] as? String
                 if type == "cliente" {
-                    emit(razonso ?? "", nil)
+                    emit("\(id) - \(razonso ?? "")", nil)
                 }
-            }, version: "1.6")
+            }, version: "1.7")
         }
         
         let clienteLiveQuery = view.createQuery().asLive()

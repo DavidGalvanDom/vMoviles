@@ -57,11 +57,13 @@ class ClienteViewController: UITableViewController,UISearchResultsUpdating {
     // MARK: - Segues
     
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        if segue.identifier == "muestraDetalle" {
+        if segue.identifier == "segueClienteDetail" {
             let indexPath = self.tableView.indexPathForSelectedRow
             if indexPath!.row > 0 {
                 let cliente = Cliente(for: (clienteRows?[indexPath!.row].document)!)
+                
                 let controller = (segue.destination as! UINavigationController).topViewController as! ClienteDetalleViewController
+                
                 controller.detalleCliente = cliente
                 controller.navigationItem.leftBarButtonItem = self.splitViewController?.displayModeButtonItem
                 controller.navigationItem.leftItemsSupplementBackButton = true
@@ -137,13 +139,13 @@ class ClienteViewController: UITableViewController,UISearchResultsUpdating {
         let cell = tableView.dequeueReusableCell(withIdentifier: "clientListCell", for: indexPath)
         
         let doc = clienteRows![indexPath.row].document!
-        cell.textLabel?.text = doc["razonsocial"] as? String
+        cell.textLabel?.text = "\(doc["id"]!) - \(doc["razonsocial"]!) "
         cell.detailTextLabel?.text = "\(doc["apostal"]!) - \(doc["ciudad"]!) - \(doc["estado"]!)"
         return cell
     }
     
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        self.performSegue(withIdentifier: "muestraDetalle", sender: nil)
+        self.performSegue(withIdentifier: "segueClienteDetail", sender: nil)
     }
     
 }

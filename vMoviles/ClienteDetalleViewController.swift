@@ -10,14 +10,35 @@ import UIKit
 
 class ClienteDetalleViewController: UIViewController {
 
-    @IBOutlet weak var lblNombre: UILabel!
+    var pedidoDetalle: PedidoDetalleViewController? = nil
+    var _storyboard: UIStoryboard!
     
+    @IBOutlet weak var lblNombre: UILabel!
+    @IBOutlet weak var lblCiudad: UILabel!
+    @IBOutlet weak var lblEstado: UILabel!
+    @IBOutlet weak var lblPais: UILabel!
+    @IBOutlet weak var lblRFC: UILabel!
+    @IBOutlet weak var lblApostal: UILabel!
     
     override func viewDidLoad() {
         super.viewDidLoad()
         self.creaNavegador()
         self.configureView()
-        // Do any additional setup after loading the view.
+        
+        let app = UIApplication.shared.delegate as! AppDelegate
+        guard let root = app.window?.rootViewController, let storyboard = root.storyboard else {
+            return
+        }
+        
+        _storyboard = storyboard
+        
+      //  let navVC: UINavigationController = self.splitViewController?.viewControllers[0] as! UINavigationController
+        
+       // let clienteView = self._storyboard?.instantiateViewController(withIdentifier: "sbClientes") as! ClienteViewController
+       
+      //  navVC.pushViewController(clienteView, animated: true)
+
+        self.splitViewController?.preferredDisplayMode = .allVisible
     }
 
     override func didReceiveMemoryWarning() {
@@ -31,6 +52,26 @@ class ClienteDetalleViewController: UIViewController {
         if let detalle = detalleCliente {
             if let label = self.lblNombre {
                 label.text = detalle.razonsocial as String
+            }
+            
+            if let label = self.lblCiudad {
+                label.text = detalle.ciudad as String
+            }
+            
+            if let label = self.lblEstado {
+                label.text = detalle.estado as String
+            }
+            
+            if let label = self.lblPais {
+                label.text = detalle.pais as String
+            }
+            
+            if let label = self.lblRFC {
+                label.text = detalle.rfc as String
+            }
+            
+            if let label = self.lblApostal {
+                label.text = detalle.apostal as String
             }
         }
     }
@@ -80,7 +121,11 @@ class ClienteDetalleViewController: UIViewController {
     }
     
     func onShowPedidos() {
+        self.splitViewController?.preferredDisplayMode = .primaryHidden
+        let pedidoDetalle = _storyboard?.instantiateViewController(withIdentifier: "sbPedidoDetalle")
         
+        self.navigationController?.pushViewController(pedidoDetalle!, animated: true)
+
     }
     
     func onShowProductos() {

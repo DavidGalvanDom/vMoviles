@@ -26,29 +26,66 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UISplitViewControllerDele
     var syncError: NSError?
     var conflictsLiveQuery: CBLLiveQuery?
     var accessDocuments: Array<CBLDocument> = [];
-    var idAgente: String!
-    var lineaVenta: String!
-    var vendedor: String!
     var compania: String!
     var cveCompania: String!
+    var config: Configuracion!
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplicationLaunchOptionsKey: Any]?) -> Bool {
+        
+        let splitViewController = self.window!.rootViewController as! UISplitViewController
+        let navigationController = splitViewController.viewControllers[splitViewController.viewControllers.count-1] as! UINavigationController
+        navigationController.topViewController!.navigationItem.leftBarButtonItem = splitViewController.displayModeButtonItem
+        splitViewController.delegate = self
         
         // Habilita el log para monitorear la replicacion
         if kLoggingEnabled {
             enableLogging()
         }
         
-        self.cargaConfiguracion()
+        self.validConfig()
         self.showCompanias()
-        
         return true
     }
 
-    func cargaConfiguracion () {
-        vendedor = "David Galvan Dom"
-        idAgente = "5"
-        lineaVenta = "cat-1,cat-2"
+    func validConfig() {
+        
+        let dataConfig = ConfiguracionDatos()
+        var doc = self.cargaConfiguracion(dataConfig: dataConfig)
+        if (self.config == nil) {
+            _ = dataConfig.createConfiguracion()
+            doc = self.cargaConfiguracion(dataConfig: dataConfig)
+        }
+        
+        //Test for update information 
+        /*
+        self.config.nombreVendedor = "David Galvan Dominguez"
+        self.config.folio = "550000034"
+        self.config.zona = "5"
+        self.config.agente = "5"
+        self.config.lineaVenta = "cat-1,cat-2"
+        
+        dataConfig.updateConfiguracion(config: doc, withConfiguracion: self.config)
+ */
+    }
+    
+    func cargaConfiguracion (dataConfig: ConfiguracionDatos) -> CBLDocument {
+        var doc :CBLDocument!
+        
+        do {
+            let configQuery = dataConfig.setupViewAndQuery() as CBLQuery
+            // var erro: NSError?
+            let result  = try configQuery.run()
+        
+            doc = result.nextRow()?.document
+            if( doc != nil) {
+                self.config = Configuracion(for: (doc)!)
+            }
+        }
+        catch {
+            
+        }
+        
+        return doc
     }
     
     func applicationWillResignActive(_ application: UIApplication) {
@@ -171,7 +208,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UISplitViewControllerDele
                                                name: NSNotification.Name.cblReplicationChange, object: pusher)
         
             puller = database.createPullReplication(url!)
-            puller.channels = ["general",lineaVenta, "saldo-\(idAgente)","saldo2-\(idAgente)","stpedido-\(idAgente)"]
+            puller.channels = ["general",config.lineaVenta as String, "saldo-\(config.agente)","saldo2-\(config.agente)","stpedido-\(config.agente)"]
             puller.continuous = true  // Runs forever in background
             NotificationCenter.default.addObserver(self, selector: #selector(replicationProgress(notification:)),
                                                name: NSNotification.Name.cblReplicationChange, object: puller)
@@ -231,6 +268,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UISplitViewControllerDele
         CBLManager.enableLogging("SyncVerbose")
     }
     
+    
     func showCompanias() {
         guard let root = window?.rootViewController, let storyboard = root.storyboard else {
             return
@@ -240,7 +278,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UISplitViewControllerDele
         window!.rootViewController = controller
     }
     
-    func showSplitView()
+    func showSplitView(viewName: String)
     {
         guard let root = window?.rootViewController, let storyboard = root.storyboard else {
             return
@@ -249,20 +287,25 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UISplitViewControllerDele
         // Override point for customization after application launch.
         let controller = storyboard.instantiateInitialViewController()
         window!.rootViewController = controller
+        
+        
+        //viewName
     }
     
     // MARK: - Split view
     func splitViewController(_ splitViewController: UISplitViewController, collapseSecondary secondaryViewController:UIViewController, onto primaryViewController:UIViewController) -> Bool {
         
+        /*
         guard let secondaryAsNavController = secondaryViewController as? UINavigationController else { return false }
         
-        guard let topAsDetailController = secondaryAsNavController.topViewController as? ClienteDetalleViewController else { return false }
+        guard let topAsDetailController = secondaryAsNavController.topViewController as? PrincipalDetalleViewController else { return false }
         
         
-        if topAsDetailController.detalleCliente == nil {
+        if topAsDetailController == nil {
             // Return true to indicate that we have handled the collapse by doing nothing; the secondary controller will be discarded.
             return true
-        }
+        }*/
+        
         return false
     }
 

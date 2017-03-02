@@ -27,7 +27,9 @@ class CompaniasViewController: UIViewController,  UITableViewDelegate, UITableVi
         // Get database and username:
         let app = UIApplication.shared.delegate as! AppDelegate
         
-        self.lblVendedor.text = app.vendedor!
+        self.lblVendedor.text = app.config!.nombreVendedor as String
+        
+        self.splitViewController?.preferredDisplayMode = .primaryHidden
 
     }
 
