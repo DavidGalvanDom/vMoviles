@@ -14,4 +14,5 @@ class Configuracion: CBLModel {
     @NSManaged var lineaVenta: NSString
     @NSManaged var zona: NSString
     @NSManaged var nombreVendedor: NSString
+    @NSManaged var urlSync: NSString
 }

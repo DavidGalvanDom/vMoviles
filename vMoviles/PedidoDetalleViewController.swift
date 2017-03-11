@@ -20,12 +20,16 @@ class PedidoDetalleViewController: UIViewController, SearchClienteDelegate, Sear
     @IBOutlet weak var lblEmbarDireccion: UILabel!
     @IBOutlet weak var txtFechaIni: UITextField!
     @IBOutlet weak var lblFolio: UILabel!
+    @IBOutlet weak var txtFechaFin: UITextField!
+    @IBOutlet weak var txtFechaCancelada: UITextField!
     
     var _storyboard: UIStoryboard!
+    var _dateFormatter = DateFormatter()
+    
     
     override func viewDidLoad() {
         super.viewDidLoad()
-
+        self._dateFormatter.dateFormat = "dd/MM/yyyy"
         self.creaNavegador()
         
         let app = UIApplication.shared.delegate as! AppDelegate
@@ -36,12 +40,26 @@ class PedidoDetalleViewController: UIViewController, SearchClienteDelegate, Sear
         _storyboard = storyboard
         
         lblFolio.text = app.config.folio as String
+        self.AsignarFechas()
+        
 
     }
 
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
         // Dispose of any resources that can be recreated.
+    }
+    
+    //Se calculan las fechas del nuevo pedido
+    func AsignarFechas() {
+        let hoy = Date()
+        let fhInicio = Calendar.current.date(byAdding: .day, value: 7, to: hoy)
+        let fhFin = Calendar.current.date(byAdding: .day, value: 42, to: hoy)
+        let fhCancelacion = Calendar.current.date(byAdding: .day, value: 42, to: hoy)
+        
+        self.txtFechaIni.text = self._dateFormatter.string(from: fhInicio!)
+        self.txtFechaFin.text = self._dateFormatter.string(from: fhFin!)
+        self.txtFechaCancelada.text = self._dateFormatter.string(from: fhCancelacion!)
     }
     
     //Se crean los opciones de navegacion
@@ -131,20 +149,7 @@ class PedidoDetalleViewController: UIViewController, SearchClienteDelegate, Sear
         case 1:
             buscarCliente()
         case 2:
-            Ui.showTextInputDialog(
-                onController: self,
-                withTitle: "Pedido",
-                withMessage:  nil,
-                withTextFieldConfig: { textField in
-                    textField.placeholder = "List name"
-                    textField.text = "name"
-                    textField.autocapitalizationType = .words
-            },
-                onOk: { (name) -> Void in
-                    NSLog("Ok button")
-                    //self.updateTaskList(list: doc, withName: name)
-            }
-            )
+            NSLog("Opcion 2")
         default:
             break
         }
@@ -166,24 +171,37 @@ class PedidoDetalleViewController: UIViewController, SearchClienteDelegate, Sear
     
     func clienteSeleccionado(sender: Cliente)
     {
-        clienteSeleccionado = sender
+        self.clienteSeleccionado = sender
         txtCliente.text = sender.id as String
         lblRfc.text = sender.razonsocial as String
         lblCuenta.text = sender.cxcobs as String
         lblCalificacion.text = sender.clasif as String
+        
+        txtEmbarque.text = ""
+        lblEmbarDireccion.text = ""
+        self.embarqueSeleccionado = nil
     }
     
     func buscarEmbarque()
     {
-        let vc = _storyboard.instantiateViewController(withIdentifier: "sbViewSearchEmbarques") as! EmbarqueSearchViewController
+        if(clienteSeleccionado != nil) {
+            let vc = _storyboard.instantiateViewController(withIdentifier: "sbViewSearchEmbarques") as! EmbarqueSearchViewController
         
-        vc.preferredContentSize = CGSize(width: 500, height: 500)
+            vc.preferredContentSize = CGSize(width: 500, height: 500)
         
-        vc.modalPresentationStyle = .formSheet
-        vc.modalTransitionStyle = .crossDissolve
-        vc.idCliente = clienteSeleccionado!.agenteid as String
-        vc.delegate = self
-        self.present(vc, animated: true, completion: { _ in })
+            vc.modalPresentationStyle = .formSheet
+            vc.modalTransitionStyle = .crossDissolve
+            vc.idCliente = clienteSeleccionado!.agenteid as String
+            vc.delegate = self
+            self.present(vc, animated: true, completion: { _ in })
+            
+        } else {
+            Ui.showMessageDialog(onController: self,
+                                 withTitle: "Informacion",
+                                 withMessage: "Debe seleccionar un Cliente",
+                                 withError: nil)
+
+        }
     }
     
     func embarqueSeleccionado(sender: Embarque)
@@ -194,9 +212,15 @@ class PedidoDetalleViewController: UIViewController, SearchClienteDelegate, Sear
     }
     
     func fechaInicioValueChanged(sender:UIDatePicker) {
-        let dateFormatter = DateFormatter()
-        dateFormatter.dateFormat = "dd/MM/yyyy"
-        txtFechaIni.text = dateFormatter.string(from: sender.date)
+        txtFechaIni.text = self._dateFormatter.string(from: sender.date)
+    }
+    
+    func fechaFinValueChanged(sender:UIDatePicker) {
+        txtFechaFin.text = self._dateFormatter.string(from: sender.date)
+    }
+   
+    func fechaCancelaValueChanged(sender:UIDatePicker) {
+        txtFechaCancelada.text = self._dateFormatter.string(from: sender.date)
     }
     
     @IBAction func onBuscarEmbarque(_ sender: Any) {
@@ -214,6 +238,55 @@ class PedidoDetalleViewController: UIViewController, SearchClienteDelegate, Sear
         
         datePickerView.addTarget(self, action: #selector(self.fechaInicioValueChanged), for: UIControlEvents.valueChanged)
         
+        let dateIni = self._dateFormatter.date(from: self.txtFechaIni.text! as String)
+        datePickerView.setDate(dateIni!, animated: true)
     }
+    
+    @IBAction func ontxtFechaFin(_ sender: UITextField) {
+        let datePickerView:UIDatePicker = UIDatePicker()
+        datePickerView.datePickerMode = UIDatePickerMode.date
+        sender.inputView = datePickerView
+        
+        datePickerView.addTarget(self, action: #selector(self.fechaFinValueChanged), for: UIControlEvents.valueChanged)
+        
+        let dateFin = self._dateFormatter.date(from: self.txtFechaFin.text! as String)
+        datePickerView.setDate(dateFin!, animated: true)
+
+    }
+
+    
+    @IBAction func ontxtFechaCancela(_ sender: UITextField) {
+        
+        let datePickerView:UIDatePicker = UIDatePicker()
+        datePickerView.datePickerMode = UIDatePickerMode.date
+        sender.inputView = datePickerView
+        
+        datePickerView.addTarget(self, action: #selector(self.fechaCancelaValueChanged), for: UIControlEvents.valueChanged)
+        
+        let dateCan = self._dateFormatter.date(from: self.txtFechaCancelada.text! as String)
+        datePickerView.setDate(dateCan!, animated: true)
+    }
+    
+    @IBAction func onAgregarProducto(_ sender: Any) {
+        if(clienteSeleccionado != nil) {
+            let vc = _storyboard.instantiateViewController(withIdentifier: "sbPedidoProducto") as! PedidoProductoViewController
+            
+            vc.preferredContentSize = CGSize(width: 950, height: 600)
+            
+            vc.modalPresentationStyle = .formSheet
+            vc.modalTransitionStyle = .crossDissolve
+            vc._listaPrecios = clienteSeleccionado.listaprec as String
+            //vc.delegate = self
+            self.present(vc, animated: true, completion: { _ in })
+            
+        } else {
+            Ui.showMessageDialog(onController: self,
+                                 withTitle: "Informacion",
+                                 withMessage: "Debe seleccionar un Cliente",
+                                 withError: nil)
+        }
+
+    }
+    
 
 }

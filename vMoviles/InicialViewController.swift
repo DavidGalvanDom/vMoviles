@@ -91,10 +91,10 @@ class InicialViewController: UIViewController {
        
     //Split view de productos
     func onShowProductos () {
-        let detailViewController = _storyboard?.instantiateViewController(withIdentifier: "sbProductoDetalle")
+       /* let detailViewController = _storyboard?.instantiateViewController(withIdentifier: "sbProductoDetalle")
         
         self.navigationController?.pushViewController(detailViewController!, animated: true)
-
+         */
     }
     
     //Split view de Pedidos

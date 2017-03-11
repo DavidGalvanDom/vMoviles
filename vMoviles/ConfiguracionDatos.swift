@@ -20,7 +20,7 @@ class ConfiguracionDatos {
             try databaseConfig = CBLManager.sharedInstance().openDatabaseNamed("config", with: options)
         }
         catch {
-            
+            NSLog("Erro al momento de abrir la base de datos de Config")
         }
         database = databaseConfig
     }
@@ -33,7 +33,8 @@ class ConfiguracionDatos {
             "agente": "-1",
             "lineaVenta": "-1", //"cat-1,cat-2",
             "zona": " -1 ",
-            "nombreVendedor": " Configurar Usuario "
+            "nombreVendedor": " Configurar Usuario ",
+            "urlSync": "http://192.168.0.8:4984"
         ]
         
         let doc = database.createDocument()
@@ -50,19 +51,23 @@ class ConfiguracionDatos {
     }
     
     ///Se actulizan los datos del documento
-    func updateConfiguracion(config: CBLDocument, withConfiguracion newConfig: Configuracion) {
+    func updateConfiguracion(withConfiguracion newConfig: Configuracion) {
         do {
-            var prop = config.properties
-            //var error: NSError?
+            if(database != nil) {
+                let docId : String = newConfig.getValueOfProperty("_id") as! String
+                let config = database.document(withID: docId)
+                var prop = config?.properties
+                //var error: NSError?
             
-            prop?["folio"] = newConfig.folio
-            prop?["agente"] = newConfig.agente
-            prop?["lineaVenta"] = newConfig.lineaVenta
-            prop?["zona"] = newConfig.zona
-            prop?["nombreVendedor"] = newConfig.nombreVendedor
+                prop?["folio"] = newConfig.folio
+                prop?["agente"] = newConfig.agente
+                prop?["lineaVenta"] = newConfig.lineaVenta
+                prop?["zona"] = newConfig.zona
+                prop?["nombreVendedor"] = newConfig.nombreVendedor
+                prop?["urlSync"] = newConfig.urlSync
         
-            try config.putProperties(prop!)
-            
+                try config?.putProperties(prop!)
+            }
         } catch {
             
         }
@@ -75,8 +80,8 @@ class ConfiguracionDatos {
         if view.mapBlock == nil {
             view.setMapBlock({ (doc, emit) in
                 let type = doc["type"] as? String
-                let agente = doc["agente"] as? String
                 if type == "configuracion" {
+                    let agente = doc["agente"] as? String
                     emit(agente ?? "", nil)
                 }
             }, version: "1.0")

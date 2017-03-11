@@ -19,6 +19,7 @@ class ClienteDetalleViewController: UIViewController {
     @IBOutlet weak var lblPais: UILabel!
     @IBOutlet weak var lblRFC: UILabel!
     @IBOutlet weak var lblApostal: UILabel!
+    @IBOutlet weak var lblIdClient: UILabel!
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -73,6 +74,11 @@ class ClienteDetalleViewController: UIViewController {
             if let label = self.lblApostal {
                 label.text = detalle.apostal as String
             }
+            
+            if let label = self.lblIdClient {
+                label.text = detalle.id as String
+            }
+            
         }
     }
     

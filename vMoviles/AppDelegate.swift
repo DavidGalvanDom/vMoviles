@@ -9,11 +9,9 @@
 import UIKit
 
 let kSyncEnabled = true
-let kSyncGatewayUrl = "http://192.168.0.8:4984"
 let kLoggingEnabled = true
 let kUsePrebuiltDb = false
 let kConflictResolution = false
-
 
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate, UISplitViewControllerDelegate {
@@ -21,8 +19,10 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UISplitViewControllerDele
     var window: UIWindow?
     
     var database: CBLDatabase!
+    var databaseImg: CBLDatabase! 
     var pusher: CBLReplication!
     var puller: CBLReplication!
+    var pullerimg: CBLReplication!
     var syncError: NSError?
     var conflictsLiveQuery: CBLLiveQuery?
     var accessDocuments: Array<CBLDocument> = [];
@@ -50,22 +50,11 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UISplitViewControllerDele
     func validConfig() {
         
         let dataConfig = ConfiguracionDatos()
-        var doc = self.cargaConfiguracion(dataConfig: dataConfig)
+        _ = self.cargaConfiguracion(dataConfig: dataConfig)
         if (self.config == nil) {
             _ = dataConfig.createConfiguracion()
-            doc = self.cargaConfiguracion(dataConfig: dataConfig)
+            _ = self.cargaConfiguracion(dataConfig: dataConfig)
         }
-        
-        //Test for update information 
-        /*
-        self.config.nombreVendedor = "David Galvan Dominguez"
-        self.config.folio = "550000034"
-        self.config.zona = "5"
-        self.config.agente = "5"
-        self.config.lineaVenta = "cat-1,cat-2"
-        
-        dataConfig.updateConfiguracion(config: doc, withConfiguracion: self.config)
- */
     }
     
     func cargaConfiguracion (dataConfig: ConfiguracionDatos) -> CBLDocument {
@@ -88,45 +77,32 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UISplitViewControllerDele
         return doc
     }
     
-    func applicationWillResignActive(_ application: UIApplication) {
-        // Sent when the application is about to move from active to inactive state. This can occur for certain types of temporary interruptions (such as an incoming phone call or SMS message) or when the user quits the application and it begins the transition to the background state.
-        // Use this method to pause ongoing tasks, disable timers, and invalidate graphics rendering callbacks. Games should use this method to pause the game.
-    }
-
-    func applicationDidEnterBackground(_ application: UIApplication) {
-        // Use this method to release shared resources, save user data, invalidate timers, and store enough application state information to restore your application to its current state in case it is terminated later.
-        // If your application supports background execution, this method is called instead of applicationWillTerminate: when the user quits.
-    }
-
-    func applicationWillEnterForeground(_ application: UIApplication) {
-        // Called as part of the transition from the background to the active state; here you can undo many of the changes made on entering the background.
-    }
-
-    func applicationDidBecomeActive(_ application: UIApplication) {
-        // Restart any tasks that were paused (or not yet started) while the application was inactive. If the application was previously in the background, optionally refresh the user interface.
-    }
-
-    func applicationWillTerminate(_ application: UIApplication) {
-        // Called when the application is about to terminate. Save data if appropriate. See also applicationDidEnterBackground:.
-    }
-
     // Base de datos
-    func openDatabase(compania:String) throws {
+    func openDatabase(companias:[String]) throws {
+        let dbname = companias[0]
+        let dbnameImg = companias[1]
         
-        let dbname = compania
         let options = CBLDatabaseOptions()
         options.create = true
         
         try database = CBLManager.sharedInstance().openDatabaseNamed(dbname, with: options)
         
-        
         NotificationCenter.default.addObserver(self, selector: #selector(AppDelegate.observeDatabaseChange), name:Notification.Name.cblDatabaseChange, object: database)
+        
+        try databaseImg = CBLManager.sharedInstance().openDatabaseNamed(dbnameImg, with: options)
+        
+        NotificationCenter.default.addObserver(self, selector: #selector(AppDelegate.observeDatabaseChange), name:Notification.Name.cblDatabaseChange, object: databaseImg)
+        
     }
 
     func closeDatabase() throws {
         //stopConflictLiveQuery()
         if(database != nil) {
             try database.close()
+        }
+        
+        if(databaseImg != nil) {
+            try databaseImg.close()
         }
     }
     
@@ -150,15 +126,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UISplitViewControllerDele
                 continue;
             }
             
-            if(docType != "task-list.user") {
-                continue;
-            }
-            
-            let username = changedDoc?.properties?["username"] as! String?;
-            if(username != database.name) {
-                continue;
-            }
-            
             accessDocuments.append(changedDoc!);
             NotificationCenter.default.addObserver(self, selector: #selector(AppDelegate.handleAccessChange), name: NSNotification.Name.cblDocumentChange, object: changedDoc);
         }
@@ -171,15 +138,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UISplitViewControllerDele
             return;
         }
         
-        let deletedRev = try changedDoc?.getLeafRevisions()[0];
-        let listId = (deletedRev?["taskList"] as! Dictionary<String, NSObject>)["id"] as! String?;
-        if(listId == nil) {
-            return;
-        }
-        
         accessDocuments.remove(at: accessDocuments.index(of: changedDoc!)!);
-        let listDoc = database.existingDocument(withID: listId!);
-        try listDoc?.purgeDocument();
         try changedDoc?.purgeDocument()
     }
     
@@ -189,16 +148,20 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UISplitViewControllerDele
             return
         }
         
+        let companias = compania.components(separatedBy: "-")
+        
         do {
             try closeDatabase()
-            try openDatabase(compania: compania)
+            try openDatabase(companias: companias)
         } catch let error as NSError {
             NSLog("No se puede cerrar la base de datos: %@", error)
         }
 
         syncError = nil
         //se asigna la copania
-        let url = URL(string: "\(kSyncGatewayUrl)/\(compania)")
+        let url = URL(string: "\(self.config.urlSync)/\(companias[0])")
+        let urlImg = URL(string: "\(self.config.urlSync)/\(companias[1])")
+        
         if(database != nil) {
             // Inicia push/pull replications
             pusher = database.createPushReplication(url!)
@@ -212,8 +175,18 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UISplitViewControllerDele
             puller.continuous = true  // Runs forever in background
             NotificationCenter.default.addObserver(self, selector: #selector(replicationProgress(notification:)),
                                                name: NSNotification.Name.cblReplicationChange, object: puller)
+            //puller imagenes
+            if( databaseImg != nil) {
+                pullerimg = databaseImg.createPullReplication(urlImg!)
+                pullerimg.continuous = true
+             
+                NotificationCenter.default.addObserver(self, selector: #selector(replicationProgress(notification:)),
+                                                       name: NSNotification.Name.cblReplicationChange, object: pullerimg)
+            }
+            
             pusher.start()
             puller.start()
+            pullerimg.start()
         }
     }
     
@@ -233,11 +206,17 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UISplitViewControllerDele
         NotificationCenter.default.removeObserver(
             self, name: NSNotification.Name.cblReplicationChange, object: puller)
         }
+        
+        if(pullerimg != nil) {
+            pullerimg.stop()
+            NotificationCenter.default.removeObserver(
+                self, name: NSNotification.Name.cblReplicationChange, object: pullerimg)
+        }
     }
     
     func replicationProgress(notification: NSNotification) {
         UIApplication.shared.isNetworkActivityIndicatorVisible =
-            (pusher.status == .active || puller.status == .active)
+            (pusher.status == .active || puller.status == .active || pullerimg.status == .active)
         
         let error = pusher.lastError as? NSError;
         if (error != syncError) {
@@ -267,7 +246,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UISplitViewControllerDele
         CBLManager.enableLogging("Sync")
         CBLManager.enableLogging("SyncVerbose")
     }
-    
     
     func showCompanias() {
         guard let root = window?.rootViewController, let storyboard = root.storyboard else {
@@ -308,6 +286,30 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UISplitViewControllerDele
         
         return false
     }
+    
+    func applicationWillResignActive(_ application: UIApplication) {
+        // Sent when the application is about to move from active to inactive state. This can occur for certain types of temporary interruptions (such as an incoming phone call or SMS message) or when the user quits the application and it begins the transition to the background state.
+        // Use this method to pause ongoing tasks, disable timers, and invalidate graphics rendering callbacks. Games should use this method to pause the game.
+    }
+    
+    func applicationDidEnterBackground(_ application: UIApplication) {
+        // Use this method to release shared resources, save user data, invalidate timers, and store enough application state information to restore your application to its current state in case it is terminated later.
+        // If your application supports background execution, this method is called instead of applicationWillTerminate: when the user quits.
+    }
+    
+    func applicationWillEnterForeground(_ application: UIApplication) {
+        // Called as part of the transition from the background to the active state; here you can undo many of the changes made on entering the background.
+    }
+    
+    func applicationDidBecomeActive(_ application: UIApplication) {
+        // Restart any tasks that were paused (or not yet started) while the application was inactive. If the application was previously in the background, optionally refresh the user interface.
+    }
+    
+    func applicationWillTerminate(_ application: UIApplication) {
+        // Called when the application is about to terminate. Save data if appropriate. See also applicationDidEnterBackground:.
+    }
+    
+
 
 
 }

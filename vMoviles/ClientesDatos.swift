@@ -22,19 +22,17 @@ class ClienteDatos
         if view.mapBlock == nil {
             view.setMapBlock({ (doc, emit) in
                 let type = doc["type"] as? String
-                let razonso = doc["razonsocial"] as? String
-                let id = doc["id"] as? String
                 if type == "cliente" {
+                    let razonso = doc["razonsocial"] as? String
+                    let id = doc["id"] as? String
                     emit("\(id) - \(razonso ?? "")", nil)
                 }
-            }, version: "1.7")
+            }, version: "1.8")
         }
         
         let clienteLiveQuery = view.createQuery().asLive()
         clienteLiveQuery.descending = false
         
         return clienteLiveQuery
-        
     }
-
 }

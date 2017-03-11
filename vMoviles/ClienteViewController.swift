@@ -59,7 +59,7 @@ class ClienteViewController: UITableViewController,UISearchResultsUpdating {
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         if segue.identifier == "segueClienteDetail" {
             let indexPath = self.tableView.indexPathForSelectedRow
-            if indexPath!.row > 0 {
+            if indexPath!.row >= 0 {
                 let cliente = Cliente(for: (clienteRows?[indexPath!.row].document)!)
                 
                 let controller = (segue.destination as! UINavigationController).topViewController as! ClienteDetalleViewController
