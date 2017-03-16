@@ -76,8 +76,6 @@ class CompaniasViewController: UIViewController,  UITableViewDelegate, UITableVi
         app.compania = _companias[indexPath.row]._descripcion
     }
     
-    // MARK: - Navigation
-
     //Secaptura la compñia seleccionada para iniciar la sincronizacion
     //se sincroniza informacion he imagenes
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {

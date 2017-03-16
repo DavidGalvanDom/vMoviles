@@ -14,20 +14,13 @@ class ProductoTableViewCell: UITableViewCell {
     @IBOutlet weak var imageButton: UIButton!
     @IBOutlet weak var lblDetalle: UILabel!
     
+    var productoImageAction: (() -> ())?
+    
     var productoImage: UIImage? {
         didSet {
             imageButton.setImage(productoImage, for: .normal)
         }
     }
-    
-    var productoImageAction: (() -> ())?
-    
-    @IBAction func imageButtonAction(sender: AnyObject) {
-        if let action = productoImageAction {
-            action()
-        }
-    }
-
     
     override func awakeFromNib() {
         
@@ -40,5 +33,11 @@ class ProductoTableViewCell: UITableViewCell {
 
         // Configure the view for the selected state
     }
-
+    
+    @IBAction func imageButtonAction(sender: AnyObject) {
+        if let action = productoImageAction {
+            action()
+        }
+    }
+    
 }
