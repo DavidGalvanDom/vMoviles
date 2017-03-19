@@ -9,5 +9,5 @@
 import Foundation
 
 protocol PrepackDelegate: class  {
-    func prepackSeleccionado (sender: Prepack)
+    func prepackSeleccionado (sender: PrepackInventario)
 }

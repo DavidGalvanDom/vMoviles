@@ -8,10 +8,8 @@
 
 import UIKit
 
-class PedidoDetalleViewController: UIViewController, SearchClienteDelegate, SearchEmbarqueDelegate {
-    
-    var clienteSeleccionado: Cliente!
-    var embarqueSeleccionado: Embarque!
+class PedidoDetalleViewController: UIViewController, SearchClienteDelegate, SearchEmbarqueDelegate, PedidoProductoDelegate, UITableViewDelegate, UITableViewDataSource {
+   
     @IBOutlet weak var lblRfc: UILabel!
     @IBOutlet weak var txtCliente: UITextField!
     @IBOutlet weak var lblCuenta: UILabel!
@@ -22,10 +20,13 @@ class PedidoDetalleViewController: UIViewController, SearchClienteDelegate, Sear
     @IBOutlet weak var lblFolio: UILabel!
     @IBOutlet weak var txtFechaFin: UITextField!
     @IBOutlet weak var txtFechaCancelada: UITextField!
+    @IBOutlet weak var tableView: UITableView!
     
     var _storyboard: UIStoryboard!
     var _dateFormatter = DateFormatter()
-    
+    var _rowPedidoProductos: [RowPedidoProducto] = []
+    var _clienteSeleccionado: Cliente!
+    var _embarqueSeleccionado: Embarque!
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -37,11 +38,13 @@ class PedidoDetalleViewController: UIViewController, SearchClienteDelegate, Sear
             return
         }
         
-        _storyboard = storyboard
+        self._storyboard = storyboard
+        self.tableView.delegate = self
+        self.tableView.dataSource = self
         
-        lblFolio.text = app.config.folio as String
+        self.lblFolio.text = app.config.folio as String
         self.AsignarFechas()
-        
+        self.CrearLinea()
 
     }
 
@@ -50,6 +53,14 @@ class PedidoDetalleViewController: UIViewController, SearchClienteDelegate, Sear
         // Dispose of any resources that can be recreated.
     }
     
+    func CrearLinea()
+    {
+        let lineView = UIView(frame: CGRect(x:275,y:170,width:730, height:1.0))
+        lineView.layer.borderWidth = 1.0
+        lineView.layer.borderColor = UIColor.gray.cgColor
+        self.view.addSubview(lineView)
+        
+    }
     //Se calculan las fechas del nuevo pedido
     func AsignarFechas() {
         let hoy = Date()
@@ -99,6 +110,7 @@ class PedidoDetalleViewController: UIViewController, SearchClienteDelegate, Sear
         self.navigationItem.leftBarButtonItems = [barCompania, lblbuttonComapania]
         
         //Toolbar Derecho
+        /*
         let barClientes = UIBarButtonItem(image: UIImage(named:"User2"), style: .plain, target: self, action: #selector(onClientes))
         
         let barProducto =  UIBarButtonItem(image: UIImage(named:"Zapato2"), style: .plain, target: self, action: #selector(onShowProductos))
@@ -110,55 +122,47 @@ class PedidoDetalleViewController: UIViewController, SearchClienteDelegate, Sear
         barProducto.tintColor = .black
         
         self.navigationItem.rightBarButtonItems = [barClientes,barProducto]
+         */
         
     }
+    
+    
+    // MARK: Delegates de la Tabla
+    
+    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        return self._rowPedidoProductos.count
+    }
+    
+    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        let cell = tableView.dequeueReusableCell(withIdentifier: "celPedidoDetalle", for: indexPath) as! PedidoTableViewCell
+
+        
+        let renglon = self._rowPedidoProductos[indexPath.row]
+        cell.productoImage = renglon.imagen
+        cell.lblRenglon.text = String(renglon.renglon)
+        cell.lblPielColor.text = renglon.pielcolor
+        cell.lblClave.text = renglon.cveart
+    
+        
+        return cell
+    }
+    
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        /*let app = UIApplication.shared.delegate as! AppDelegate
+        app.cveCompania = _companias[indexPath.row]._id
+        app.compania = _companias[indexPath.row]._descripcion
+         */
+    }
+
+    
+    
     
     //Regresar a companias
     func backController() {
         _ = self.navigationController?.popViewController(animated: true)
     }
 
-    
-    func onShowProductos ()
-    {
-        
-    }
-    
-    func onClientes ()
-    {
-        
-    }
-    
-    @IBAction func onTabChange(_ sender: UISegmentedControl) {
-        switch sender.selectedSegmentIndex {
-        case 0:
-            Ui.showTextInputDialog(
-                onController: self,
-                withTitle: "Cliente",
-                withMessage:  nil,
-                withTextFieldConfig: { textField in
-                    textField.placeholder = "List name"
-                    textField.text = "name"
-                    textField.autocapitalizationType = .words
-            },
-                onOk: { (name) -> Void in
-                    NSLog("Ok button")
-                    //self.updateTaskList(list: doc, withName: name)
-            }
-            )
-        case 1:
-            buscarCliente()
-        case 2:
-            NSLog("Opcion 2")
-        default:
-            break
-        }
-    
-    }
-    
     func buscarCliente() {
-        
-        //let storyboard : UIStoryboard = UIStoryboard(name: "Main", bundle: nil)
         let vc = _storyboard.instantiateViewController(withIdentifier: "sbViewSearchClientes") as! ClienteSearchViewController
         
         vc.preferredContentSize = CGSize(width: 500, height: 500)
@@ -171,7 +175,7 @@ class PedidoDetalleViewController: UIViewController, SearchClienteDelegate, Sear
     
     func clienteSeleccionado(sender: Cliente)
     {
-        self.clienteSeleccionado = sender
+        self._clienteSeleccionado = sender
         txtCliente.text = sender.id as String
         lblRfc.text = sender.razonsocial as String
         lblCuenta.text = sender.cxcobs as String
@@ -179,19 +183,19 @@ class PedidoDetalleViewController: UIViewController, SearchClienteDelegate, Sear
         
         txtEmbarque.text = ""
         lblEmbarDireccion.text = ""
-        self.embarqueSeleccionado = nil
+        self._embarqueSeleccionado = nil
     }
     
     func buscarEmbarque()
     {
-        if(clienteSeleccionado != nil) {
+        if(self._clienteSeleccionado != nil) {
             let vc = _storyboard.instantiateViewController(withIdentifier: "sbViewSearchEmbarques") as! EmbarqueSearchViewController
         
             vc.preferredContentSize = CGSize(width: 500, height: 500)
         
             vc.modalPresentationStyle = .formSheet
             vc.modalTransitionStyle = .crossDissolve
-            vc.idCliente = clienteSeleccionado!.agenteid as String
+            vc.idCliente = self._clienteSeleccionado!.agenteid as String
             vc.delegate = self
             self.present(vc, animated: true, completion: { _ in })
             
@@ -206,7 +210,7 @@ class PedidoDetalleViewController: UIViewController, SearchClienteDelegate, Sear
     
     func embarqueSeleccionado(sender: Embarque)
     {
-        embarqueSeleccionado = sender
+        self._embarqueSeleccionado = sender
         txtEmbarque.text = sender.embarque as String
         lblEmbarDireccion.text = sender.direccion as String
     }
@@ -221,6 +225,12 @@ class PedidoDetalleViewController: UIViewController, SearchClienteDelegate, Sear
    
     func fechaCancelaValueChanged(sender:UIDatePicker) {
         txtFechaCancelada.text = self._dateFormatter.string(from: sender.date)
+    }
+    
+    //Se agrega a la coleccion el producto
+    func PedidoProductoSeleccionado (sender: RowPedidoProducto) {
+        self._rowPedidoProductos.append(sender)
+        self.tableView.reloadData()
     }
     
     @IBAction func onBuscarEmbarque(_ sender: Any) {
@@ -253,7 +263,6 @@ class PedidoDetalleViewController: UIViewController, SearchClienteDelegate, Sear
         datePickerView.setDate(dateFin!, animated: true)
 
     }
-
     
     @IBAction func ontxtFechaCancela(_ sender: UITextField) {
         
@@ -268,15 +277,16 @@ class PedidoDetalleViewController: UIViewController, SearchClienteDelegate, Sear
     }
     
     @IBAction func onAgregarProducto(_ sender: Any) {
-        if(clienteSeleccionado != nil) {
+        if(self._clienteSeleccionado != nil) {
             let vc = _storyboard.instantiateViewController(withIdentifier: "sbPedidoProducto") as! PedidoProductoViewController
             
             vc.preferredContentSize = CGSize(width: 950, height: 550)
             
             vc.modalPresentationStyle = .formSheet
             vc.modalTransitionStyle = .crossDissolve
-            vc._listaPrecios = clienteSeleccionado.listaprec as String
-            //vc.delegate = self
+            vc._listaPrecios = self._clienteSeleccionado.listaprec as String
+            vc._renglon = self._rowPedidoProductos.count + 1
+            vc.delegate = self
             self.present(vc, animated: true, completion: { _ in })
             
         } else {

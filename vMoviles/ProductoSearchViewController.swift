@@ -17,6 +17,7 @@ class ProductoSearchViewController : UIViewController,  UITableViewDelegate, UIT
     var searchController: UISearchController!
     var _listaPrecios: String!
     var _app: AppDelegate!
+    var initSearch: String!
     
     @IBOutlet weak var tableView: UITableView!
     
@@ -28,6 +29,7 @@ class ProductoSearchViewController : UIViewController,  UITableViewDelegate, UIT
         searchController.searchResultsUpdater = self
         searchController.dimsBackgroundDuringPresentation = false
         
+        
         self.tableView.delegate = self
         self.tableView.dataSource = self
         self.tableView.tableHeaderView = searchController.searchBar
@@ -36,6 +38,19 @@ class ProductoSearchViewController : UIViewController,  UITableViewDelegate, UIT
         
         // Inicializa las vistas y querys couchbase lite:
         iniciaBaseDatos()
+        
+        
+    }
+    
+    override func viewDidAppear(_ animated: Bool) {
+        if(self.initSearch != nil) {
+            searchController.searchBar.text = self.initSearch
+            
+            DispatchQueue.main.async {
+                self.searchController.searchBar.becomeFirstResponder()
+            }
+            
+        }
 
     }
 
@@ -68,7 +83,6 @@ class ProductoSearchViewController : UIViewController,  UITableViewDelegate, UIT
     func iniciaBaseDatos() {
         
         productoLiveQuery = ProductoDatos(_database: _app.database).setupLstPrecioViewAndQuery()
-        
         
         if( self._listaPrecios != nil ) {
             productoLiveQuery.startKey = [self._listaPrecios]
@@ -118,7 +132,6 @@ class ProductoSearchViewController : UIViewController,  UITableViewDelegate, UIT
         
         
         if(docImg != nil) {
-            //let docCalve = docImg?["clave"] as! String
             let rev = docImg?.currentRevision
             if let attachment = rev?.attachmentNamed("\(clave).jpg"), let data = attachment.content {
                 let digest = attachment.metadata["digest"] as! String

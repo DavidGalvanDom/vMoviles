@@ -56,11 +56,14 @@ class PedidoProductoViewController: UIViewController, SearchProductoDelegate, Pr
     @IBOutlet weak var txtEstilo: UITextField!
     @IBOutlet weak var productoImage: UIImageView!
     
+    weak var delegate:PedidoProductoDelegate?
+    
     var _storyboard: UIStoryboard!
     var _productoSelected: Producto!
     var _app: AppDelegate!
     var _corridaSelected: Corrida!
     var _listaPrecios: String!
+    var _renglon: Int!
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -73,7 +76,7 @@ class PedidoProductoViewController: UIViewController, SearchProductoDelegate, Pr
         EventosText()
         DespliegaCorrida()
         
-        lblRenglon.text = "1"
+        lblRenglon.text = String(_renglon)
         _storyboard = storyboard
         self._app = UIApplication.shared.delegate as! AppDelegate
     }
@@ -228,29 +231,62 @@ class PedidoProductoViewController: UIViewController, SearchProductoDelegate, Pr
     
     func CalculaTotalPares()
     {
-        var total : Double = 0
-        total =  total + (txtC1.text! as NSString).doubleValue
-        total =  total + (txtC2.text! as NSString).doubleValue
-        total =  total + (txtC3.text! as NSString).doubleValue
-        total =  total + (txtC4.text! as NSString).doubleValue
-        total =  total + (txtC5.text! as NSString).doubleValue
-        total =  total + (txtC6.text! as NSString).doubleValue
-        total =  total + (txtC7.text! as NSString).doubleValue
-        total =  total + (txtC8.text! as NSString).doubleValue
-        total =  total + (txtC9.text! as NSString).doubleValue
-        total =  total + (txtC10.text! as NSString).doubleValue
-        total =  total + (txtC11.text! as NSString).doubleValue
-        total =  total + (txtC12.text! as NSString).doubleValue
-        total =  total + (txtC13.text! as NSString).doubleValue
-        total =  total + (txtC14.text! as NSString).doubleValue
-        total =  total + (txtC15.text! as NSString).doubleValue
+        var total : Int = 0
+        var numPck : Int = 0
+        
+        total =  total + (txtC1.text! as NSString).integerValue
+        total =  total + (txtC2.text! as NSString).integerValue
+        total =  total + (txtC3.text! as NSString).integerValue
+        total =  total + (txtC4.text! as NSString).integerValue
+        total =  total + (txtC5.text! as NSString).integerValue
+        total =  total + (txtC6.text! as NSString).integerValue
+        total =  total + (txtC7.text! as NSString).integerValue
+        total =  total + (txtC8.text! as NSString).integerValue
+        total =  total + (txtC9.text! as NSString).integerValue
+        total =  total + (txtC10.text! as NSString).integerValue
+        total =  total + (txtC11.text! as NSString).integerValue
+        total =  total + (txtC12.text! as NSString).integerValue
+        total =  total + (txtC13.text! as NSString).integerValue
+        total =  total + (txtC14.text! as NSString).integerValue
+        total =  total + (txtC15.text! as NSString).integerValue
+       
+        if(self.txtPK.text != "99" && !((self.txtPK.text?.isEmpty)!)) {
+            numPck = (txtInterroga.text! as NSString).integerValue
+            total = total * numPck
+        }
         
         txtPares.text = "\(total)"
     }
     
     //Se recibe el prepack seleccionado de la lista de prepacks
-    func prepackSeleccionado(sender: Prepack) {
-            NSLog("Prepack")
+    func prepackSeleccionado(sender: PrepackInventario) {
+        self.txtC1.text = sender.p1 as String
+        self.txtC2.text = sender.p2 as String
+        self.txtC3.text = sender.p3 as String
+        self.txtC4.text = sender.p4 as String
+        self.txtC5.text = sender.p5 as String
+        self.txtC6.text = sender.p6 as String
+        self.txtC7.text = sender.p7 as String
+        self.txtC8.text = sender.p8 as String
+        self.txtC9.text = sender.p9 as String
+        self.txtC10.text = sender.p10 as String
+        self.txtC11.text = sender.p11 as String
+        self.txtC12.text = sender.p12 as String
+        self.txtC13.text = sender.p13 as String
+        self.txtC14.text = sender.p14 as String
+        self.txtC15.text = sender.p15 as String
+        
+        self.txtPK.text = sender.pck as String
+        if(self.txtPK.text == "99"){
+            self.txtInterroga.text = "0"
+            self.txtInterroga.isEnabled = false
+        } else {
+            self.txtInterroga.text = "1"
+            self.txtInterroga.isEnabled = true
+        }
+        
+        CalculaTotalPares()
+        
     }
     
     //Prosucto seleccionado de la lista de productos deletegate
@@ -276,8 +312,65 @@ class PedidoProductoViewController: UIViewController, SearchProductoDelegate, Pr
             self.productoImage.image = UIImage(named: "noImage")
         }
         
-        CargaCorrida()
+        self.txtPK.text = ""
+        self.txtPares.text = ""
+        self.txtInterroga.text = ""
+        self.txtC1.text = "0"
+        self.txtC2.text = "0"
+        self.txtC3.text = "0"
+        self.txtC4.text = "0"
+        self.txtC5.text = "0"
+        self.txtC6.text = "0"
+        self.txtC7.text = "0"
+        self.txtC8.text = "0"
+        self.txtC9.text = "0"
+        self.txtC10.text = "0"
+        self.txtC11.text = "0"
+        self.txtC12.text = "0"
+        self.txtC13.text = "0"
+        self.txtC14.text = "0"
+        self.txtC15.text = "0"
         
+        CargaCorrida()
+    }
+    
+    //Se valida que la informacion del producto este completa
+    func ValidaInformacion () -> Bool {
+        
+        if(self._productoSelected == nil)
+        {
+            Ui.showMessageDialog(onController: self,
+                                 withTitle: "Información",
+                                 withMessage: "Debe seleccionar un producto",
+                withError: nil)
+            return false
+        }
+        
+        if(  self.txtPK.text == "") {
+            Ui.showMessageDialog(onController: self,
+                                 withTitle: "Información",
+                                 withMessage: "Debe seleccionar un Prepack PK",
+                                 withError: nil)
+            return false
+        }
+        
+        if( self.txtPares.text?.isEmpty == true) {
+            Ui.showMessageDialog(onController: self,
+                                 withTitle: "Información",
+                                 withMessage: "El numero de pares debe ser mayor a cero.",
+                                 withError: nil)
+            return false
+        }
+        
+        if( Int(self.txtPares.text ?? "0")! <= 0) {
+            Ui.showMessageDialog(onController: self,
+                                 withTitle: "Información",
+                                 withMessage: "El número de pares debe ser mayor a cero.",
+                                 withError: nil)
+            return false
+        }
+        
+        return true
     }
     
     @IBAction func onCerrar(_ sender: Any) {
@@ -294,6 +387,7 @@ class PedidoProductoViewController: UIViewController, SearchProductoDelegate, Pr
         vc.modalTransitionStyle = .crossDissolve
         vc._listaPrecios = self._listaPrecios
         vc.delegate = self
+        vc.initSearch = self.txtClave.text
         self.present(vc, animated: true, completion: { _ in })
     }
     
@@ -308,6 +402,30 @@ class PedidoProductoViewController: UIViewController, SearchProductoDelegate, Pr
         vc._corrida = self._corridaSelected 
         vc.delegate = self
         self.present(vc, animated: true, completion: { _ in })
+    }
+    
+    @IBAction func txtInterroga(_ sender: Any) {
+        if(self.txtInterroga.text?.isEmpty != true &&
+           self.txtPK.text?.isEmpty != true){
+            CalculaTotalPares()
+        }
+    }
+    
+    //Evento para guardar el nuvo producto
+    @IBAction func onGuardar(_ sender: Any) {
+        if(ValidaInformacion()){
+            
+         let pedidoProducto = RowPedidoProducto(renglon: self._renglon, cveart:self.txtClave.text!, img: self.productoImage.image!, pielcolor: self.txtPielColor.text!)
+            
+         /*   let pedidoProducto = RowPedidoProducto(renglon: self._renglon,semana: self.txtSemana.text!, semanaClie: self.txtSemanaCli.text!,cveart: self.txtClave.text!, opcion: self.txtOpcion.text!,estilo: self.txtEstilo.text!, pares: Int(self.txtPares.text!)!,precio:Double(self.txtPrecio.text!)!, pielcolor: self.txtPielColor.text!, ts: self.txtTs.text!, pck: self.txtPK.text!, numpck: Int(self.txtInterroga.text!)!, img: self.productoImage.image!,p1: self.txtC1.text!, p2: self.txtC2.text!, p3:self.txtC3.text!, p4: self.txtC4.text!, p5:self.txtC5.text!,p6:self.txtC6.text!,p7:self.txtC7.text!, p8:self.txtC8.text!, p9:self.txtC9.text!, p10:self.txtC10.text!, p11:self.txtC11.text!, p12:self.txtC12.text!, p13:self.txtC13.text!, p14:self.txtC14.text!, p15:self.txtC15.text!)*/
+            
+            
+            delegate?.PedidoProductoSeleccionado(sender: pedidoProducto)
+            
+            dismiss(animated: true, completion: nil)
+            popoverPresentationController?.delegate?.popoverPresentationControllerDidDismissPopover?(popoverPresentationController!)
+
+        }
     }
 
 }

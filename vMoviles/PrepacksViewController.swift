@@ -36,6 +36,37 @@ class PrepacksViewController: UIViewController,UITableViewDelegate, UITableViewD
     
     //Se carga la coleccion de prepacks e inventarios
     
+    //Se carga la descripcion del tipo de pedido
+    func DescripcionTipo (idTipo: String) -> String {
+        let tipoPedidoQuery = TipoPedidoDatos(_database: _app.database).setupViewAndQuery()
+        
+        if( self._producto != nil ) {
+            tipoPedidoQuery.startKey = idTipo
+            tipoPedidoQuery.endKey = idTipo
+        }
+        
+        do {
+            
+            let result  = try tipoPedidoQuery.run()
+            let doc = result.nextRow()?.document
+            
+            if(doc != nil) {
+                let tipoPedido = TipoPedido(for: (doc)!)
+                return tipoPedido!.descripcion as String
+            }
+        }
+        catch {
+            Ui.showMessageDialog(onController: self,
+                                 withTitle: "Error",
+                                 withMessage: "Error al cargar descripcion tipo Pedido",
+                withError: nil)
+        }
+        
+        return "OZONO NORMAL \(idTipo)"
+
+    }
+    
+    //Se cargan los inventarios de los prepack y se genera el 99
     func CargarInventarioTipoDatos()
     {
         let inventariosQuery = InventarioTipoDatos(_database: _app.database).setupViewAndQuery()
@@ -46,7 +77,6 @@ class PrepacksViewController: UIViewController,UITableViewDelegate, UITableViewD
         }
         
         do {
-            // var erro: NSError?
             var encontroPrepcak = false
             let result  = try inventariosQuery.run()
             while let doc = result.nextRow()?.document {
@@ -72,17 +102,18 @@ class PrepacksViewController: UIViewController,UITableViewDelegate, UITableViewD
                         pck.I14 = inventario?.I14 as! String
                         pck.I15 = inventario?.I15 as! String
                         
+                        pck.descripcion = DescripcionTipo(idTipo: inventario?.Tipo as! String)
+                        
                         encontroPrepcak = true
                     }
                 }
                 
                 if(!encontroPrepcak){
                     let nuevo = PrepackInventario(forPrepack: nil)
-                    
                     nuevo.cveart = inventario?.keyArticulo as! String
                     nuevo.pck = "99"
                     nuevo.tipo = inventario?.Tipo as! String
-                    
+                    nuevo.descripcion = DescripcionTipo(idTipo: inventario?.Tipo as! String)
                     nuevo.I1 = inventario?.I1 as! String
                     nuevo.I2 = inventario?.I2 as! String
                     nuevo.I3 = inventario?.I3 as! String
@@ -102,13 +133,11 @@ class PrepacksViewController: UIViewController,UITableViewDelegate, UITableViewD
                     self._prepacksInv.append(nuevo)
                 }
             }
-            
-            tableView.reloadData()
         }
         catch {
             Ui.showMessageDialog(onController: self,
                                  withTitle: "Error",
-                                 withMessage: "Error al cargar los prepacks del producto: \(self._producto.description)",
+                                 withMessage: "Error al cargar los inventarios tipo  clave: \(self._producto.clave)",
                 withError: nil)
         }
     }
@@ -195,7 +224,6 @@ class PrepacksViewController: UIViewController,UITableViewDelegate, UITableViewD
         cell.txtP14.isEnabled = true
         cell.txtP15.isEnabled = true
     }
-
     
     //Se genera el encabezado de la corrida
     func AsignaCorrida(cell: prepackTableViewCell)
@@ -274,7 +302,6 @@ class PrepacksViewController: UIViewController,UITableViewDelegate, UITableViewD
     }
     
     // MARK: Delegates de la Tabla
-    
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return self._prepacksInv.count
     }
@@ -295,7 +322,40 @@ class PrepacksViewController: UIViewController,UITableViewDelegate, UITableViewD
     }
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-       
+        if indexPath.row >= 0 {
+            let prepackInv = self._prepacksInv[indexPath.row]
+            
+            let cell:prepackTableViewCell = tableView.cellForRow(at: indexPath) as! prepackTableViewCell
+            
+            if(cell.lblCorPK.text == "99"){
+                //Se actualiza el bojeto con los valores de las cajas de texto
+                prepackInv.p1 = cell.txtP1.text!
+                prepackInv.p2 = cell.txtP2.text!
+                prepackInv.p3 = cell.txtP3.text!
+                prepackInv.p4 = cell.txtP4.text!
+                prepackInv.p5 = cell.txtP5.text!
+                prepackInv.p6 = cell.txtP6.text!
+                prepackInv.p7 = cell.txtP7.text!
+                prepackInv.p8 = cell.txtP8.text!
+                prepackInv.p9 = cell.txtP9.text!
+                prepackInv.p10 = cell.txtP10.text!
+                prepackInv.p11 = cell.txtP11.text!
+                prepackInv.p12 = cell.txtP12.text!
+                prepackInv.p13 = cell.txtP13.text!
+                prepackInv.p14 = cell.txtP14.text!
+                prepackInv.p15 = cell.txtP15.text!
+            }
+            
+            delegate?.prepackSeleccionado(sender: prepackInv)
+            
+            dismiss(animated: true, completion: nil)
+            popoverPresentationController?.delegate?.popoverPresentationControllerDidDismissPopover?(popoverPresentationController!)
+        }
+
+    }
+    
+    func tableView(_ tableView: UITableView, canEditRowAt indexPath: IndexPath) -> Bool {
+        return true
     }
 
     
