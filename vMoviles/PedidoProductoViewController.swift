@@ -415,10 +415,31 @@ class PedidoProductoViewController: UIViewController, SearchProductoDelegate, Pr
     @IBAction func onGuardar(_ sender: Any) {
         if(ValidaInformacion()){
             
-         let pedidoProducto = RowPedidoProducto(renglon: self._renglon, cveart:self.txtClave.text!, img: self.productoImage.image!, pielcolor: self.txtPielColor.text!)
+            let pedidoProducto = RowPedidoProducto(renglon: self._renglon, cveart:self.txtClave.text!, img: self.productoImage.image!, pielcolor: self.txtPielColor.text!, corrida: self._corridaSelected)
             
-         /*   let pedidoProducto = RowPedidoProducto(renglon: self._renglon,semana: self.txtSemana.text!, semanaClie: self.txtSemanaCli.text!,cveart: self.txtClave.text!, opcion: self.txtOpcion.text!,estilo: self.txtEstilo.text!, pares: Int(self.txtPares.text!)!,precio:Double(self.txtPrecio.text!)!, pielcolor: self.txtPielColor.text!, ts: self.txtTs.text!, pck: self.txtPK.text!, numpck: Int(self.txtInterroga.text!)!, img: self.productoImage.image!,p1: self.txtC1.text!, p2: self.txtC2.text!, p3:self.txtC3.text!, p4: self.txtC4.text!, p5:self.txtC5.text!,p6:self.txtC6.text!,p7:self.txtC7.text!, p8:self.txtC8.text!, p9:self.txtC9.text!, p10:self.txtC10.text!, p11:self.txtC11.text!, p12:self.txtC12.text!, p13:self.txtC13.text!, p14:self.txtC14.text!, p15:self.txtC15.text!)*/
+            pedidoProducto.semana = self.txtSemana.text!
+            pedidoProducto.semanaCliente = self.txtSemanaCli.text!
+            pedidoProducto.precio = (_productoSelected.costo).doubleValue
+            pedidoProducto.pares = Int(self.txtPares.text!)!
+            pedidoProducto.pck = self.txtPK.text!
+            pedidoProducto.numPck = Int(self.txtInterroga.text!)!
+            pedidoProducto.ts = self._productoSelected.tiposervicio as String
             
+            pedidoProducto.p1 = self.txtC1.text!
+            pedidoProducto.p2 = self.txtC2.text!
+            pedidoProducto.p3 = self.txtC3.text!
+            pedidoProducto.p4 = self.txtC4.text!
+            pedidoProducto.p5 = self.txtC5.text!
+            pedidoProducto.p6 = self.txtC6.text!
+            pedidoProducto.p7 = self.txtC7.text!
+            pedidoProducto.p8 = self.txtC8.text!
+            pedidoProducto.p9 = self.txtC9.text!
+            pedidoProducto.p10 = self.txtC10.text!
+            pedidoProducto.p11 = self.txtC11.text!
+            pedidoProducto.p12 = self.txtC12.text!
+            pedidoProducto.p13 = self.txtC13.text!
+            pedidoProducto.p14 = self.txtC14.text!
+            pedidoProducto.p15 = self.txtC15.text!
             
             delegate?.PedidoProductoSeleccionado(sender: pedidoProducto)
             

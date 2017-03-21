@@ -11,8 +11,6 @@ import UIKit
 class PedidoTableViewCell: UITableViewCell {
 
     @IBOutlet weak var lblClave: UILabel!
-    @IBOutlet weak var lblEstilo: UILabel!
-    @IBOutlet weak var lblOpcion: UILabel!
     @IBOutlet weak var lblTS: UILabel!
     @IBOutlet weak var lblPielColor: UILabel!
     @IBOutlet weak var lblPrecio: UILabel!

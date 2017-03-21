@@ -270,6 +270,18 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UISplitViewControllerDele
         //viewName
     }
     
+    func formatCurrency(_ value: String?) -> String {
+        guard value != nil else { return "$0.00" }
+        let doubleValue = Double(value!) ?? 0.0
+        let formatter = NumberFormatter()
+        formatter.currencyCode = "PMX"
+        formatter.currencySymbol = "$"
+        formatter.minimumFractionDigits = (value!.contains(".00")) ? 0 : 2
+        formatter.maximumFractionDigits = 2
+        formatter.numberStyle = .currencyAccounting
+        return formatter.string(from: NSNumber(value: doubleValue)) ?? "$\(doubleValue)"
+    }
+    
     // MARK: - Split view
     func splitViewController(_ splitViewController: UISplitViewController, collapseSecondary secondaryViewController:UIViewController, onto primaryViewController:UIViewController) -> Bool {
         
