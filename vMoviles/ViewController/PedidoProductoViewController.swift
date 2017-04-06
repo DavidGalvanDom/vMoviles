@@ -8,7 +8,7 @@
 
 import UIKit
 
-class PedidoProductoViewController: UIViewController, SearchProductoDelegate, PrepackDelegate {
+class PedidoProductoViewController: UIViewController, SearchProductoDelegate, PrepackDelegate,UITextFieldDelegate {
 
     @IBOutlet weak var txtC1: UITextField!
     @IBOutlet weak var txtC2: UITextField!
@@ -54,7 +54,8 @@ class PedidoProductoViewController: UIViewController, SearchProductoDelegate, Pr
     @IBOutlet weak var txtTs: UITextField!
     @IBOutlet weak var txtOpcion: UITextField!
     @IBOutlet weak var txtEstilo: UITextField!
-    @IBOutlet weak var productoImage: UIImageView!
+    @IBOutlet weak var imagenProd: UIButton!
+    @IBOutlet weak var btnGuardar: UIBarButtonItem!
     
     weak var delegate:PedidoProductoDelegate?
     
@@ -63,6 +64,7 @@ class PedidoProductoViewController: UIViewController, SearchProductoDelegate, Pr
     var _app: AppDelegate!
     var _corridaSelected: Corrida!
     var _listaPrecios: String!
+    var _estatusProducto: String!
     var _renglon: Int!
     var _rowPedidoProducto: RowPedidoProducto!
     var _semanas: Dictionary<String, Any> = [:]
@@ -81,6 +83,16 @@ class PedidoProductoViewController: UIViewController, SearchProductoDelegate, Pr
         lblRenglon.text = String(_renglon)
         _storyboard = storyboard
         self._app = UIApplication.shared.delegate as! AppDelegate
+        
+        //Definir el Key ENTER
+        self.txtClave.delegate = self
+        self.txtOpcion.delegate = self
+        self.txtEstilo.delegate = self
+        
+        //Se valida el estatus del pedido
+        if(self._estatusProducto != ESTATUS_PEDIDO_CAPTURADO) {
+            self.btnGuardar.isEnabled = false
+        }
     }
     
     override func viewDidAppear(_ animated: Bool) {
@@ -90,7 +102,9 @@ class PedidoProductoViewController: UIViewController, SearchProductoDelegate, Pr
     }
     
     override func didReceiveMemoryWarning() {
+        
         super.didReceiveMemoryWarning()
+        
         // Dispose of any resources that can be recreated.
     }
     
@@ -158,6 +172,8 @@ class PedidoProductoViewController: UIViewController, SearchProductoDelegate, Pr
             let doc = result.nextRow()?.document
             if( doc != nil) {
                 self._corridaSelected = Corrida(for: (doc)!)
+                self._corridaSelected.objectId = doc?["_id"] as! String
+                NSLog(self._corridaSelected.objectId as String)
                 
                 lblC1.text = doc?["c1"] as? String
                 lblC2.text = doc?["c2"] as? String
@@ -313,10 +329,17 @@ class PedidoProductoViewController: UIViewController, SearchProductoDelegate, Pr
         self.txtPares.isEnabled = false
         
         if(image != nil){
-            self.productoImage.image = image
+            self.imagenProd.setImage(image, for: .normal)
         } else {
-            self.productoImage.image = UIImage(named: "noImage")
+            self.imagenProd.setImage(UIImage(named: "noImage"), for: .normal)
         }
+        
+        self.imagenProd.imageView?.contentMode = .scaleAspectFit
+        self.imagenProd.imageEdgeInsets = UIEdgeInsetsMake(200, 200, 200, 200)
+        self.imagenProd.layer.cornerRadius = 16
+        self.imagenProd.layer.masksToBounds = true
+        self.imagenProd.isUserInteractionEnabled = true
+        
         
         switch(self.txtTs.text!) {
             case "E":
@@ -393,24 +416,14 @@ class PedidoProductoViewController: UIViewController, SearchProductoDelegate, Pr
     //Carga el renglon seleccionado del pedido
     func EditaDatos() {
         
-        let idProd = "prod-\( self._rowPedidoProducto.cveart)-\(self._rowPedidoProducto.tpc)"
-        let doc = ProductoDatos(_database: self._app.database).CargarProducto(clave: idProd)
-        
-        let producto = Producto(for: (doc))
-
-        self._productoSelected = producto
-        
         self.txtPrecio.isEnabled = false
         self.txtTs.isEnabled = false
         self.txtPielColor.isEnabled = false
         self.txtPares.isEnabled = false
         
-        self.txtClave.text = self._rowPedidoProducto.cveart
-        self.txtPielColor.text = self._rowPedidoProducto.pielcolor
-        self.txtOpcion.text = self._productoSelected.opcion as String
-        self.txtEstilo.text = self._productoSelected.estilo as String
-        self.txtPrecio.text = "$ \((_productoSelected.costo).doubleValue)"
-        self.txtTs.text = _productoSelected.tiposervicio as String
+        BuscarProducto(claveProd: self._rowPedidoProducto.cveart, tpc: self._listaPrecios)
+        CargaCorrida()
+
         self.txtSemana.text = self._rowPedidoProducto.semana
         self.txtSemanaCli.text = self._rowPedidoProducto.semanaCliente
         self.txtPares.text = String(self._rowPedidoProducto.pares)
@@ -433,27 +446,81 @@ class PedidoProductoViewController: UIViewController, SearchProductoDelegate, Pr
         self.txtC14.text = self._rowPedidoProducto.p14
         self.txtC15.text = self._rowPedidoProducto.p15
         
-         ///self.productoImage.image = self._productoSelected
-        let clave = self._rowPedidoProducto.cveart
-        let docImg = self._app.databaseImg.document(withID: clave)
-        let rev = docImg?.currentRevision
+    }
+    
+    func BuscarPorEstilo(estilo: String) {
+        var claveProd: String = ""
         
-        if let attachment = rev?.attachmentNamed("\(clave).jpg"), let data = attachment.content {
-            let digest = attachment.metadata["digest"] as! String
-            let scale = UIScreen.main.scale
+        claveProd = estilo
+        claveProd = claveProd.leftPadding(toLength: 10, withPad: "0")
+        claveProd = claveProd + self.txtOpcion.text!.leftPadding(toLength: 2, withPad: "0")
+        
+        self.BuscarProducto(claveProd: claveProd, tpc: self._listaPrecios)
+    }
+    
+    func BuscarPorOpcion(opcion:String) {
+        var claveProd: String = ""
+        
+        claveProd = self.txtEstilo.text!
+        claveProd = claveProd.leftPadding(toLength: 10, withPad: "0")
+        claveProd = claveProd + opcion.leftPadding(toLength: 2, withPad: "0")
+        
+        self.BuscarProducto(claveProd: claveProd, tpc: self._listaPrecios)
+    }
+    
+    //Se carga toda la informacion del producto y se despliega la imagen
+    // tpc = Lista de precios del cliente 
+    func BuscarProducto(claveProd: String, tpc: String) {
+        let idProd = "prod-\(claveProd)-\(tpc)"
+        if let doc = ProductoDatos(_database: self._app.database).CargarProducto(clave: idProd) {
+        
+            let producto = Producto(for: (doc))
+            self._productoSelected = producto
+            self.txtClave.text = self._productoSelected.clave as String
+            self.txtPielColor.text = self._productoSelected.descripcion as String
+            self.txtOpcion.text = self._productoSelected.opcion as String
+            self.txtEstilo.text = self._productoSelected.estilo as String
+            self.txtPrecio.text = "$ \((_productoSelected.costo).doubleValue)"
+            self.txtTs.text = _productoSelected.tiposervicio as String
             
-            let thumbnail = Image.square(image: UIImage(data: data, scale: scale), withSize: 85.0,
-                                         withCacheName: digest, onComplete: { (thumbnail) -> Void in self.productoImage.image = thumbnail })
+            //Se carga la imagen el producto y se despliega en la interfaz
+            let docImg = self._app.databaseImg.document(withID: claveProd)
+            let rev = docImg?.currentRevision
             
-            if(thumbnail != nil){
-                self.productoImage.image = thumbnail
-            } else {
-                self.productoImage.image = UIImage(named: "noImage")
+            if let attachment = rev?.attachmentNamed("\(claveProd).jpg"), let data = attachment.content {
+                let digest = attachment.metadata["digest"] as! String
+                let scale = UIScreen.main.scale
+                
+                let thumbnail = Image.square(image: UIImage(data: data, scale: scale), withSize: 85.0,
+                                             withCacheName: digest, onComplete: { (thumbnail) -> Void in self.imagenProd.setImage(thumbnail, for: .normal) })
+                
+                if(thumbnail != nil){
+                    self.imagenProd.setImage(thumbnail, for: .normal)
+                } else {
+                    self.imagenProd.setImage(UIImage(named: "noImage"), for: .normal)
+                }
+                
+                //Expande la imagen al tamaño del boton
+                self.imagenProd.imageView?.contentMode = .scaleAspectFit
+                self.imagenProd.imageEdgeInsets = UIEdgeInsetsMake(200, 200, 200, 200)
+                self.imagenProd.layer.cornerRadius = 16
+                self.imagenProd.layer.masksToBounds = true
+                self.imagenProd.isUserInteractionEnabled = true
+
             }
         }
-
-        CargaCorrida()
-        
+        else {
+            
+            self._productoSelected = nil
+            self.imagenProd.setImage(UIImage(named: "noImage"), for: .normal)
+            self.txtPielColor.text = ""
+            self.txtPrecio.text = "0"
+            self.txtTs.text = ""
+            Ui.showMessageDialog(onController: self,
+                                 withTitle: "Información",
+                                 withMessage: "No se encontro el producto Calve:\(claveProd)",
+                                 withError: nil)
+        }
     }
     
     @IBAction func onCerrar(_ sender: Any) {
@@ -476,15 +543,27 @@ class PedidoProductoViewController: UIViewController, SearchProductoDelegate, Pr
     
     @IBAction func onPrepacks(_ sender: Any) {
         
-        let vc = _storyboard.instantiateViewController(withIdentifier: "sbViewSearchPrepacks") as! PrepacksViewController
+        if( self._productoSelected != nil) {
         
-        vc.preferredContentSize = CGSize(width: 950, height: 550)
-        vc.modalPresentationStyle = .formSheet
-        vc.modalTransitionStyle = .crossDissolve
-        vc._producto = self._productoSelected
-        vc._corrida = self._corridaSelected 
-        vc.delegate = self
-        self.present(vc, animated: true, completion: { _ in })
+            let vc = _storyboard.instantiateViewController(withIdentifier: "sbViewSearchPrepacks") as! PrepacksViewController
+        
+            vc.preferredContentSize = CGSize(width: 950, height: 550)
+            vc.modalPresentationStyle = .formSheet
+            vc.modalTransitionStyle = .crossDissolve
+            vc._producto = self._productoSelected
+            vc._corrida = self._corridaSelected
+            vc.delegate = self
+            self.present(vc, animated: true, completion: { _ in })
+            
+        } else {
+            
+            Ui.showMessageDialog(onController: self,
+                                 withTitle: "Información",
+                                 withMessage: "Debe seleccionar un producto.",
+                withError: nil)
+
+        }
+        
     }
     
     @IBAction func txtInterroga(_ sender: Any) {
@@ -494,11 +573,26 @@ class PedidoProductoViewController: UIViewController, SearchProductoDelegate, Pr
         }
     }
     
+    //Click imagen producto para desplegar las diferentes opciones
+    @IBAction func onClickImgProd(_ sender: Any) {
+        let vc = _storyboard.instantiateViewController(withIdentifier: "sbOpcionProducto") as! OpcionProductoViewController
+        
+        vc._claveProd = self._productoSelected.clave as String
+        vc._estilo = self._productoSelected.estilo as String
+        vc._listaPrecios  = self._listaPrecios
+        vc._app = self._app
+        vc.preferredContentSize = CGSize(width: 990, height: 690)
+        vc.modalPresentationStyle = .formSheet
+        vc.modalTransitionStyle = .crossDissolve
+        //vc.delegate = self
+        self.present(vc, animated: true, completion: { _ in })
+    }
+    
     //Evento para guardar el nuvo producto
     @IBAction func onGuardar(_ sender: Any) {
         if(ValidaInformacion()){
             
-            let pedidoProducto = RowPedidoProducto(renglon: self._renglon, cveart:self.txtClave.text!, img: self.productoImage.image!, pielcolor: self.txtPielColor.text!, tpc: String(self._productoSelected.tpc), corrida: self._corridaSelected)
+            let pedidoProducto = RowPedidoProducto(renglon: self._renglon, cveart:self.txtClave.text!, img: self.imagenProd.currentImage!, pielcolor: self.txtPielColor.text!, tpc: String(self._productoSelected.tpc), corrida: self._corridaSelected)
             
             pedidoProducto.semana = self.txtSemana.text!
             pedidoProducto.semanaCliente = self.txtSemanaCli.text!
@@ -534,5 +628,27 @@ class PedidoProductoViewController: UIViewController, SearchProductoDelegate, Pr
 
         }
     }
+    
+    //Delegate del input clave, opcion
+    //Se captura el ENTER
+    func textFieldShouldReturn(_ textField: UITextField) -> Bool {
+        //para ocultar el teclado
+        textField.resignFirstResponder()
+        
+        if(textField == self.txtClave) {
+            if (self.txtClave.text?.characters.count)! > 7 {
+                self.BuscarProducto(claveProd: self.txtClave.text! as String,tpc: "1")
+            }
+        } else {
+            if(textField == self.txtEstilo) {
+                self.BuscarPorEstilo(estilo: self.txtEstilo.text ?? "0")
+            } else {
+                self.BuscarPorOpcion(opcion: self.txtOpcion.text ?? "0")
+            }
+        }
+        
+        return false
+    }
+
 
 }

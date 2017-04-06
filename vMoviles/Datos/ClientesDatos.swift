@@ -35,4 +35,15 @@ class ClienteDatos
         
         return clienteLiveQuery
     }
+    
+    //Regresa el documento con los datos del cliente
+    func CargarCliente (cliente: String) -> CBLDocument? {
+        
+        if database.existingDocument(withID: cliente) != nil {
+            let doc = database.document(withID: cliente)
+            return doc
+        } else {
+            return nil
+        }
+    }
 }

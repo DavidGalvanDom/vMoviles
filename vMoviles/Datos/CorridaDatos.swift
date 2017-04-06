@@ -35,4 +35,16 @@ class CorridaDatos
         
         return corridaQuery
     }
+    
+    //Regresa el documento con los datos de la corrida
+    func CargarCorrida (idDocument: String) -> CBLDocument? {
+        
+        if database.existingDocument(withID: idDocument) != nil {
+            let doc = database.document(withID: idDocument)
+            return doc
+        } else {
+            return nil
+        }
+    }
+
 }

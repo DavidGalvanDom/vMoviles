@@ -38,6 +38,7 @@ class Pedido {
         self.pares = 0
         self.total = 0
         self.observacion = ""
+        self.estatus = "N"
     }
     
 }

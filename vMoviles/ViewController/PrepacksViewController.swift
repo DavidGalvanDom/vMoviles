@@ -33,9 +33,6 @@ class PrepacksViewController: UIViewController,UITableViewDelegate, UITableViewD
         // Dispose of any resources that can be recreated.
     }
     
-    
-    //Se carga la coleccion de prepacks e inventarios
-    
     //Se carga la descripcion del tipo de pedido
     func DescripcionTipo (idTipo: String) -> String {
         let tipoPedidoQuery = TipoPedidoDatos(_database: _app.database).setupViewAndQuery()
@@ -63,7 +60,6 @@ class PrepacksViewController: UIViewController,UITableViewDelegate, UITableViewD
         }
         
         return "OZONO NORMAL \(idTipo)"
-
     }
     
     //Se cargan los inventarios de los prepack y se genera el 99

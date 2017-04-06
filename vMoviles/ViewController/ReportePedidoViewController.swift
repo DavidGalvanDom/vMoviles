@@ -23,6 +23,8 @@ class ReportePedidoViewController: UIViewController {
     func generarHTML () {
        var htmlNew : String = ""
        var index :Int = 0
+       var costo : Double = 0
+       var pares = 0
         
         do{
             guard let filePath = Bundle.main.path(forResource: "rptPedido", ofType: "html")
@@ -39,8 +41,11 @@ class ReportePedidoViewController: UIViewController {
             for item in self._pedido.detalle {
                 index = index + 1
                 htmlNew = htmlNew + self.crearRenglon(item: item, index: index)
+                pares = pares + item.pares
+                costo = costo + item.precio
             }
-            
+            let totalesHml = self.generaTotalesHtml(pares:pares,costo:costo)
+            htmlCont =  htmlCont.replacingOccurrences(of: "$TOTALES_PEDIDO$", with: totalesHml)
             htmlCont =  htmlCont.replacingOccurrences(of: "$DETALLE_PEDIDO$", with: htmlNew)
             let baseUrl = URL.init(fileURLWithPath: filePath)
             self.webView.loadHTMLString(htmlCont as String, baseURL: baseUrl)
@@ -51,6 +56,19 @@ class ReportePedidoViewController: UIViewController {
         }
     }
     
+    func generaTotalesHtml(pares: Int, costo: Double) -> String {
+        var inf:String = ""
+        let iva = costo * 0.16
+        let total = costo * 1.16
+        
+        inf = "<tr> <td colspan='4' class='rtext'>Total Pares</td><td class='rangoCol'>\(pares)</td>"
+        inf = inf + " <td class='rtext'>Subtotal</td><td class='rangoCol'>\(costo)</td> </tr>"
+        inf = inf + "<tr> <td class='rtext' colspan='6'>Impuesto</td><td class='rangoCol'>\(iva)</td> </tr>"
+        inf = inf + "<tr> <td class='rtext' colspan='6'>Total</td><td class='rangoCol'>\(total)</td> </tr>"
+
+        return inf
+    }
+    
     func encabezadoPedido(html: String) -> String {
         var inf : String = html
         
@@ -58,13 +76,13 @@ class ReportePedidoViewController: UIViewController {
         inf = inf.replacingOccurrences(of: "$NUM_CLIENTE$", with: String(self._pedido.idcliente))
         inf = inf.replacingOccurrences(of: "$NOM_CLI$", with: self._pedido.cliente?.razonsocial as! String)
         inf = inf.replacingOccurrences(of: "$DIR_CLI$", with: self._pedido.cliente?.dir as! String)
-        inf = inf.replacingOccurrences(of: "$COLCID_CLI$", with: " \(self._pedido.cliente?.colonia)   \(self._pedido.cliente?.ciudad)")
+        inf = inf.replacingOccurrences(of: "$COLCID_CLI$", with: " \(self._pedido.cliente?.colonia as! String)   \(self._pedido.cliente?.ciudad as! String)")
         inf = inf.replacingOccurrences(of: "$ESTADO_CLI$", with: self._pedido.cliente?.estado as! String)
         inf = inf.replacingOccurrences(of: "$SUCUR_CLI$", with: self._pedido.cliente?.sucursal as! String)
         inf = inf.replacingOccurrences(of: "$OBSER_CLI$", with: self._pedido.observacion as String)
         
         inf = inf.replacingOccurrences(of: "$DIR_ENTREGA$", with:  self._pedido.embarque?.direccion as! String)
-        inf = inf.replacingOccurrences(of: "$COLCIU_ENTREGA$", with: " \(self._pedido.embarque?.colonia)   \(self._pedido.embarque?.ciudad)")
+        inf = inf.replacingOccurrences(of: "$COLCIU_ENTREGA$", with: " \(self._pedido.embarque?.colonia as! String)   \(self._pedido.embarque?.ciudad as! String)")
         inf = inf.replacingOccurrences(of: "$ESTADO_ENTREGA$", with:  self._pedido.embarque?.estado as! String)
         inf = inf.replacingOccurrences(of: "$FENTREGA_ENTREGA$", with: "\(self._pedido.fechaInicio!) - \(self._pedido.fechaFin!)")
         inf = inf.replacingOccurrences(of: "$FPEDIDO_ENTREGA$", with:  self._pedido.fechaCreacion as String)
@@ -137,22 +155,72 @@ class ReportePedidoViewController: UIViewController {
         numeracion = numeracion + " </tr> </table>"
         
         row = row + " <tr> "
-        row = row + "  <td>\(item.renglon)</td>"
-        row = row + "  <td>\(item.estilo) - \(item.opcion)</td>"
-        row = row + "  <td>\(item.pielcolor)</td>"
-        row = row + "  <td>\(item.linea)</td>"
-        row = row + "  <td>\(item.pares)</td>"
-        row = row + "  <td>\(numeracion)</td>"
+        row = row + "  <td class='rd'>\(item.renglon)</td>"
+        row = row + "  <td class='rd'>\(item.estilo) - \(item.opcion)</td>"
+        row = row + "  <td class='rd'>\(item.pielcolor)</td>"
+        row = row + "  <td class='rd'>\(item.linea)</td>"
+        row = row + "  <td class='rd'>\(item.pares)</td>"
+        row = row + "  <td class='rd'>\(numeracion)</td>"
         row = row + "  <td class='rangoCol'>\(item.precio)</td>"
-        row = row + "  <td>\(item.precioCalle)</td>"
-        row = row + "  <td>\(item.precioCCom)</td>"
-        row = row + "  <td>\(item.semana)</td>"
-        row = row + "  <td>\(item.ts)</td>"
+        row = row + "  <td class='rd'>\(item.precioCalle)</td>"
+        row = row + "  <td class='rd'>\(item.precioCCom)</td>"
+        row = row + "  <td class='rd'>\(item.semana)</td>"
+        row = row + "  <td class='rd'>\(item.estatus)</td>"
         row = row + " </tr>"
         
         
         return row
     }
+    
+    func cargarPDF(folio: String) {
+        //Se guarda el pdf en un archivo
+        let documentsPath = NSSearchPathForDirectoriesInDomains(.documentDirectory, .userDomainMask, true)[0]
+        let filePath  = "\(documentsPath)/rptPedido-\(folio).pdf"
+        print(filePath)
+        let url = NSURL(fileURLWithPath: filePath)
+        let urlRequest = NSURLRequest(url: url as URL)
+        
+        webView.loadRequest(urlRequest as URLRequest)
+        
+    }
+    
+    func crearPDF(folio: String) {
+        //let html = "<b> Hola Productos</b>"
+        //let fmt = UIMarkupTextPrintFormatter(markupText: html)
+        
+        let fmt = self.webView.viewPrintFormatter()
+        
+        //Se asigna el formato de impresora
+        let render = UIPrintPageRenderer()
+        render.addPrintFormatter(fmt, startingAtPageAt: 0)
+        
+        let page = CGRect(x:0, y:0,width:595.2,height: 841.8) //A4, 72 dpi
+        let printable = page.insetBy(dx: 0,dy: 0)
+        
+        render.setValue(NSValue(cgRect: page), forKey: "paperRect")
+        render.setValue(NSValue(cgRect: printable), forKey: "printableRect")
+        
+        //Se crea el contexto del PDF
+        let pdfData = NSMutableData()
+        UIGraphicsBeginPDFContextToData(pdfData, CGRect.zero, nil)
+        
+        for i in 1...render.numberOfPages {
+            UIGraphicsBeginPDFPage()
+            let bounds = UIGraphicsGetPDFContextBounds()
+            render.drawPage(at: i-1, in: bounds)
+        }
+        
+        UIGraphicsEndPDFContext()
+        
+        //Se guarda el pdf en un archivo
+        let documentsPath = NSSearchPathForDirectoriesInDomains(.documentDirectory, .userDomainMask, true)[0]
+        
+        pdfData.write(toFile: "\(documentsPath)/rptPedido-\(folio).pdf", atomically: true)
+        
+        self.cargarPDF(folio: folio)
+        
+    }
+
     
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
@@ -160,7 +228,7 @@ class ReportePedidoViewController: UIViewController {
     }
     
     @IBAction func onPDF(_ sender: Any) {
-        
+        self.crearPDF(folio: self._pedido.folio)
     }
     
     @IBAction func onCerrar(_ sender: Any) {

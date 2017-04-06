@@ -119,7 +119,7 @@ class ProductoSearchViewController : UIViewController,  UITableViewDelegate, UIT
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: "productoListCellSearch", for: indexPath) as! ProductoTableViewCell
+        let cell = tableView.dequeueReusableCell(withIdentifier: "productoListCellSearch", for: indexPath) as! productoTableViewCell
         
         let doc = productoRows![indexPath.row].document!
         let costo = (doc["costo"] as! NSString).doubleValue
@@ -170,7 +170,7 @@ class ProductoSearchViewController : UIViewController,  UITableViewDelegate, UIT
         let rev = docImg?.currentRevision
         
         if let revDigest = rev?.attachmentNamed("\(clave).jpg")?.metadata["digest"] as? String, digest == revDigest {
-            let cell = tableView.cellForRow(at: indexPath) as! ProductoTableViewCell
+            let cell = tableView.cellForRow(at: indexPath) as! productoTableViewCell
             cell.productoImage = image
         }
     }
@@ -179,7 +179,7 @@ class ProductoSearchViewController : UIViewController,  UITableViewDelegate, UIT
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         if indexPath.row >= 0 {
             let producto = Producto(for: (productoRows?[indexPath.row].document)!)
-            let cell:ProductoTableViewCell = tableView.cellForRow(at: indexPath) as! ProductoTableViewCell
+            let cell:productoTableViewCell = tableView.cellForRow(at: indexPath) as! productoTableViewCell
             
             var imageProd: UIImage?
             if( cell.productoImage != nil) {

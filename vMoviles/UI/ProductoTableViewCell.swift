@@ -8,7 +8,7 @@
 
 import UIKit
 
-class ProductoTableViewCell: UITableViewCell {
+class productoTableViewCell: UITableViewCell {
 
     @IBOutlet weak var productoLabel: UILabel!
     @IBOutlet weak var imageButton: UIButton!
@@ -19,6 +19,8 @@ class ProductoTableViewCell: UITableViewCell {
     var productoImage: UIImage? {
         didSet {
             imageButton.setImage(productoImage, for: .normal)
+            imageButton.layer.cornerRadius = 16
+            imageButton.layer.masksToBounds = true
         }
     }
     

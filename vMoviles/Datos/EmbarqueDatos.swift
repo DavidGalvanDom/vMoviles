@@ -53,4 +53,13 @@ class EmbarqueDatos
         
         return embarqueclienteLiveQuery
     }
+    
+    func CargarEmbarque(embarque: String) -> CBLDocument? {
+        if database.existingDocument(withID: embarque) != nil {
+            let doc = database.document(withID: embarque)
+            return doc
+        } else {
+            return nil
+        }
+    }
 }

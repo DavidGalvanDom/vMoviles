@@ -16,6 +16,7 @@ class ProductoDatos
         database = _database
     }
     
+    //Todos los productos
     func setupViewAndQuery() ->  CBLLiveQuery{
         let view = database.viewNamed("productos")
         if view.mapBlock == nil {
@@ -33,7 +34,6 @@ class ProductoDatos
         productoLiveQuery.descending = false
         
         return productoLiveQuery
-        
     }
     
     //Productos que pertenecen a una lista de precios
@@ -55,13 +55,49 @@ class ProductoDatos
         productoLiveQuery.descending = false
         
         return productoLiveQuery
-        
     }
     
     //Se carga el producto con la clave seleccionada
-    func CargarProducto (clave: String)-> CBLDocument {
-        let doc = database.document(withID: clave)
-        return doc!
+    func CargarProducto (clave: String)-> CBLDocument? {
+        if database.existingDocument(withID: clave) != nil {
+            let doc = database.document(withID: clave)
+            return doc
+        } else {
+            return nil
+        }
+    }
+
+    //Regresa la imagen sin ninguna modificacion
+    func CargarImagen ( clave: String) -> UIImage {
+        //Se carga la imagen el producto y se despliega en la interfaz
+        let docImg = self.database.document(withID: clave as String)
+        let rev = docImg?.currentRevision
+        
+        if let attachment = rev?.attachmentNamed("\(clave).jpg"), let data = attachment.content {
+            return UIImage(data: data)!
+        } else {
+            return UIImage(named: "noImage")!
+        }
+    }
+    
+    //Se cargan las opciones de un estilo
+    func CargaOpciones() ->  CBLQuery {
+        let view = database.viewNamed("productoOpciones")
+        if view.mapBlock == nil {
+            view.setMapBlock({ (doc, emit) in
+                let type = doc["type"] as? String
+                if type == "producto" {
+                    let estilo = doc["estilo"] as? String
+                    let tpc = doc["tpc"] as? String
+                    emit([tpc,estilo ?? "0"], nil)
+                }
+            }, version: "1.1")
+        }
+        
+        let opcionesEstiloQuery = view.createQuery()
+        opcionesEstiloQuery.descending = false
+        
+        return opcionesEstiloQuery
     }
 
     

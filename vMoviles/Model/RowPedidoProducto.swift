@@ -25,6 +25,7 @@ class RowPedidoProducto  {
     var pck: String
     var numPck: Int
     var tpc: String
+    var estatus: String
     var p1: String
     var p2: String
     var p3: String
@@ -62,6 +63,7 @@ class RowPedidoProducto  {
         self.linea = ""
         self.ts = ""
         self.pck = ""
+        self.estatus = "N"
         self.numPck = 0
         self.p1 = ""
         self.p2 = ""
@@ -78,5 +80,11 @@ class RowPedidoProducto  {
         self.p13 = ""
         self.p14 = ""
         self.p15 = "" 
+    }
+    
+    var productoImage: UIImage? {
+        didSet {
+            self.imagen = productoImage!
+        }
     }
 }

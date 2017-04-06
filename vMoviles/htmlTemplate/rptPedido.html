@@ -1,5 +1,6 @@
 <html>
     <head>
+        <meta name="format-detection" content="telephone=no">
         <style>
             * {
                 margin: 0;
@@ -32,7 +33,7 @@
             }
 
             .imgLogo {
-                margin-top: 15px;
+                margin-top:     5px;
                 height: 55px;
                 widows: 164px;
             }
@@ -41,8 +42,17 @@
                 border: #ccc 0.125em solid;
                 text-align: center;
             }
+
             .center {
                 text-align: center;
+            }
+
+            .rtext {
+                text-align: right;
+            }
+
+            .rd {
+                border-bottom: 1px solid #ddd;
             }
         </style>
     </head>
@@ -53,7 +63,7 @@
                    <label class="title"> Cliente</label>
                 </td>
                 <td class="title center">
-                   $NUM_CLIENTE$
+                    <label class="title center">$NUM_CLIENTE$</label>
                 </td>
                 <td>
                     <label class="title">Entregar en:</label>
@@ -69,7 +79,7 @@
                         </tr>
                         <tr>
                             <td class="title center" >
-                                $FOLIO$
+                             <label class="title">$FOLIO$</label>
                             </td>
                         </tr>
                         <tr>
@@ -192,9 +202,7 @@
                         </tr>
                     </table>
                 </td>
-                <td>
-                  
-                </td>
+                <td></td>
         </table>
         <br>
 
@@ -213,7 +221,8 @@
                 <td class="encabezado"> Sts</td>
             </tr>
             $DETALLE_PEDIDO$
+
+            $TOTALES_PEDIDO$
         </table>
-        $TOTALES_PEDIDO$
     </body>
 </html>

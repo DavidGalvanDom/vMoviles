@@ -65,5 +65,6 @@ class Cliente: CBLModel {
     @NSManaged var estado: NSString
     @NSManaged var listaprec: NSString
     @NSManaged var noamece: NSString
+    @NSManaged var _id: NSString
     
 }

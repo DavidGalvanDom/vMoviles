@@ -8,7 +8,7 @@
 
 import UIKit
 
-class PedidoTableViewCell: UITableViewCell {
+class pedidoTableViewCell: UITableViewCell {
 
     @IBOutlet weak var lblClave: UILabel!
     @IBOutlet weak var lblTS: UILabel!
@@ -57,6 +57,8 @@ class PedidoTableViewCell: UITableViewCell {
     var productoImage: UIImage? {
         didSet {
             btnImage.setImage(productoImage, for: .normal)
+            btnImage.layer.cornerRadius = 16
+            btnImage.layer.masksToBounds = true
         }
     }
 

@@ -11,6 +11,7 @@ import UIKit
 class ReporteProdViewController: UIViewController, UIWebViewDelegate {
 
     @IBOutlet weak var webView: UIWebView!
+    var _folio:String!
     var _rowPedidoProductos: [RowPedidoProducto] = []
 
     
@@ -78,7 +79,7 @@ class ReporteProdViewController: UIViewController, UIWebViewDelegate {
         row = row + "  <div class='box'>"
         row = row + "    <div class='row imagenst'>"
         row = row + "     <div class='col-xs-12 centertext'>"
-        row = row + "      <img alt='Zapato' src='data:image/png;base64,\(base64String)' /> "
+        row = row + "      <img alt='Zapato' style='width:210px; height:195px;' src='data:image/png;base64,\(base64String)' /> "
         row = row + "     </div> "
         row = row + "    </div>"
         row = row + "    <div class='row'>"
@@ -114,10 +115,10 @@ class ReporteProdViewController: UIViewController, UIWebViewDelegate {
         return row
     }
     
-    func cargarPDF() {
+    func cargarPDF(folio: String) {
         //Se guarda el pdf en un archivo
         let documentsPath = NSSearchPathForDirectoriesInDomains(.documentDirectory, .userDomainMask, true)[0]
-        let filePath  = "\(documentsPath)/rptProcuctos.pdf"
+        let filePath  = "\(documentsPath)/rptProcuctos-\(folio).pdf"
         print(filePath)
         let url = NSURL(fileURLWithPath: filePath)
         let urlRequest = NSURLRequest(url: url as URL)
@@ -126,7 +127,7 @@ class ReporteProdViewController: UIViewController, UIWebViewDelegate {
         
     }
     
-    func crearPDF() {
+    func crearPDF(folio: String) {
         //let html = "<b> Hola Productos</b>"
         //let fmt = UIMarkupTextPrintFormatter(markupText: html)
         
@@ -157,8 +158,9 @@ class ReporteProdViewController: UIViewController, UIWebViewDelegate {
         //Se guarda el pdf en un archivo
         let documentsPath = NSSearchPathForDirectoriesInDomains(.documentDirectory, .userDomainMask, true)[0]
         
-        pdfData.write(toFile: "\(documentsPath)/rptProcuctos.pdf", atomically: true)
+        pdfData.write(toFile: "\(documentsPath)/rptProcuctos-\(folio).pdf", atomically: true)
         
+        self.cargarPDF(folio: folio)
     }
     
     func webViewDidFinishLoad(_ webView: UIWebView) {
@@ -173,8 +175,7 @@ class ReporteProdViewController: UIViewController, UIWebViewDelegate {
     }
 
     @IBAction func onCrearPDF(_ sender: Any) {
-        self.crearPDF()
-        self.cargarPDF()
+        self.crearPDF(folio:self._folio)
     }
     
 }

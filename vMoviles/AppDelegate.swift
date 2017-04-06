@@ -12,6 +12,8 @@ let kSyncEnabled = true
 let kLoggingEnabled = true
 let kUsePrebuiltDb = false
 let kConflictResolution = false
+let ESTATUS_PEDIDO_CAPTURADO = "Capturado"
+let ESTATUS_PEDIDO_ENVIADO = "Enviado"
 
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate, UISplitViewControllerDelegate {

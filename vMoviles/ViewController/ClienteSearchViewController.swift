@@ -102,7 +102,8 @@ class ClienteSearchViewController: UIViewController,  UITableViewDelegate, UITab
     
      func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         if indexPath.row >= 0 {
-            let cliente = Cliente(for: (clienteRows?[indexPath.row].document)!)
+            let doc = clienteRows?[indexPath.row].document
+            let cliente = Cliente(for: (doc)!)
             delegate?.clienteSeleccionado(sender: cliente!)
             dismiss(animated: true, completion: nil)
             popoverPresentationController?.delegate?.popoverPresentationControllerDidDismissPopover?(popoverPresentationController!)

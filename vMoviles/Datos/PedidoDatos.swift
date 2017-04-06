@@ -16,5 +16,22 @@ class PedidoDatos
         database = _database
     }
     
+    func setupViewAndQuery() ->  CBLLiveQuery{
+        let view = database.viewNamed("pedidos")
+        if view.mapBlock == nil {
+            view.setMapBlock({ (doc, emit) in
+                let type = doc["type"] as? String
+                if type == "pedido" {
+                    let key = "\(doc["folio"])\(doc["estatus"])\(doc["razonsocial"])"
+                    emit(key, nil)
+                }
+            }, version: "1.1")
+        }
+        
+        let productoLiveQuery = view.createQuery().asLive()
+        productoLiveQuery.descending = true
+        
+        return productoLiveQuery
+    }
        
 }

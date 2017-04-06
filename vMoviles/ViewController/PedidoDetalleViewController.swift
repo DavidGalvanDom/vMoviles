@@ -23,12 +23,17 @@ class PedidoDetalleViewController: UIViewController, SearchClienteDelegate, Sear
     @IBOutlet weak var tableView: UITableView!
     @IBOutlet weak var lblTotal: UILabel!
     @IBOutlet weak var lblPares: UILabel!
+    @IBOutlet weak var txtComentario: UITextField!
+    @IBOutlet weak var chkEnviar: UISwitch!
+    @IBOutlet weak var lblEstatus: UILabel!
+    @IBOutlet weak var btnNuevoProd: UIButton!
     
     var _storyboard: UIStoryboard!
     var _dateFormatter = DateFormatter()
     var _semanas: Dictionary<String, Any> = [:]
     var _app: AppDelegate!
     var _pedido: Pedido!
+    var _tipo: String! //Si se edita o es nuevo
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -45,14 +50,47 @@ class PedidoDetalleViewController: UIViewController, SearchClienteDelegate, Sear
         self.tableView.dataSource = self
         
         if(self._pedido == nil) {
-            self.lblFolio.text = self._app.config.folio as String
-            self.AsignarFechas()
-            self.CrearLinea()
-            self.CargarSemanas()
-            
-            self._pedido = Pedido(folio: self.lblFolio.text!)
-            self._pedido.fechaCreacion = self._dateFormatter.string(from: Date())
+            self.IniciaNuevo()
+        } else {
+            self.IniciaEditar()
         }
+    }
+    
+    func IniciaEditar () {
+        self._tipo = "Editar"
+        self.lblFolio.text = self._pedido.folio
+        self.txtFechaIni.text = self._pedido.fechaInicio
+        self.txtFechaFin.text = self._pedido.fechaFin
+        self.txtFechaCancelada.text = self._pedido.fechaCancelacion
+        self.lblPares.text = "\(self._pedido.pares!)"
+        self.lblTotal.text = self._app.formatCurrency("\(self._pedido.total)")
+        self.txtComentario.text = self._pedido.observacion
+        
+        let doc = ClienteDatos(_database: self._app.database).CargarCliente(cliente: "cliente-\(self._pedido.idcliente!)")
+        
+        if doc != nil {
+            let cliente = Cliente(for: (doc)!)
+            self.clienteSeleccionado(sender: cliente!)
+        }
+        
+        let cveEmbarque = "embar\(self._pedido.idcliente!)-\(self._pedido.idembarque!)"
+        let docEmbar = EmbarqueDatos(_database: self._app.database).CargarEmbarque(embarque: cveEmbarque)
+        
+        if docEmbar != nil {
+            let embarque = Embarque(for: (docEmbar)!)
+            self.embarqueSeleccionado(sender: embarque!)
+        }
+    }
+    
+    func IniciaNuevo() {
+        self._tipo = "Nuevo"
+        self.lblFolio.text = self._app.config.folio as String
+        self.AsignarFechas()
+        self.CrearLinea()
+        self.CargarSemanas()
+        
+        self._pedido = Pedido(folio: self.lblFolio.text!)
+        self._pedido.fechaCreacion = self._dateFormatter.string(from: Date())
     }
     
     func CrearLinea()
@@ -112,22 +150,16 @@ class PedidoDetalleViewController: UIViewController, SearchClienteDelegate, Sear
         
         let lblbuttonComapania = UIBarButtonItem(customView: btnCompania)
         
-        let barCompania = UIBarButtonItem(image: UIImage(named:"icoCompania"), style: .plain, target: self, action: #selector(backController))
-        barCompania.imageInsets = UIEdgeInsetsMake(5, 5, 5, 5)
-        barCompania.tintColor = .black
+        let barListaPedidos = UIBarButtonItem(image: UIImage(named:"Pedido2"), style: .plain, target: self, action: #selector(backController))
+        barListaPedidos.imageInsets = UIEdgeInsetsMake(7, 5, 7, 5)
+        barListaPedidos.tintColor = .black
         
-        self.navigationItem.leftBarButtonItems = [barCompania, lblbuttonComapania]
+        self.navigationItem.leftBarButtonItems = [barListaPedidos, lblbuttonComapania]
         
         //Toolbar Derecho
-        
-        let brGuardar = UIBarButtonItem(image: UIImage(named:"Save"), style: .plain, target: self, action: #selector(onGuardar))
-        
         let brRptProductos = UIBarButtonItem(image: UIImage(named:"rptProducto"), style: .plain, target: self, action: #selector(onRptProductos))
         
         let brRptPedido = UIBarButtonItem(image: UIImage(named:"PDF"), style: .plain, target: self, action: #selector(onRptPedido))
-        
-        brGuardar.imageInsets = UIEdgeInsetsMake(5, 5, 5, 5)
-        brGuardar.tintColor = .black
         
         brRptProductos.imageInsets = UIEdgeInsetsMake(2, 2, 2, 2)
         brRptProductos.tintColor = .black
@@ -135,10 +167,18 @@ class PedidoDetalleViewController: UIViewController, SearchClienteDelegate, Sear
         brRptPedido.imageInsets = UIEdgeInsetsMake(5, 2, 5, 2)
         brRptPedido.tintColor = .black
         
-         self.navigationItem.rightBarButtonItems = [brRptPedido,brRptProductos,brGuardar]
+        if(self._pedido?.estatus == ESTATUS_PEDIDO_CAPTURADO) {
+            let brGuardar = UIBarButtonItem(image: UIImage(named:"Save"), style: .plain, target: self, action: #selector(onGuardar))
+            brGuardar.imageInsets = UIEdgeInsetsMake(5, 5, 5, 5)
+            brGuardar.tintColor = .black
+            self.navigationItem.rightBarButtonItems = [brRptPedido,brRptProductos,brGuardar]
+        } else {
+            self.navigationItem.rightBarButtonItems = [brRptPedido,brRptProductos]
+            self.btnNuevoProd.isHidden = true
+        }
     }
     
-    func DespliegaCorrida (cell: PedidoTableViewCell) {
+    func DespliegaCorrida (cell: pedidoTableViewCell) {
         
         cell.lblc10.isHidden = !(cell.lblc10.text != "0")
         cell.lblp10.isHidden = !(cell.lblc10.text != "0")
@@ -159,8 +199,73 @@ class PedidoDetalleViewController: UIViewController, SearchClienteDelegate, Sear
         cell.lblp15.isHidden = !(cell.lblc15.text != "0")
         
     }
-
-    func IniciaDatosRenglon(cell: PedidoTableViewCell, renglon: RowPedidoProducto)
+    
+    func FormatoLabel (cell: pedidoTableViewCell)
+    {
+        cell.lblc1.layer.borderWidth = 1.0
+        cell.lblc1.layer.cornerRadius = 6
+        cell.lblc2.layer.borderWidth = 1.0
+        cell.lblc2.layer.cornerRadius = 6
+        cell.lblc3.layer.borderWidth = 1.0
+        cell.lblc3.layer.cornerRadius = 6
+        cell.lblc4.layer.borderWidth = 1.0
+        cell.lblc4.layer.cornerRadius = 6
+        cell.lblc5.layer.borderWidth = 1.0
+        cell.lblc5.layer.cornerRadius = 6
+        cell.lblc6.layer.borderWidth = 1.0
+        cell.lblc6.layer.cornerRadius = 6
+        cell.lblc7.layer.borderWidth = 1.0
+        cell.lblc7.layer.cornerRadius = 6
+        cell.lblc8.layer.borderWidth = 1.0
+        cell.lblc8.layer.cornerRadius = 6
+        cell.lblc9.layer.borderWidth = 1.0
+        cell.lblc9.layer.cornerRadius = 6
+        cell.lblc10.layer.borderWidth = 1.0
+        cell.lblc10.layer.cornerRadius = 6
+        cell.lblc11.layer.borderWidth = 1.0
+        cell.lblc11.layer.cornerRadius = 6
+        cell.lblc12.layer.borderWidth = 1.0
+        cell.lblc12.layer.cornerRadius = 6
+        cell.lblc13.layer.borderWidth = 1.0
+        cell.lblc13.layer.cornerRadius = 6
+        cell.lblc14.layer.borderWidth = 1.0
+        cell.lblc14.layer.cornerRadius = 6
+        cell.lblc15.layer.borderWidth = 1.0
+        cell.lblc15.layer.cornerRadius = 6
+        
+        cell.lblp1.layer.borderWidth = 1.0
+        cell.lblp1.layer.cornerRadius = 6
+        cell.lblp2.layer.borderWidth = 1.0
+        cell.lblp2.layer.cornerRadius = 6
+        cell.lblp3.layer.borderWidth = 1.0
+        cell.lblp3.layer.cornerRadius = 6
+        cell.lblp4.layer.borderWidth = 1.0
+        cell.lblp4.layer.cornerRadius = 6
+        cell.lblp5.layer.borderWidth = 1.0
+        cell.lblp5.layer.cornerRadius = 6
+        cell.lblp6.layer.borderWidth = 1.0
+        cell.lblp6.layer.cornerRadius = 6
+        cell.lblp7.layer.borderWidth = 1.0
+        cell.lblp7.layer.cornerRadius = 6
+        cell.lblp8.layer.borderWidth = 1.0
+        cell.lblp8.layer.cornerRadius = 6
+        cell.lblp9.layer.borderWidth = 1.0
+        cell.lblp9.layer.cornerRadius = 6
+        cell.lblp10.layer.borderWidth = 1.0
+        cell.lblp10.layer.cornerRadius = 6
+        cell.lblp11.layer.borderWidth = 1.0
+        cell.lblp11.layer.cornerRadius = 6
+        cell.lblp12.layer.borderWidth = 1.0
+        cell.lblp12.layer.cornerRadius = 6
+        cell.lblp13.layer.borderWidth = 1.0
+        cell.lblp13.layer.cornerRadius = 6
+        cell.lblp14.layer.borderWidth = 1.0
+        cell.lblp14.layer.cornerRadius = 6
+        cell.lblp15.layer.borderWidth = 1.0
+        cell.lblp15.layer.cornerRadius = 6
+    }
+    
+    func IniciaDatosRenglon(cell: pedidoTableViewCell, renglon: RowPedidoProducto)
     {
         cell.productoImage = renglon.imagen
         cell.lblRenglon.text = String(renglon.renglon)
@@ -215,6 +320,7 @@ class PedidoDetalleViewController: UIViewController, SearchClienteDelegate, Sear
                 vc.modalPresentationStyle = .formSheet
                 vc.modalTransitionStyle = .crossDissolve
                 vc._listaPrecios = self._pedido.cliente?.listaprec as! String
+                vc._estatusProducto = self._pedido?.estatus
                 vc._renglon = renglon.renglon
                 vc._rowPedidoProducto = renglon
                 vc._semanas = self._semanas
@@ -238,12 +344,13 @@ class PedidoDetalleViewController: UIViewController, SearchClienteDelegate, Sear
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: "celPedidoDetalle", for: indexPath) as! PedidoTableViewCell
+        let cell = tableView.dequeueReusableCell(withIdentifier: "celPedidoDetalle", for: indexPath) as! pedidoTableViewCell
         
         let renglon = self._pedido.detalle[indexPath.row]
         
         self.IniciaDatosRenglon(cell: cell, renglon: renglon)
         self.DespliegaCorrida(cell: cell)
+        self.FormatoLabel(cell: cell)
         
         return cell
     }
@@ -269,7 +376,7 @@ class PedidoDetalleViewController: UIViewController, SearchClienteDelegate, Sear
         self.lblPares.text = String(pares)
     }
     
-    func GuardarPedido() -> CBLSavedRevision?{
+    func GuardarNuevoPedido() -> CBLSavedRevision?{
         
         var renglones : [Dictionary<String, Any>] = []
         
@@ -279,6 +386,7 @@ class PedidoDetalleViewController: UIViewController, SearchClienteDelegate, Sear
                 "renglon": String(item.renglon)
             ]
             renglon["status"] = "activo"
+            renglon["linea"] = item.linea
             renglon["semana"] = item.semana
             renglon["semanaCli"] = item.semanaCliente
             renglon["cveart"] =  item.cveart
@@ -291,6 +399,7 @@ class PedidoDetalleViewController: UIViewController, SearchClienteDelegate, Sear
             renglon["pck"] =  item.pck
             renglon["tpc"] =  item.tpc
             renglon["numPck"] =  item.numPck
+            renglon["idCorrida"] = item.corrida.objectId
             renglon["p1"] =  item.p1
             renglon["p2"] =  item.p2
             renglon["p3"] =  item.p3
@@ -314,7 +423,8 @@ class PedidoDetalleViewController: UIViewController, SearchClienteDelegate, Sear
             "type": "pedido"
         ]
             properties["folio"] = self._app.config.folio
-            properties["cliente"] = self._pedido.cliente?.agenteid
+            properties["cliente"] = self._pedido.cliente?.id
+            properties["razonsocial"] = self._pedido.cliente?.razonsocial
             properties["embarque"] = self._pedido.embarque?.embarque
             properties["fechainicio"] = self.txtFechaIni.text ?? ""
             properties["fechafin"] = self.txtFechaFin.text ?? ""
@@ -322,10 +432,10 @@ class PedidoDetalleViewController: UIViewController, SearchClienteDelegate, Sear
             properties["total"] = self.lblTotal.text ?? "0"
             properties["pares"] = self.lblPares.text ?? "0"
             properties["vendedor"] = self._app.config.agente
-            properties["estatus"] = "Capturado"
+            properties["estatus"] = ESTATUS_PEDIDO_CAPTURADO
             properties["fechaCreacion"] = CBLJSON.jsonObject(with: Date())
             properties["renglones"] =  renglones
-            properties["observacion"] =  ""
+            properties["observacion"] =  self.txtComentario.text ?? ""
            
         let doc = self._app.database.createDocument()
         
@@ -488,9 +598,6 @@ class PedidoDetalleViewController: UIViewController, SearchClienteDelegate, Sear
         self.tableView.reloadData()
     }
     
-    
-    
-    
     func onRptPedido() {
         if(self._pedido.detalle.count > 0) {
             let vc = _storyboard.instantiateViewController(withIdentifier: "sbViewRptPedido") as! ReportePedidoViewController
@@ -521,6 +628,7 @@ class PedidoDetalleViewController: UIViewController, SearchClienteDelegate, Sear
             vc.preferredContentSize = CGSize(width: 950, height: 550)
             vc.modalPresentationStyle = .formSheet
             vc.modalTransitionStyle = .crossDissolve
+            vc._folio = self.lblFolio.text
             vc._rowPedidoProductos = self._pedido.detalle
             self.present(vc, animated: true, completion: { _ in })
             
@@ -533,18 +641,20 @@ class PedidoDetalleViewController: UIViewController, SearchClienteDelegate, Sear
     }
     
     func onGuardar() {
-        
         if(self.ValidarPedido()){
-            _ = self.GuardarPedido()
-            let dataConfig = ConfiguracionDatos()
-            let nuevoFolio = self._app.config.folio.intValue + 1
-            self._app.config.folio = "\(nuevoFolio)" as NSString
-            dataConfig.updateConfiguracion(withConfiguracion: self._app.config)
+            if(self._tipo == "Nuevo") {
+                _ = self.GuardarNuevoPedido()
+                let dataConfig = ConfiguracionDatos()
+                
+                //Se incrementa el folio
+                let nuevoFolio = self._app.config.folio.intValue + 1
+                self._app.config.folio = "\(nuevoFolio)" as NSString
+                dataConfig.updateConfiguracion(withConfiguracion: self._app.config)
+            } else {
+                print("Actualiza documento")
+            }
             
             _ = self.navigationController?.popViewController(animated: true)
-        
-            /*let inicialViewController = _storyboard?.instantiateViewController(withIdentifier: "sbInicial")
-            self.navigationController?.pushViewController(inicialViewController!, animated: true)*/
         }
     }
     
@@ -600,6 +710,7 @@ class PedidoDetalleViewController: UIViewController, SearchClienteDelegate, Sear
             vc._listaPrecios = self._pedido.cliente?.listaprec as! String
             vc._renglon = self._pedido.detalle.count + 1
             vc._semanas = self._semanas
+            vc._estatusProducto = self._pedido?.estatus
             vc.delegate = self
             self.present(vc, animated: true, completion: { _ in })
             
@@ -608,6 +719,14 @@ class PedidoDetalleViewController: UIViewController, SearchClienteDelegate, Sear
                                  withTitle: "Informacion",
                                  withMessage: "Debe seleccionar un Cliente",
                                  withError: nil)
+        }
+    }
+    
+    @IBAction func onEstatusCambia(_ sender: UISwitch) {
+        if sender.isOn {
+            self.lblEstatus.text = ESTATUS_PEDIDO_CAPTURADO
+        } else {
+            self.lblEstatus.text = ESTATUS_PEDIDO_ENVIADO
         }
     }
 

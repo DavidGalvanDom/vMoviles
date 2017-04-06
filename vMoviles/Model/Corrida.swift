@@ -28,4 +28,5 @@ class Corrida: CBLModel {
     @NSManaged var c13: NSString
     @NSManaged var c14: NSString
     @NSManaged var c15: NSString
+    var objectId: String = ""
 }

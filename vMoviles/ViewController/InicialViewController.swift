@@ -99,9 +99,9 @@ class InicialViewController: UIViewController {
     
     //Split view de Pedidos
     func onShowPedidos () {
-        let detailViewController = _storyboard?.instantiateViewController(withIdentifier: "sbPedidosDetalle")
+        let pedidoViewController = _storyboard?.instantiateViewController(withIdentifier: "sbPedidos")
         
-        self.navigationController?.pushViewController(detailViewController!, animated: true)
+        self.navigationController?.pushViewController(pedidoViewController!, animated: true)
 
     }
     
