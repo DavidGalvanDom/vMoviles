@@ -171,6 +171,7 @@ class PedidoViewController:  UITableViewController,UISearchResultsUpdating {
         pedido.idembarque = forDoc["embarque"] as! String
         pedido.pares = Int(forDoc["pares"] as! String)
         pedido.estatus = forDoc["estatus"] as! String
+        pedido.observacion = forDoc["observacion"] as! String
         
         var total:String = forDoc["total"] as! String
         total = total.replacingOccurrences(of: "$", with: "")
@@ -222,6 +223,8 @@ class PedidoViewController:  UITableViewController,UISearchResultsUpdating {
         row.pares = item["pares"] as! Int
         row.pck = item["pck"] as! String
         row.precio = item["precio"] as! Double
+        row.precioCCom = item["precioCCom"] as! Double
+        row.precioCalle = item["precioCalle"] as! Double
         row.ts = item["ts"] as! String
         row.opcion = item["opcion"] as! String
         row.semana = item["semana"] as! String

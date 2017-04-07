@@ -597,6 +597,8 @@ class PedidoProductoViewController: UIViewController, SearchProductoDelegate, Pr
             pedidoProducto.semana = self.txtSemana.text!
             pedidoProducto.semanaCliente = self.txtSemanaCli.text!
             pedidoProducto.precio = (_productoSelected.costo).doubleValue
+            pedidoProducto.precioCalle = (_productoSelected.precioca).doubleValue
+            pedidoProducto.precioCCom = (_productoSelected.preciocc).doubleValue
             pedidoProducto.pares = Int(self.txtPares.text!)!
             pedidoProducto.pck = self.txtPK.text!
             pedidoProducto.numPck = Int(self.txtInterroga.text!)!

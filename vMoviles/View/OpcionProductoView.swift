@@ -24,11 +24,11 @@ class OpcionProductoView: UIView, UIScrollViewDelegate {
     
     func FormatoLabel ()
     {
-        lblPrecio.layer.borderWidth = 1.0
+        lblPrecio.layer.borderWidth = 0.1
         lblPrecio.layer.cornerRadius = 6
-        lblColor.layer.borderWidth = 1.0
+        lblColor.layer.borderWidth = 0.1
         lblColor.layer.cornerRadius = 6
-        lblOpcion.layer.borderWidth = 1.0
+        lblOpcion.layer.borderWidth = 0.1
         lblOpcion.layer.cornerRadius = 6
     }
 

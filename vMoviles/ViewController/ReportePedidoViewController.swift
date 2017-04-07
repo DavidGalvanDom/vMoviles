@@ -42,7 +42,7 @@ class ReportePedidoViewController: UIViewController {
                 index = index + 1
                 htmlNew = htmlNew + self.crearRenglon(item: item, index: index)
                 pares = pares + item.pares
-                costo = costo + item.precio
+                costo = costo + (item.precio * Double(item.pares))
             }
             let totalesHml = self.generaTotalesHtml(pares:pares,costo:costo)
             htmlCont =  htmlCont.replacingOccurrences(of: "$TOTALES_PEDIDO$", with: totalesHml)
@@ -62,9 +62,9 @@ class ReportePedidoViewController: UIViewController {
         let total = costo * 1.16
         
         inf = "<tr> <td colspan='4' class='rtext'>Total Pares</td><td class='rangoCol'>\(pares)</td>"
-        inf = inf + " <td class='rtext'>Subtotal</td><td class='rangoCol'>\(costo)</td> </tr>"
-        inf = inf + "<tr> <td class='rtext' colspan='6'>Impuesto</td><td class='rangoCol'>\(iva)</td> </tr>"
-        inf = inf + "<tr> <td class='rtext' colspan='6'>Total</td><td class='rangoCol'>\(total)</td> </tr>"
+        inf = inf + " <td class='rtext'>Subtotal</td><td class='rangoCol rtext'>\(String(format: "%.2f",costo))</td> </tr>"
+        inf = inf + "<tr> <td class='rtext' colspan='6'>Impuesto</td><td class='rangoCol rtext'>\(String(format: "%.2f",iva))</td> </tr>"
+        inf = inf + "<tr> <td class='rtext' colspan='6'>Total</td><td class='rangoCol rtext'>\(String(format: "%.2f",total))</td> </tr>"
 
         return inf
     }
@@ -159,13 +159,13 @@ class ReportePedidoViewController: UIViewController {
         row = row + "  <td class='rd'>\(item.estilo) - \(item.opcion)</td>"
         row = row + "  <td class='rd'>\(item.pielcolor)</td>"
         row = row + "  <td class='rd'>\(item.linea)</td>"
-        row = row + "  <td class='rd'>\(item.pares)</td>"
+        row = row + "  <td class='rd center'>\(item.pares)</td>"
         row = row + "  <td class='rd'>\(numeracion)</td>"
-        row = row + "  <td class='rangoCol'>\(item.precio)</td>"
-        row = row + "  <td class='rd'>\(item.precioCalle)</td>"
-        row = row + "  <td class='rd'>\(item.precioCCom)</td>"
-        row = row + "  <td class='rd'>\(item.semana)</td>"
-        row = row + "  <td class='rd'>\(item.estatus)</td>"
+        row = row + "  <td class='rangoCol rtext'>\(item.precio)</td>"
+        row = row + "  <td class='rd rtext'>\(item.precioCalle)</td>"
+        row = row + "  <td class='rd rtext'>\(item.precioCCom)</td>"
+        row = row + "  <td class='rd rtext'>\(item.semana)</td>"
+        row = row + "  <td class='rd center'>\(item.estatus)</td>"
         row = row + " </tr>"
         
         

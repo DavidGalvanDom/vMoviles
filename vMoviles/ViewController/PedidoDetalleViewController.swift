@@ -27,18 +27,18 @@ class PedidoDetalleViewController: UIViewController, SearchClienteDelegate, Sear
     @IBOutlet weak var chkEnviar: UISwitch!
     @IBOutlet weak var lblEstatus: UILabel!
     @IBOutlet weak var btnNuevoProd: UIButton!
+    @IBOutlet weak var btnBuscarCliente: UIButton!
     
     var _storyboard: UIStoryboard!
     var _dateFormatter = DateFormatter()
     var _semanas: Dictionary<String, Any> = [:]
     var _app: AppDelegate!
     var _pedido: Pedido!
-    var _tipo: String! //Si se edita o es nuevo
+    var _tipo: String = "Nuevo" //Si se edita o es nuevo
 
     override func viewDidLoad() {
         super.viewDidLoad()
         self._dateFormatter.dateFormat = "dd/MM/yyyy"
-        self.creaNavegador()
         
         self._app = UIApplication.shared.delegate as! AppDelegate
         guard let root = self._app.window?.rootViewController, let storyboard = root.storyboard else {
@@ -54,6 +54,9 @@ class PedidoDetalleViewController: UIViewController, SearchClienteDelegate, Sear
         } else {
             self.IniciaEditar()
         }
+        
+        self.creaNavegador()
+        self.btnBuscarCliente.isEnabled = (self._pedido.detalle.count < 1)
     }
     
     func IniciaEditar () {
@@ -65,6 +68,9 @@ class PedidoDetalleViewController: UIViewController, SearchClienteDelegate, Sear
         self.lblPares.text = "\(self._pedido.pares!)"
         self.lblTotal.text = self._app.formatCurrency("\(self._pedido.total)")
         self.txtComentario.text = self._pedido.observacion
+        
+        self.lblEstatus.text = self._pedido.estatus
+        chkEnviar.isOn = self._pedido.estatus == ESTATUS_PEDIDO_CAPTURADO ? true : false
         
         let doc = ClienteDatos(_database: self._app.database).CargarCliente(cliente: "cliente-\(self._pedido.idcliente!)")
         
@@ -90,6 +96,7 @@ class PedidoDetalleViewController: UIViewController, SearchClienteDelegate, Sear
         self.CargarSemanas()
         
         self._pedido = Pedido(folio: self.lblFolio.text!)
+        self._pedido.estatus = ESTATUS_PEDIDO_CAPTURADO
         self._pedido.fechaCreacion = self._dateFormatter.string(from: Date())
     }
     
@@ -152,7 +159,7 @@ class PedidoDetalleViewController: UIViewController, SearchClienteDelegate, Sear
         
         let barListaPedidos = UIBarButtonItem(image: UIImage(named:"Pedido2"), style: .plain, target: self, action: #selector(backController))
         barListaPedidos.imageInsets = UIEdgeInsetsMake(7, 5, 7, 5)
-        barListaPedidos.tintColor = .black
+        barListaPedidos.tintColor = .gray
         
         self.navigationItem.leftBarButtonItems = [barListaPedidos, lblbuttonComapania]
         
@@ -162,16 +169,17 @@ class PedidoDetalleViewController: UIViewController, SearchClienteDelegate, Sear
         let brRptPedido = UIBarButtonItem(image: UIImage(named:"PDF"), style: .plain, target: self, action: #selector(onRptPedido))
         
         brRptProductos.imageInsets = UIEdgeInsetsMake(2, 2, 2, 2)
-        brRptProductos.tintColor = .black
+        brRptProductos.tintColor = .gray
         
         brRptPedido.imageInsets = UIEdgeInsetsMake(5, 2, 5, 2)
-        brRptPedido.tintColor = .black
+        brRptPedido.tintColor = .gray
         
         if(self._pedido?.estatus == ESTATUS_PEDIDO_CAPTURADO) {
             let brGuardar = UIBarButtonItem(image: UIImage(named:"Save"), style: .plain, target: self, action: #selector(onGuardar))
             brGuardar.imageInsets = UIEdgeInsetsMake(5, 5, 5, 5)
-            brGuardar.tintColor = .black
+            brGuardar.tintColor = .gray
             self.navigationItem.rightBarButtonItems = [brRptPedido,brRptProductos,brGuardar]
+            self.btnNuevoProd.tintColor = .gray
         } else {
             self.navigationItem.rightBarButtonItems = [brRptPedido,brRptProductos]
             self.btnNuevoProd.isHidden = true
@@ -355,13 +363,8 @@ class PedidoDetalleViewController: UIViewController, SearchClienteDelegate, Sear
         return cell
     }
     
-    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        /*let app = UIApplication.shared.delegate as! AppDelegate
-        app.cveCompania = _companias[indexPath.row]._id
-        app.compania = _companias[indexPath.row]._descripcion
-         */
-    }
     
+    // MARK: Funciones generales
     func CalculaTotales()
     {
         var total: Double = 0
@@ -376,8 +379,7 @@ class PedidoDetalleViewController: UIViewController, SearchClienteDelegate, Sear
         self.lblPares.text = String(pares)
     }
     
-    func GuardarNuevoPedido() -> CBLSavedRevision?{
-        
+    func GuardarNuevoPedido() -> CBLSavedRevision? {
         var renglones : [Dictionary<String, Any>] = []
         
         for item in self._pedido.detalle {
@@ -391,6 +393,91 @@ class PedidoDetalleViewController: UIViewController, SearchClienteDelegate, Sear
             renglon["semanaCli"] = item.semanaCliente
             renglon["cveart"] =  item.cveart
             renglon["opcion"] = item.opcion
+            renglon["estilo"] =  item.estilo
+            renglon["pares"] =  item.pares
+            renglon["precio"] = item.precio
+            renglon["precioCCom"] = item.precioCCom
+            renglon["precioCalle"] = item.precioCalle
+            renglon["pielcolor"] =  item.pielcolor
+            renglon["ts"] =  item.ts
+            renglon["pck"] =  item.pck
+            renglon["tpc"] =  item.tpc
+            renglon["numPck"] =  item.numPck
+            renglon["idCorrida"] = item.corrida.objectId
+            renglon["p1"] =  item.p1
+            renglon["p2"] =  item.p2
+            renglon["p3"] =  item.p3
+            renglon["p4"] =  item.p4
+            renglon["p5"] =  item.p5
+            renglon["p6"] =  item.p6
+            renglon["p7"] =  item.p7
+            renglon["p8"] =  item.p8
+            renglon["p9"] =  item.p9
+            renglon["p10"] =  item.p10
+            renglon["p11"] =  item.p11
+            renglon["p12"] =  item.p12
+            renglon["p13"] =  item.p13
+            renglon["p14"] =  item.p14
+            renglon["p15"] =  item.p15
+            
+            renglones.append(renglon)
+        }
+        
+        var properties: Dictionary<String, Any> = [
+            "type": "pedido"
+        ]
+
+        properties["folio"] = self._app.config.folio
+        properties["cliente"] = self._pedido.cliente?.id
+        properties["razonsocial"] = self._pedido.cliente?.razonsocial
+        properties["embarque"] = self._pedido.embarque?.embarque
+        properties["fechainicio"] = self.txtFechaIni.text ?? ""
+        properties["fechafin"] = self.txtFechaFin.text ?? ""
+        properties["fechacancelacion"] = self.txtFechaCancelada.text ?? ""
+        properties["total"] = self.lblTotal.text ?? "0"
+        properties["pares"] = self.lblPares.text ?? "0"
+        properties["vendedor"] = self._app.config.agente
+        properties["estatus"] = self.chkEnviar.isOn ?  ESTATUS_PEDIDO_CAPTURADO : ESTATUS_PEDIDO_ENVIADO
+        properties["fechaCreacion"] = CBLJSON.jsonObject(with: Date())
+        properties["renglones"] =  renglones
+        properties["observacion"] =  self.txtComentario.text ?? ""
+           
+        let doc = self._app.database.createDocument()
+        
+        do {
+            return try doc.putProperties(properties)
+        } catch let error as NSError {
+            Ui.showMessageDialog(onController: self, withTitle: "Error",
+                                 withMessage: "No se puede guardar el pedido", withError: error)
+            return nil
+        }
+    }
+    
+    func ActualizarPedido() -> CBLSavedRevision? {
+       
+        
+        return nil
+
+        /* var renglones : [Dictionary<String, Any>] = []
+        
+        var docPedido = PedidoDatos(_database: self._app.database).CargarPedido(folio: self._pedido.folio)
+        
+        
+        
+        
+        for item in self._pedido.detalle {
+            
+            var renglon: Dictionary<String, Any> = [
+                "renglon": String(item.renglon)
+            ]
+            renglon["status"] = "activo"
+            renglon["linea"] = item.linea
+            renglon["semana"] = item.semana
+            renglon["semanaCli"] = item.semanaCliente
+            renglon["cveart"] =  item.cveart
+            renglon["opcion"] = item.opcion
+            renglon["precioCCom"] = item.precioCCom
+            renglon["precioCalle"] = item.precioCalle
             renglon["estilo"] =  item.estilo
             renglon["pares"] =  item.pares
             renglon["precio"] = item.precio
@@ -422,21 +509,21 @@ class PedidoDetalleViewController: UIViewController, SearchClienteDelegate, Sear
         var properties: Dictionary<String, Any> = [
             "type": "pedido"
         ]
-            properties["folio"] = self._app.config.folio
-            properties["cliente"] = self._pedido.cliente?.id
-            properties["razonsocial"] = self._pedido.cliente?.razonsocial
-            properties["embarque"] = self._pedido.embarque?.embarque
-            properties["fechainicio"] = self.txtFechaIni.text ?? ""
-            properties["fechafin"] = self.txtFechaFin.text ?? ""
-            properties["fechacancelacion"] = self.txtFechaCancelada.text ?? ""
-            properties["total"] = self.lblTotal.text ?? "0"
-            properties["pares"] = self.lblPares.text ?? "0"
-            properties["vendedor"] = self._app.config.agente
-            properties["estatus"] = ESTATUS_PEDIDO_CAPTURADO
-            properties["fechaCreacion"] = CBLJSON.jsonObject(with: Date())
-            properties["renglones"] =  renglones
-            properties["observacion"] =  self.txtComentario.text ?? ""
-           
+        
+        properties["cliente"] = self._pedido.cliente?.id
+        properties["razonsocial"] = self._pedido.cliente?.razonsocial
+        properties["embarque"] = self._pedido.embarque?.embarque
+        properties["fechainicio"] = self.txtFechaIni.text ?? ""
+        properties["fechafin"] = self.txtFechaFin.text ?? ""
+        properties["fechacancelacion"] = self.txtFechaCancelada.text ?? ""
+        properties["total"] = self.lblTotal.text ?? "0"
+        properties["pares"] = self.lblPares.text ?? "0"
+        properties["vendedor"] = self._app.config.agente
+        properties["estatus"] = self.chkEnviar.isOn ?  ESTATUS_PEDIDO_CAPTURADO : ESTATUS_PEDIDO_ENVIADO
+        properties["fechaCreacion"] = CBLJSON.jsonObject(with: Date())
+        properties["renglones"] =  renglones
+        properties["observacion"] =  self.txtComentario.text ?? ""
+        
         let doc = self._app.database.createDocument()
         
         do {
@@ -446,7 +533,10 @@ class PedidoDetalleViewController: UIViewController, SearchClienteDelegate, Sear
                                  withMessage: "No se puede guardar el pedido", withError: error)
             return nil
         }
+ 
+ */
     }
+
     
     func ValidarPedido () -> Bool {
         
@@ -542,7 +632,7 @@ class PedidoDetalleViewController: UIViewController, SearchClienteDelegate, Sear
         
             vc.modalPresentationStyle = .formSheet
             vc.modalTransitionStyle = .crossDissolve
-            vc.idCliente = self._pedido.cliente!.agenteid as String
+            vc.idCliente = self._pedido.cliente!.id as String
             vc.delegate = self
             self.present(vc, animated: true, completion: { _ in })
             
@@ -594,6 +684,7 @@ class PedidoDetalleViewController: UIViewController, SearchClienteDelegate, Sear
             self._pedido.detalle.append(sender)
         }
         
+        self.btnBuscarCliente.isEnabled = (self._pedido.detalle.count < 1)
         self.CalculaTotales()
         self.tableView.reloadData()
     }

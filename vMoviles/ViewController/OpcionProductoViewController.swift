@@ -55,8 +55,6 @@ class OpcionProductoViewController: UIViewController, UIScrollViewDelegate {
             opcionView.lblOpcion.text = item.opcion
             opcionView.lblPrecio.text = "$ \(item.precio!)"
             
-           
-            
             opcionView.imageView.image = ProductoDatos(_database: self._app.databaseImg).CargarImagen(clave: item.clave)
             
             self.scrollView.addSubview(opcionView)
@@ -103,13 +101,13 @@ class OpcionProductoViewController: UIViewController, UIScrollViewDelegate {
 
     func FormatoLabel ()
     {
-        lblCategoria.layer.borderWidth = 1.0
+        lblCategoria.layer.borderWidth = 0.2
         lblCategoria.layer.cornerRadius = 6
-        lblLinea.layer.borderWidth = 1.0
+        lblLinea.layer.borderWidth = 0.2
         lblLinea.layer.cornerRadius = 6
-        lblEstilo.layer.borderWidth = 1.0
+        lblEstilo.layer.borderWidth = 0.2
         lblEstilo.layer.cornerRadius = 6
-        lblCorrida.layer.borderWidth = 1.0
+        lblCorrida.layer.borderWidth = 0.2
         lblCorrida.layer.cornerRadius = 6
     }
     

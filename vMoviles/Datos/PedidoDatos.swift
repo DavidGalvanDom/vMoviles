@@ -33,5 +33,17 @@ class PedidoDatos
         
         return productoLiveQuery
     }
+    
+    //Regresa el documento con los datos del pedido
+    func CargarPedido (folio: String) -> CBLDocument? {
+        
+        if database.existingDocument(withID: folio) != nil {
+            let doc = database.document(withID: folio)
+            return doc
+        } else {
+            return nil
+        }
+    }
+
        
 }
