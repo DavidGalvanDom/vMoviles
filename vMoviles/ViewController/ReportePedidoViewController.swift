@@ -73,19 +73,19 @@ class ReportePedidoViewController: UIViewController {
         var inf : String = html
         
         inf = inf.replacingOccurrences(of: "$FOLIO$", with: self._pedido.folio)
-        inf = inf.replacingOccurrences(of: "$NUM_CLIENTE$", with: String(self._pedido.idcliente))
-        inf = inf.replacingOccurrences(of: "$NOM_CLI$", with: self._pedido.cliente?.razonsocial as! String)
-        inf = inf.replacingOccurrences(of: "$DIR_CLI$", with: self._pedido.cliente?.dir as! String)
-        inf = inf.replacingOccurrences(of: "$COLCID_CLI$", with: " \(self._pedido.cliente?.colonia as! String)   \(self._pedido.cliente?.ciudad as! String)")
-        inf = inf.replacingOccurrences(of: "$ESTADO_CLI$", with: self._pedido.cliente?.estado as! String)
-        inf = inf.replacingOccurrences(of: "$SUCUR_CLI$", with: self._pedido.cliente?.sucursal as! String)
-        inf = inf.replacingOccurrences(of: "$OBSER_CLI$", with: self._pedido.observacion as String)
+        inf = inf.replacingOccurrences(of: "$NUM_CLIENTE$", with: String(describing: self._pedido.idcliente))
+        inf = inf.replacingOccurrences(of: "$NOM_CLI$", with: String(describing: self._pedido.cliente?.razonsocial))
+        inf = inf.replacingOccurrences(of: "$DIR_CLI$", with: String(describing: self._pedido.cliente?.dir))
+        inf = inf.replacingOccurrences(of: "$COLCID_CLI$", with: " \(String(describing: self._pedido.cliente?.colonia))   \(String(describing: self._pedido.cliente?.ciudad))")
+        inf = inf.replacingOccurrences(of: "$ESTADO_CLI$", with: String(describing: self._pedido.cliente?.estado))
+        inf = inf.replacingOccurrences(of: "$SUCUR_CLI$", with: String(describing: self._pedido.cliente?.sucursal))
+        inf = inf.replacingOccurrences(of: "$OBSER_CLI$", with: String(describing: self._pedido.observacion))
         
-        inf = inf.replacingOccurrences(of: "$DIR_ENTREGA$", with:  self._pedido.embarque?.direccion as! String)
-        inf = inf.replacingOccurrences(of: "$COLCIU_ENTREGA$", with: " \(self._pedido.embarque?.colonia as! String)   \(self._pedido.embarque?.ciudad as! String)")
-        inf = inf.replacingOccurrences(of: "$ESTADO_ENTREGA$", with:  self._pedido.embarque?.estado as! String)
-        inf = inf.replacingOccurrences(of: "$FENTREGA_ENTREGA$", with: "\(self._pedido.fechaInicio!) - \(self._pedido.fechaFin!)")
-        inf = inf.replacingOccurrences(of: "$FPEDIDO_ENTREGA$", with:  self._pedido.fechaCreacion as String)
+        inf = inf.replacingOccurrences(of: "$DIR_ENTREGA$", with:  String(describing: self._pedido.embarque?.direccion))
+        inf = inf.replacingOccurrences(of: "$COLCIU_ENTREGA$", with: " \(String(describing: self._pedido.embarque?.colonia))   \(String(describing: self._pedido.embarque?.ciudad))")
+        inf = inf.replacingOccurrences(of: "$ESTADO_ENTREGA$", with:  String(describing: self._pedido.embarque?.estado))
+        inf = inf.replacingOccurrences(of: "$FENTREGA_ENTREGA$", with: "\(String(describing: self._pedido.fechaInicio!)) - \(String(describing: self._pedido.fechaFin!))")
+        inf = inf.replacingOccurrences(of: "$FPEDIDO_ENTREGA$", with:  String(describing: self._pedido.fechaCreacion))
         inf = inf.replacingOccurrences(of: "$CONDICIONES_ENTREGA$", with: " ")
         
         return inf

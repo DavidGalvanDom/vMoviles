@@ -112,10 +112,7 @@ class EmbarqueSearchViewController : UIViewController,  UITableViewDelegate, UIT
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         if indexPath.row >= 0 {
-            let doc = (embarquesRows?[indexPath.row].document)!
-            
             let embarque = Embarque(for: (embarquesRows?[indexPath.row].document)!)
-            print("\(doc["_id"])")
             delegate?.embarqueSeleccionado(sender: embarque!)
             dismiss(animated: true, completion: nil)
             popoverPresentationController?.delegate?.popoverPresentationControllerDidDismissPopover?(popoverPresentationController!)

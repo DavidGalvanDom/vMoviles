@@ -59,7 +59,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UISplitViewControllerDele
         }
     }
     
-    func cargaConfiguracion (dataConfig: ConfiguracionDatos) -> CBLDocument {
+    func cargaConfiguracion (dataConfig: ConfiguracionDatos) -> CBLDocument? {
         var doc :CBLDocument!
         
         do {
@@ -220,7 +220,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UISplitViewControllerDele
         UIApplication.shared.isNetworkActivityIndicatorVisible =
             (pusher.status == .active || puller.status == .active || pullerimg.status == .active)
         
-        let error = pusher.lastError as? NSError;
+        let error = pusher.lastError as NSError?;
         if (error != syncError) {
             syncError = error
             if let errorCode = error?.code {

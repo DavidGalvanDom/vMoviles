@@ -327,7 +327,7 @@ class PedidoDetalleViewController: UIViewController, SearchClienteDelegate, Sear
                 vc.preferredContentSize = CGSize(width: 950, height: 550)
                 vc.modalPresentationStyle = .formSheet
                 vc.modalTransitionStyle = .crossDissolve
-                vc._listaPrecios = self._pedido.cliente?.listaprec as! String
+                vc._listaPrecios = String (describing: self._pedido.cliente?.listaprec)
                 vc._estatusProducto = self._pedido?.estatus
                 vc._renglon = renglon.renglon
                 vc._rowPedidoProducto = renglon
@@ -363,6 +363,12 @@ class PedidoDetalleViewController: UIViewController, SearchClienteDelegate, Sear
         return cell
     }
     
+    func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCellEditingStyle, forRowAt indexPath: IndexPath) {
+        if editingStyle == UITableViewCellEditingStyle.delete {
+            self._pedido.detalle.remove(at: indexPath.row)
+            tableView.deleteRows(at: [indexPath], with: UITableViewRowAnimation.automatic)
+        }
+    }
     
     // MARK: Funciones generales
     func CalculaTotales()
@@ -380,49 +386,6 @@ class PedidoDetalleViewController: UIViewController, SearchClienteDelegate, Sear
     }
     
     func GuardarNuevoPedido() -> CBLSavedRevision? {
-        var renglones : [Dictionary<String, Any>] = []
-        
-        for item in self._pedido.detalle {
-            
-            var renglon: Dictionary<String, Any> = [
-                "renglon": String(item.renglon)
-            ]
-            renglon["status"] = "activo"
-            renglon["linea"] = item.linea
-            renglon["semana"] = item.semana
-            renglon["semanaCli"] = item.semanaCliente
-            renglon["cveart"] =  item.cveart
-            renglon["opcion"] = item.opcion
-            renglon["estilo"] =  item.estilo
-            renglon["pares"] =  item.pares
-            renglon["precio"] = item.precio
-            renglon["precioCCom"] = item.precioCCom
-            renglon["precioCalle"] = item.precioCalle
-            renglon["pielcolor"] =  item.pielcolor
-            renglon["ts"] =  item.ts
-            renglon["pck"] =  item.pck
-            renglon["tpc"] =  item.tpc
-            renglon["numPck"] =  item.numPck
-            renglon["idCorrida"] = item.corrida.objectId
-            renglon["p1"] =  item.p1
-            renglon["p2"] =  item.p2
-            renglon["p3"] =  item.p3
-            renglon["p4"] =  item.p4
-            renglon["p5"] =  item.p5
-            renglon["p6"] =  item.p6
-            renglon["p7"] =  item.p7
-            renglon["p8"] =  item.p8
-            renglon["p9"] =  item.p9
-            renglon["p10"] =  item.p10
-            renglon["p11"] =  item.p11
-            renglon["p12"] =  item.p12
-            renglon["p13"] =  item.p13
-            renglon["p14"] =  item.p14
-            renglon["p15"] =  item.p15
-            
-            renglones.append(renglon)
-        }
-        
         var properties: Dictionary<String, Any> = [
             "type": "pedido"
         ]
@@ -439,7 +402,7 @@ class PedidoDetalleViewController: UIViewController, SearchClienteDelegate, Sear
         properties["vendedor"] = self._app.config.agente
         properties["estatus"] = self.chkEnviar.isOn ?  ESTATUS_PEDIDO_CAPTURADO : ESTATUS_PEDIDO_ENVIADO
         properties["fechaCreacion"] = CBLJSON.jsonObject(with: Date())
-        properties["renglones"] =  renglones
+        properties["renglones"] =  self.RenglonesPedidoDB()
         properties["observacion"] =  self.txtComentario.text ?? ""
            
         let doc = self._app.database.createDocument()
@@ -448,23 +411,41 @@ class PedidoDetalleViewController: UIViewController, SearchClienteDelegate, Sear
             return try doc.putProperties(properties)
         } catch let error as NSError {
             Ui.showMessageDialog(onController: self, withTitle: "Error",
-                                 withMessage: "No se puede guardar el pedido", withError: error)
+                                 withMessage: "No se pudo guardar el pedido", withError: error)
             return nil
         }
     }
     
-    func ActualizarPedido() -> CBLSavedRevision? {
-       
+    func ActualizarPedido()  {
+        let docPedido = PedidoDatos(_database: self._app.database).CargarPedido(folio: self._pedido.folio)
         
-        return nil
-
-        /* var renglones : [Dictionary<String, Any>] = []
+         //nr = Nueva Revision
+         do {
+            try docPedido?.update { nr in
+                nr["embarque"] = self._pedido.embarque?.embarque
+                nr["fechainicio"] = self.txtFechaIni.text ?? ""
+                nr["fechafin"] = self.txtFechaFin.text ?? ""
+                nr["fechacancelacion"] = self.txtFechaCancelada.text ?? ""
+                nr["total"] = self.lblTotal.text ?? "0"
+                nr["pares"] = self.lblPares.text ?? "0"
+                nr["vendedor"] = self._app.config.agente
+                nr["estatus"] = self.chkEnviar.isOn ?  ESTATUS_PEDIDO_CAPTURADO : ESTATUS_PEDIDO_ENVIADO
+                nr["fechaCreacion"] = CBLJSON.jsonObject(with: Date())
+                nr["renglones"] =  self.RenglonesPedidoDB()
+                nr["observacion"] =  self.txtComentario.text ?? ""
+                
+                return true
+            }
+         } catch let error as NSError {
+                Ui.showMessageDialog(onController: self, withTitle: "Error", withMessage: "No se pudo actualizar el Pedido", withError: error)
+         }
+    }
+    
+    ///Se genera la lista de renglones para el formato de base de datos Dictionary
+    func RenglonesPedidoDB() -> [Dictionary<String, Any>] {
+        var renglones : [Dictionary<String, Any>] = []
         
-        var docPedido = PedidoDatos(_database: self._app.database).CargarPedido(folio: self._pedido.folio)
-        
-        
-        
-        
+        //Se generan los renglones
         for item in self._pedido.detalle {
             
             var renglon: Dictionary<String, Any> = [
@@ -506,35 +487,7 @@ class PedidoDetalleViewController: UIViewController, SearchClienteDelegate, Sear
             renglones.append(renglon)
         }
         
-        var properties: Dictionary<String, Any> = [
-            "type": "pedido"
-        ]
-        
-        properties["cliente"] = self._pedido.cliente?.id
-        properties["razonsocial"] = self._pedido.cliente?.razonsocial
-        properties["embarque"] = self._pedido.embarque?.embarque
-        properties["fechainicio"] = self.txtFechaIni.text ?? ""
-        properties["fechafin"] = self.txtFechaFin.text ?? ""
-        properties["fechacancelacion"] = self.txtFechaCancelada.text ?? ""
-        properties["total"] = self.lblTotal.text ?? "0"
-        properties["pares"] = self.lblPares.text ?? "0"
-        properties["vendedor"] = self._app.config.agente
-        properties["estatus"] = self.chkEnviar.isOn ?  ESTATUS_PEDIDO_CAPTURADO : ESTATUS_PEDIDO_ENVIADO
-        properties["fechaCreacion"] = CBLJSON.jsonObject(with: Date())
-        properties["renglones"] =  renglones
-        properties["observacion"] =  self.txtComentario.text ?? ""
-        
-        let doc = self._app.database.createDocument()
-        
-        do {
-            return try doc.putProperties(properties)
-        } catch let error as NSError {
-            Ui.showMessageDialog(onController: self, withTitle: "Error",
-                                 withMessage: "No se puede guardar el pedido", withError: error)
-            return nil
-        }
- 
- */
+        return renglones
     }
 
     
@@ -798,7 +751,7 @@ class PedidoDetalleViewController: UIViewController, SearchClienteDelegate, Sear
             vc.preferredContentSize = CGSize(width: 950, height: 550)
             vc.modalPresentationStyle = .formSheet
             vc.modalTransitionStyle = .crossDissolve
-            vc._listaPrecios = self._pedido.cliente?.listaprec as! String
+            vc._listaPrecios = String ( describing: self._pedido.cliente?.listaprec)
             vc._renglon = self._pedido.detalle.count + 1
             vc._semanas = self._semanas
             vc._estatusProducto = self._pedido?.estatus

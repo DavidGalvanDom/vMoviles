@@ -22,7 +22,7 @@ class PedidoDatos
             view.setMapBlock({ (doc, emit) in
                 let type = doc["type"] as? String
                 if type == "pedido" {
-                    let key = "\(doc["folio"])\(doc["estatus"])\(doc["razonsocial"])"
+                    let key = "\(String(describing: doc["folio"]))\(String(describing: doc["estatus"]))\(String(describing: doc["razonsocial"]))"
                     emit(key, nil)
                 }
             }, version: "1.1")

@@ -87,7 +87,6 @@ class CompaniasViewController: UIViewController,  UITableViewDelegate, UITableVi
             app.stopReplication()
             app.startReplication(compania: _companias[comIndex]._id)
         }
-
     }
     
     //Despliega la pantalla de configuracion
