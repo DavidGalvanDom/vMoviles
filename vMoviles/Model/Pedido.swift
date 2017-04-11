@@ -7,7 +7,7 @@
 //
 
 class Pedido {
-    
+    var _id:String!
     var folio:String!
     var observacion:String!
     var fechaInicio:String!
@@ -27,7 +27,7 @@ class Pedido {
     
     init(folio: String) {
         self.folio = folio
-      
+        self._id = ""
         self.idcliente = "0"
         self.idembarque = "0"
         self.fechaFin = ""

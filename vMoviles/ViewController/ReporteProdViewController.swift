@@ -6,12 +6,15 @@
 //  Copyright © 2017 sysba. All rights reserved.
 //
 
+import Foundation
 import UIKit
+import MessageUI
 
-class ReporteProdViewController: UIViewController, UIWebViewDelegate {
+class ReporteProdViewController: UIViewController, UIWebViewDelegate, MFMailComposeViewControllerDelegate {
 
     @IBOutlet weak var webView: UIWebView!
     var _folio:String!
+    var _email:String!
     var _rowPedidoProductos: [RowPedidoProducto] = []
 
     
@@ -169,6 +172,46 @@ class ReporteProdViewController: UIViewController, UIWebViewDelegate {
         }
     }
     
+    func configuredMailComposeViewController(folio: String, email: String) -> MFMailComposeViewController {
+        let mailComposerVC = MFMailComposeViewController()
+        mailComposerVC.mailComposeDelegate = self
+        mailComposerVC.setToRecipients([email])
+        mailComposerVC.setSubject("Productos pedido con folio \(folio)")
+        mailComposerVC.setMessageBody("Se agrega el pdf con el detalle del pedido.", isHTML: false)
+        
+        return mailComposerVC
+    }
+    
+    func showSendMailErrorAlert() {
+        Ui.showMessageDialog(onController: self,
+                             withTitle: "No se puede enviar el Correo",
+                             withMessage: "Tu dispositivo no puede enviar correos. Favor de checar la configuracion de correos y volver a intentar.",
+                             withError: nil)
+    }
+    
+    // MARK: MFMailComposeViewControllerDelegate
+    
+    func mailComposeController(_ controller: MFMailComposeViewController, didFinishWith result: MFMailComposeResult, error: Error?) {
+        controller.dismiss(animated: true, completion: nil)
+    }
+    
+    func enviaCorreo(folio: String) {
+        let mailComposeViewController = configuredMailComposeViewController(folio: folio,email: self._email)
+        if MFMailComposeViewController.canSendMail() {
+            
+            let documentsPath = NSSearchPathForDirectoriesInDomains(.documentDirectory, .userDomainMask, true)[0]
+            let filePath  = "\(documentsPath)/rptProcuctos-\(folio).pdf"
+            
+            if let fileData = NSData(contentsOfFile: filePath) {
+                mailComposeViewController.addAttachmentData(fileData as Data, mimeType: "application/pdf", fileName: filePath)
+                self.present(mailComposeViewController, animated: true, completion: nil)
+            }
+        } else {
+            self.showSendMailErrorAlert()
+        }
+    }
+
+    
     @IBAction func onCerrar(_ sender: Any) {
         dismiss(animated: true, completion: nil)
         popoverPresentationController?.delegate?.popoverPresentationControllerDidDismissPopover?(popoverPresentationController!)
@@ -176,6 +219,7 @@ class ReporteProdViewController: UIViewController, UIWebViewDelegate {
 
     @IBAction func onCrearPDF(_ sender: Any) {
         self.crearPDF(folio:self._folio)
+        self.enviaCorreo(folio: self._folio)
     }
     
 }

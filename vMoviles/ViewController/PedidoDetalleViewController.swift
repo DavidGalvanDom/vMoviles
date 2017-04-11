@@ -327,7 +327,7 @@ class PedidoDetalleViewController: UIViewController, SearchClienteDelegate, Sear
                 vc.preferredContentSize = CGSize(width: 950, height: 550)
                 vc.modalPresentationStyle = .formSheet
                 vc.modalTransitionStyle = .crossDissolve
-                vc._listaPrecios = String (describing: self._pedido.cliente?.listaprec)
+                vc._listaPrecios =  self._pedido.cliente?.listaprec as String!
                 vc._estatusProducto = self._pedido?.estatus
                 vc._renglon = renglon.renglon
                 vc._rowPedidoProducto = renglon
@@ -367,6 +367,7 @@ class PedidoDetalleViewController: UIViewController, SearchClienteDelegate, Sear
         if editingStyle == UITableViewCellEditingStyle.delete {
             self._pedido.detalle.remove(at: indexPath.row)
             tableView.deleteRows(at: [indexPath], with: UITableViewRowAnimation.automatic)
+            self.CalculaTotales()
         }
     }
     
@@ -378,7 +379,7 @@ class PedidoDetalleViewController: UIViewController, SearchClienteDelegate, Sear
         
         for item in self._pedido.detalle {
             pares = pares + item.pares
-            total = total + (Double(pares) * item.precio)
+            total = total + (Double(item.pares) * item.precio)
         }
         
         self.lblTotal.text = self._app.formatCurrency("\(total)")
@@ -417,7 +418,7 @@ class PedidoDetalleViewController: UIViewController, SearchClienteDelegate, Sear
     }
     
     func ActualizarPedido()  {
-        let docPedido = PedidoDatos(_database: self._app.database).CargarPedido(folio: self._pedido.folio)
+        let docPedido = PedidoDatos(_database: self._app.database).CargarPedido(folio: self._pedido._id)
         
          //nr = Nueva Revision
          do {
@@ -672,6 +673,7 @@ class PedidoDetalleViewController: UIViewController, SearchClienteDelegate, Sear
             vc.preferredContentSize = CGSize(width: 950, height: 550)
             vc.modalPresentationStyle = .formSheet
             vc.modalTransitionStyle = .crossDissolve
+            vc._email = self._pedido.cliente?.email as String!
             vc._folio = self.lblFolio.text
             vc._rowPedidoProductos = self._pedido.detalle
             self.present(vc, animated: true, completion: { _ in })
@@ -695,11 +697,22 @@ class PedidoDetalleViewController: UIViewController, SearchClienteDelegate, Sear
                 self._app.config.folio = "\(nuevoFolio)" as NSString
                 dataConfig.updateConfiguracion(withConfiguracion: self._app.config)
             } else {
-                print("Actualiza documento")
+                self.ActualizarPedido()
             }
             
             _ = self.navigationController?.popViewController(animated: true)
         }
+    }
+    
+    func ObtenerSiguienteRenglon() -> Int{
+        var numRenglon : Int = 1
+        
+        if self._pedido.detalle.count > 0 {
+            let count = self._pedido.detalle.count - 1
+            numRenglon = self._pedido.detalle[count].renglon + 1
+        }
+        
+        return numRenglon
     }
     
     @IBAction func onBuscarEmbarque(_ sender: Any) {
@@ -751,8 +764,8 @@ class PedidoDetalleViewController: UIViewController, SearchClienteDelegate, Sear
             vc.preferredContentSize = CGSize(width: 950, height: 550)
             vc.modalPresentationStyle = .formSheet
             vc.modalTransitionStyle = .crossDissolve
-            vc._listaPrecios = String ( describing: self._pedido.cliente?.listaprec)
-            vc._renglon = self._pedido.detalle.count + 1
+            vc._listaPrecios =  self._pedido.cliente?.listaprec as String?
+            vc._renglon = self.ObtenerSiguienteRenglon()
             vc._semanas = self._semanas
             vc._estatusProducto = self._pedido?.estatus
             vc.delegate = self

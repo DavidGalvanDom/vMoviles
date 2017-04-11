@@ -32,6 +32,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UISplitViewControllerDele
     var cveCompania: String!
     var config: Configuracion!
 
+
+
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplicationLaunchOptionsKey: Any]?) -> Bool {
         
         let splitViewController = self.window!.rootViewController as! UISplitViewController
@@ -255,6 +257,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UISplitViewControllerDele
         }
         
         let controller = storyboard.instantiateViewController(withIdentifier: "navCompanias")
+        
         window!.rootViewController = controller
     }
     
@@ -267,9 +270,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UISplitViewControllerDele
         // Override point for customization after application launch.
         let controller = storyboard.instantiateInitialViewController()
         window!.rootViewController = controller
-        
-        
-        //viewName
     }
     
     func formatCurrency(_ value: String?) -> String {

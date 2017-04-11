@@ -79,26 +79,26 @@ class PrepacksViewController: UIViewController,UITableViewDelegate, UITableViewD
                 let inventario = InventarioTipo(for: (doc))
                 encontroPrepcak = false
                 self._prepacksInv.forEach { pck in
-                    if(pck.cveart == String(describing: inventario?.keyArticulo) &&
-                        pck.pck == String(describing: inventario?.pck)) {
-                        pck.tipo = String(describing: inventario?.Tipo)
-                        pck.I1 = String(describing: inventario?.I1)
-                        pck.I2 = String(describing: inventario?.I2)
-                        pck.I3 = String(describing: inventario?.I3)
-                        pck.I4 = String(describing: inventario?.I4)
-                        pck.I5 = String(describing: inventario?.I5)
-                        pck.I6 = String(describing: inventario?.I6)
-                        pck.I7 = String(describing: inventario?.I7)
-                        pck.I8 = String(describing: inventario?.I8)
-                        pck.I9 = String(describing: inventario?.I9)
-                        pck.I10 = String(describing: inventario?.I10)
-                        pck.I11 = String(describing: inventario?.I11)
-                        pck.I12 = String(describing: inventario?.I12)
-                        pck.I13 = String(describing: inventario?.I13)
-                        pck.I14 = String(describing: inventario?.I14)
-                        pck.I15 = String(describing: inventario?.I15)
+                    if(pck.cveart == inventario?.keyArticulo as String! &&
+                        pck.pck ==  inventario?.pck as String!) {
+                        pck.tipo =  inventario?.Tipo as String!
+                        pck.I1 =  inventario?.I1 as String!
+                        pck.I2 = inventario?.I2 as String!
+                        pck.I3 = inventario?.I3 as String!
+                        pck.I4 = inventario?.I4 as String!
+                        pck.I5 = inventario?.I5 as String!
+                        pck.I6 = inventario?.I6 as String!
+                        pck.I7 = inventario?.I7 as String!
+                        pck.I8 = inventario?.I8 as String!
+                        pck.I9 = inventario?.I9 as String!
+                        pck.I10 = inventario?.I10 as String!
+                        pck.I11 = inventario?.I11 as String!
+                        pck.I12 = inventario?.I12 as String!
+                        pck.I13 = inventario?.I13 as String!
+                        pck.I14 = inventario?.I14 as String!
+                        pck.I15 = inventario?.I15 as String!
                         
-                        pck.descripcion = DescripcionTipo(idTipo: String(describing: inventario?.Tipo))
+                        pck.descripcion = DescripcionTipo(idTipo: inventario?.Tipo as String!)
                         
                         encontroPrepcak = true
                     }
@@ -106,25 +106,25 @@ class PrepacksViewController: UIViewController,UITableViewDelegate, UITableViewD
                 
                 if(!encontroPrepcak){
                     let nuevo = PrepackInventario(forPrepack: nil)
-                    nuevo.cveart = String(describing: inventario?.keyArticulo)
+                    nuevo.cveart = inventario?.keyArticulo as String!
                     nuevo.pck = "99"
-                    nuevo.tipo = String(describing: inventario?.Tipo)
-                    nuevo.descripcion = DescripcionTipo(idTipo: String(describing: inventario?.Tipo))
-                    nuevo.I1 = String(describing: inventario?.I1)
-                    nuevo.I2 = String(describing: inventario?.I2)
-                    nuevo.I3 = String(describing: inventario?.I3)
-                    nuevo.I4 = String(describing: inventario?.I4)
-                    nuevo.I5 = String(describing: inventario?.I5)
-                    nuevo.I6 = String(describing: inventario?.I6)
-                    nuevo.I7 = String(describing: inventario?.I7)
-                    nuevo.I8 = String(describing: inventario?.I8)
-                    nuevo.I9 = String(describing: inventario?.I9)
-                    nuevo.I10 = String(describing: inventario?.I10)
-                    nuevo.I11 = String(describing: inventario?.I11)
-                    nuevo.I12 = String(describing: inventario?.I12)
-                    nuevo.I13 = String(describing: inventario?.I13)
-                    nuevo.I14 = String(describing: inventario?.I14)
-                    nuevo.I15 = String(describing: inventario?.I15)
+                    nuevo.tipo = inventario?.Tipo as String!
+                    nuevo.descripcion = DescripcionTipo(idTipo: inventario?.Tipo as String!)
+                    nuevo.I1 = inventario?.I1 as String!
+                    nuevo.I2 = inventario?.I2 as String!
+                    nuevo.I3 = inventario?.I3 as String!
+                    nuevo.I4 = inventario?.I4 as String!
+                    nuevo.I5 = inventario?.I5 as String!
+                    nuevo.I6 = inventario?.I6 as String!
+                    nuevo.I7 = inventario?.I7 as String!
+                    nuevo.I8 = inventario?.I8 as String!
+                    nuevo.I9 = inventario?.I9 as String!
+                    nuevo.I10 = inventario?.I10 as String!
+                    nuevo.I11 = inventario?.I11 as String!
+                    nuevo.I12 = inventario?.I12 as String!
+                    nuevo.I13 = inventario?.I13 as String!
+                    nuevo.I14 = inventario?.I14 as String!
+                    nuevo.I15 = inventario?.I15 as String!
                     
                     self._prepacksInv.append(nuevo)
                 }

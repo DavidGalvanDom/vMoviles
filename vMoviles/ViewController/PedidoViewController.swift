@@ -8,8 +8,11 @@
 
 import UIKit
 
-class PedidoViewController:  UITableViewController,UISearchResultsUpdating {
+class PedidoViewController: UIViewController,  UITableViewDelegate, UITableViewDataSource  ,UISearchResultsUpdating {
 
+    @IBOutlet weak var tableView: UITableView!
+    @IBOutlet weak var segment: UISegmentedControl!
+    
     var searchController: UISearchController!
     var _storyboard: UIStoryboard!
     var _app: AppDelegate!
@@ -46,6 +49,10 @@ class PedidoViewController:  UITableViewController,UISearchResultsUpdating {
     }
     
     deinit {
+        self.TerminaObservable()
+    }
+    
+    func TerminaObservable() {
         if self._pedidoLiveQuery != nil {
             self._pedidoLiveQuery.removeObserver(self, forKeyPath: "rows")
             self._pedidoLiveQuery.stop()
@@ -68,13 +75,20 @@ class PedidoViewController:  UITableViewController,UISearchResultsUpdating {
     // MARK: - Database
     func IniciaBaseDatos() {
         self._pedidoLiveQuery = PedidoDatos(_database: self._app.database).setupViewAndQuery()
+       
+        if( self._pedidoLiveQuery  != nil ) {
+            self._pedidoLiveQuery.startKey = [ESTATUS_PEDIDO_CAPTURADO]
+            self._pedidoLiveQuery.endKey = [ESTATUS_PEDIDO_CAPTURADO]
+            self._pedidoLiveQuery.prefixMatchLevel = 1
+        }
+        
         self._pedidoLiveQuery.addObserver(self, forKeyPath: "rows", options: .new, context: nil)
         self._pedidoLiveQuery.start()
     }
     
     func RecargarPedidos() {
         self._lstPedidos = self._pedidoLiveQuery.rows?.allObjects as? [CBLQueryRow] ?? nil
-        tableView.reloadData()
+        self.tableView.reloadData()
     }
     
     //Se crean los opciones de navegacion
@@ -129,7 +143,7 @@ class PedidoViewController:  UITableViewController,UISearchResultsUpdating {
         let text = self.searchController.searchBar.text ?? ""
         
         if !text.isEmpty {
-            self._pedidoLiveQuery.postFilter = NSPredicate(format: "key CONTAINS[cd] %@", text)
+            self._pedidoLiveQuery.postFilter = NSPredicate(format: "key1 CONTAINS[cd] %@", text)
         } else {
             self._pedidoLiveQuery.postFilter = nil
         }
@@ -137,11 +151,11 @@ class PedidoViewController:  UITableViewController,UISearchResultsUpdating {
     }
 
     // MARK: - UITableViewController
-    override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return self._lstPedidos?.count ?? 0
     }
     
-    override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "pedidoListCell", for: indexPath) as! lstPedidosTableViewCell
         
         let doc = self._lstPedidos![indexPath.row].document!
@@ -159,10 +173,26 @@ class PedidoViewController:  UITableViewController,UISearchResultsUpdating {
         return cell
     }
     
+    //Mostrar detalle de un pedido existente
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        if indexPath.row >= 0 {
+            
+            let pedido = self.EditaPedido(forDoc: (self._lstPedidos?[indexPath.row].document)!)
+            
+            let controller = _storyboard?.instantiateViewController(withIdentifier: "sbPedidosDetalle") as! PedidoDetalleViewController
+            
+            controller._pedido = pedido
+            
+            self.navigationController?.pushViewController(controller, animated: true)
+        }
+    }
+
+    
     //Convierte el objeto al Modelo de pedido
     func EditaPedido(forDoc: CBLDocument) -> Pedido {
         let pedido = Pedido(folio: forDoc["folio"] as! String)
 
+        pedido._id = forDoc["_id"] as! String
         pedido.fechaInicio = forDoc["fechainicio"] as! String
         pedido.fechaFin = forDoc["fechafin"] as! String
         pedido.fechaCancelacion = forDoc["fechacancelacion"] as! String
@@ -184,92 +214,73 @@ class PedidoViewController:  UITableViewController,UISearchResultsUpdating {
         
         for detalle in detalles {
             let row = CargaRenglonPedido(item: detalle)
-            dePedido.append(row)
+            if(row != nil) {
+                dePedido.append(row!)
+            }
         }
         
         pedido.detalle = dePedido
         return pedido
     }
     
-    func CargaRenglonPedido(item : Dictionary<String, Any>) -> RowPedidoProducto {
+    func CargaRenglonPedido(item : Dictionary<String, Any>) -> RowPedidoProducto? {
         var imgRow: UIImage?
         let cveCorrida: String = item["idCorrida"] as! String
         
-        let rowCorrida = CorridaDatos(_database: self._app.database).CargarCorrida(idDocument: cveCorrida)
-        
-        let corrida = Corrida(for: rowCorrida!)
-        let claveProd = item["cveart"] as! String
-        imgRow = UIImage(named: "noImage")
-        
-        
-        //Se carga la imagen el producto y se despliega en la interfaz
-        let docImg = self._app.databaseImg.document(withID: claveProd)
-        let rev = docImg?.currentRevision
-        
-        if let attachment = rev?.attachmentNamed("\(claveProd).jpg"), let data = attachment.content {
-            let scale = UIScreen.main.scale
-            imgRow = UIImage(data: data, scale: scale)!
-        } else {
+        if let rowCorrida = CorridaDatos(_database: self._app.database).CargarCorrida(idDocument: cveCorrida) {
+            
+            let corrida = Corrida(for: rowCorrida)
+            let claveProd = item["cveart"] as! String
             imgRow = UIImage(named: "noImage")
+            
+            
+            //Se carga la imagen el producto y se despliega en la interfaz
+            let docImg = self._app.databaseImg.document(withID: claveProd)
+            let rev = docImg?.currentRevision
+            
+            if let attachment = rev?.attachmentNamed("\(claveProd).jpg"), let data = attachment.content {
+                let scale = UIScreen.main.scale
+                imgRow = UIImage(data: data, scale: scale)!
+            } else {
+                imgRow = UIImage(named: "noImage")
+            }
+            
+            let row = RowPedidoProducto(renglon: Int(item["renglon"] as? String ?? "0")!,cveart:item["cveart"] as! String,img: imgRow!,pielcolor:item["pielcolor"] as! String,tpc: item["tpc"] as! String, corrida: corrida!)
+            
+            row.estatus = item["status"] as! String
+            row.estilo = item["estilo"] as! String
+            row.linea = item["linea"] as! String
+            row.numPck = item["numPck"] as! Int
+            row.opcion = item["opcion"] as! String
+            row.pares = item["pares"] as! Int
+            row.pck = item["pck"] as! String
+            row.precio = item["precio"] as! Double
+            row.precioCCom = item["precioCCom"] as! Double
+            row.precioCalle = item["precioCalle"] as! Double
+            row.ts = item["ts"] as! String
+            row.opcion = item["opcion"] as! String
+            row.semana = item["semana"] as! String
+            row.semanaCliente = item["semanaCli"] as! String
+            
+            row.p1 = item["p1"] as! String
+            row.p2 = item["p2"] as! String
+            row.p3 = item["p3"] as! String
+            row.p4 = item["p4"] as! String
+            row.p5 = item["p5"] as! String
+            row.p6 = item["p6"] as! String
+            row.p7 = item["p7"] as! String
+            row.p8 = item["p8"] as! String
+            row.p9 = item["p9"] as! String
+            row.p10 = item["p10"] as! String
+            row.p11 = item["p11"] as! String
+            row.p12 = item["p12"] as! String
+            row.p13 = item["p13"] as! String
+            row.p14 = item["p14"] as! String
+            row.p15 = item["p15"] as! String
+            
+            return row
         }
-        
-        let row = RowPedidoProducto(renglon: Int(item["renglon"] as? String ?? "0")!,cveart:item["cveart"] as! String,img: imgRow!,pielcolor:item["pielcolor"] as! String,tpc: item["tpc"] as! String, corrida: corrida!)
-        
-        row.estatus = item["status"] as! String
-        row.estilo = item["estilo"] as! String
-        row.linea = item["linea"] as! String
-        row.numPck = item["numPck"] as! Int
-        row.opcion = item["opcion"] as! String
-        row.pares = item["pares"] as! Int
-        row.pck = item["pck"] as! String
-        row.precio = item["precio"] as! Double
-        row.precioCCom = item["precioCCom"] as! Double
-        row.precioCalle = item["precioCalle"] as! Double
-        row.ts = item["ts"] as! String
-        row.opcion = item["opcion"] as! String
-        row.semana = item["semana"] as! String
-        row.semanaCliente = item["semanaCli"] as! String
-        
-        row.p1 = item["p1"] as! String
-        row.p2 = item["p2"] as! String
-        row.p3 = item["p3"] as! String
-        row.p4 = item["p4"] as! String
-        row.p5 = item["p5"] as! String
-        row.p6 = item["p6"] as! String
-        row.p7 = item["p7"] as! String
-        row.p8 = item["p8"] as! String
-        row.p9 = item["p9"] as! String
-        row.p10 = item["p10"] as! String
-        row.p11 = item["p11"] as! String
-        row.p12 = item["p12"] as! String
-        row.p13 = item["p13"] as! String
-        row.p14 = item["p14"] as! String
-        row.p15 = item["p15"] as! String
-        
-        return row
-    }
-    
-    func updateImage(image: UIImage?, withDigest digest: String, clave: String) {
-        /*
-        let docImg = _app.databaseImg.document(withID: clave)
-        let rev = docImg?.currentRevision
-        let revDigest = rev?.attachmentNamed("\(clave).jpg")?.metadata["digest"] as? String
-        */
-        print(clave)
-    }
-    
-    //Mostrar detalle de un pedido existente
-    override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        if indexPath.row >= 0 {
-            
-            let pedido = self.EditaPedido(forDoc: (self._lstPedidos?[indexPath.row].document)!)
-            
-            let controller = _storyboard?.instantiateViewController(withIdentifier: "sbPedidosDetalle") as! PedidoDetalleViewController
-            
-            controller._pedido = pedido
-            
-            self.navigationController?.pushViewController(controller, animated: true)
-        }
+        return nil
     }
     
     //Crear nuevo pedido
@@ -278,5 +289,35 @@ class PedidoViewController:  UITableViewController,UISearchResultsUpdating {
         let controller = _storyboard?.instantiateViewController(withIdentifier: "sbPedidosDetalle") as! PedidoDetalleViewController
         
         self.navigationController?.pushViewController(controller, animated: true)
+    }
+    
+    @IBAction func onCambiaSegment(_ sender: UISegmentedControl) {
+        
+        self.TerminaObservable()
+        self._pedidoLiveQuery = PedidoDatos(_database: self._app.database).setupViewAndQuery()
+        
+        switch(sender.selectedSegmentIndex){
+            case 0:
+                if( self._pedidoLiveQuery  != nil ) {
+                    self._pedidoLiveQuery.startKey = [ESTATUS_PEDIDO_CAPTURADO]
+                    self._pedidoLiveQuery.endKey = [ESTATUS_PEDIDO_CAPTURADO]
+                    self._pedidoLiveQuery.prefixMatchLevel = 1
+                }
+
+            case 1:
+            
+                if( self._pedidoLiveQuery  != nil ) {
+                    self._pedidoLiveQuery.startKey = [ESTATUS_PEDIDO_ENVIADO]
+                    self._pedidoLiveQuery.endKey = [ESTATUS_PEDIDO_ENVIADO]
+                    self._pedidoLiveQuery.prefixMatchLevel = 1
+                }
+
+            default:
+                print("default")
+        }
+        
+        self._pedidoLiveQuery.addObserver(self, forKeyPath: "rows", options: .new, context: nil)
+        self._pedidoLiveQuery.start()
+
     }
 }

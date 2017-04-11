@@ -421,7 +421,7 @@ class PedidoProductoViewController: UIViewController, SearchProductoDelegate, Pr
         self.txtPielColor.isEnabled = false
         self.txtPares.isEnabled = false
         
-        BuscarProducto(claveProd: self._rowPedidoProducto.cveart, tpc: self._listaPrecios)
+        BuscarProducto(claveProd: self._rowPedidoProducto.cveart, tpc: self._listaPrecios!)
         CargaCorrida()
 
         self.txtSemana.text = self._rowPedidoProducto.semana
@@ -639,7 +639,7 @@ class PedidoProductoViewController: UIViewController, SearchProductoDelegate, Pr
         
         if(textField == self.txtClave) {
             if (self.txtClave.text?.characters.count)! > 7 {
-                self.BuscarProducto(claveProd: self.txtClave.text! as String,tpc: "1")
+                self.BuscarProducto(claveProd: self.txtClave.text! as String,tpc: self._listaPrecios)
             }
         } else {
             if(textField == self.txtEstilo) {

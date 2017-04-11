@@ -6,9 +6,11 @@
 //  Copyright © 2017 sysba. All rights reserved.
 //
 
+import Foundation
 import UIKit
+import MessageUI
 
-class ReportePedidoViewController: UIViewController {
+class ReportePedidoViewController: UIViewController, MFMailComposeViewControllerDelegate {
 
     @IBOutlet weak var webView: UIWebView!
     
@@ -72,21 +74,26 @@ class ReportePedidoViewController: UIViewController {
     func encabezadoPedido(html: String) -> String {
         var inf : String = html
         
-        inf = inf.replacingOccurrences(of: "$FOLIO$", with: self._pedido.folio)
-        inf = inf.replacingOccurrences(of: "$NUM_CLIENTE$", with: String(describing: self._pedido.idcliente))
-        inf = inf.replacingOccurrences(of: "$NOM_CLI$", with: String(describing: self._pedido.cliente?.razonsocial))
-        inf = inf.replacingOccurrences(of: "$DIR_CLI$", with: String(describing: self._pedido.cliente?.dir))
-        inf = inf.replacingOccurrences(of: "$COLCID_CLI$", with: " \(String(describing: self._pedido.cliente?.colonia))   \(String(describing: self._pedido.cliente?.ciudad))")
-        inf = inf.replacingOccurrences(of: "$ESTADO_CLI$", with: String(describing: self._pedido.cliente?.estado))
-        inf = inf.replacingOccurrences(of: "$SUCUR_CLI$", with: String(describing: self._pedido.cliente?.sucursal))
-        inf = inf.replacingOccurrences(of: "$OBSER_CLI$", with: String(describing: self._pedido.observacion))
+        let coloniaClie:String = self._pedido.cliente?.colonia as String!
+        let ciudadClie:String = self._pedido.cliente?.ciudad as String!
+        let colEmbar:String = self._pedido.embarque?.colonia as String!
+        let ciudadEmbar:String = self._pedido.embarque?.ciudad as String!
         
-        inf = inf.replacingOccurrences(of: "$DIR_ENTREGA$", with:  String(describing: self._pedido.embarque?.direccion))
-        inf = inf.replacingOccurrences(of: "$COLCIU_ENTREGA$", with: " \(String(describing: self._pedido.embarque?.colonia))   \(String(describing: self._pedido.embarque?.ciudad))")
-        inf = inf.replacingOccurrences(of: "$ESTADO_ENTREGA$", with:  String(describing: self._pedido.embarque?.estado))
-        inf = inf.replacingOccurrences(of: "$FENTREGA_ENTREGA$", with: "\(String(describing: self._pedido.fechaInicio!)) - \(String(describing: self._pedido.fechaFin!))")
-        inf = inf.replacingOccurrences(of: "$FPEDIDO_ENTREGA$", with:  String(describing: self._pedido.fechaCreacion))
-        inf = inf.replacingOccurrences(of: "$CONDICIONES_ENTREGA$", with: " ")
+        inf = inf.replacingOccurrences(of: "$FOLIO$", with: self._pedido.folio)
+        inf = inf.replacingOccurrences(of: "$NUM_CLIENTE$", with: self._pedido.idcliente as String!)
+        inf = inf.replacingOccurrences(of: "$NOM_CLI$", with: self._pedido.cliente?.razonsocial as String!)
+        inf = inf.replacingOccurrences(of: "$DIR_CLI$", with: self._pedido.cliente?.dir as String!)
+        inf = inf.replacingOccurrences(of: "$COLCID_CLI$", with: " \(coloniaClie)   \(ciudadClie)")
+        inf = inf.replacingOccurrences(of: "$ESTADO_CLI$", with: self._pedido.cliente?.estado as String!)
+        inf = inf.replacingOccurrences(of: "$SUCUR_CLI$", with: self._pedido.cliente?.sucursal as String!)
+        inf = inf.replacingOccurrences(of: "$OBSER_CLI$", with: self._pedido.observacion as String!)
+        
+        inf = inf.replacingOccurrences(of: "$DIR_ENTREGA$", with:  self._pedido.embarque?.direccion as String!)
+        inf = inf.replacingOccurrences(of: "$COLCIU_ENTREGA$", with: " \(colEmbar)   \(ciudadEmbar)")
+        inf = inf.replacingOccurrences(of: "$ESTADO_ENTREGA$", with:  self._pedido.embarque?.estado as String!)
+        inf = inf.replacingOccurrences(of: "$FENTREGA_ENTREGA$", with: "\(self._pedido.fechaInicio!) - \(self._pedido.fechaFin!))")
+        inf = inf.replacingOccurrences(of: "$FPEDIDO_ENTREGA$", with:  self._pedido.fechaCreacion as String!)
+        inf = inf.replacingOccurrences(of: "$CONDICIONES_ENTREGA$", with: self._pedido.cliente?.condiciones as String!)
         
         return inf
     }
@@ -220,15 +227,54 @@ class ReportePedidoViewController: UIViewController {
         self.cargarPDF(folio: folio)
         
     }
-
     
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
         // Dispose of any resources that can be recreated.
     }
     
+    func configuredMailComposeViewController(folio: String, email: String) -> MFMailComposeViewController {
+        let mailComposerVC = MFMailComposeViewController()
+        mailComposerVC.mailComposeDelegate = self
+        mailComposerVC.setToRecipients([email])
+        mailComposerVC.setSubject("Pedido con folio \(folio)")
+        mailComposerVC.setMessageBody("Se agrega el pdf con el detalle del pedido.", isHTML: false)
+        
+        return mailComposerVC
+    }
+    
+    func showSendMailErrorAlert() {
+        Ui.showMessageDialog(onController: self,
+                             withTitle: "No se puede enviar el Correo",
+                             withMessage: "Tu dispositivo no puede enviar correos. Favor de checar la configuracion de correos y volver a intentar.",
+                             withError: nil)
+    }
+    
+    // MARK: MFMailComposeViewControllerDelegate
+    
+    func mailComposeController(_ controller: MFMailComposeViewController, didFinishWith result: MFMailComposeResult, error: Error?) {
+        controller.dismiss(animated: true, completion: nil)
+    }
+    
+    func enviaCorreo(folio: String) {
+        let mailComposeViewController = configuredMailComposeViewController(folio: folio,email: self._pedido.cliente?.email as String!)
+        if MFMailComposeViewController.canSendMail() {
+            
+            let documentsPath = NSSearchPathForDirectoriesInDomains(.documentDirectory, .userDomainMask, true)[0]
+            let filePath  = "\(documentsPath)/rptPedido-\(folio).pdf"
+           
+            if let fileData = NSData(contentsOfFile: filePath) {
+                mailComposeViewController.addAttachmentData(fileData as Data, mimeType: "application/pdf", fileName: filePath)
+                self.present(mailComposeViewController, animated: true, completion: nil)
+            }
+        } else {
+            self.showSendMailErrorAlert()
+        }
+    }
+    
     @IBAction func onPDF(_ sender: Any) {
         self.crearPDF(folio: self._pedido.folio)
+        self.enviaCorreo(folio: self._pedido.folio)
     }
     
     @IBAction func onCerrar(_ sender: Any) {

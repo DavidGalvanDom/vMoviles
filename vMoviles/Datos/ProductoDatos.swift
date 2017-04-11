@@ -25,7 +25,7 @@ class ProductoDatos
                 if type == "producto" {
                     let clave = doc["clave"] as? String
                     let descripcion = doc["descripcion"] as? String
-                    emit("\(String(describing: clave)) - \(descripcion ?? "")", nil)
+                    emit("\( clave as String!) - \(descripcion ?? "")", nil)
                 }
             }, version: "1.0")
         }
@@ -46,7 +46,7 @@ class ProductoDatos
                     let clave = doc["clave"] as? String
                     let descripcion = doc["descripcion"] as? String
                     let tpc = doc["tpc"] as? String
-                    emit([tpc,clave,"\(String(describing: clave)) - \(descripcion ?? "")"], nil)
+                    emit([tpc,clave,"\(clave as String!) - \(descripcion ?? "")"], nil)
                 }
             }, version: "1.5")
         }

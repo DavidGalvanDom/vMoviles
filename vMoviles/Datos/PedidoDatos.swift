@@ -22,10 +22,11 @@ class PedidoDatos
             view.setMapBlock({ (doc, emit) in
                 let type = doc["type"] as? String
                 if type == "pedido" {
-                    let key = "\(String(describing: doc["folio"]))\(String(describing: doc["estatus"]))\(String(describing: doc["razonsocial"]))"
-                    emit(key, nil)
+                    let key = "\(doc["folio"]  as! String)\(doc["estatus"] as! String)\(doc["razonsocial"] as! String)"
+                    let estatus = doc["estatus"] as? String
+                    emit([estatus ?? "",key], nil)
                 }
-            }, version: "1.1")
+            }, version: "1.9")
         }
         
         let productoLiveQuery = view.createQuery().asLive()

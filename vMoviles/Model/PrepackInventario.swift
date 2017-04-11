@@ -47,24 +47,24 @@ class PrepackInventario  {
     
     init(forPrepack: Prepack?) {
         if(forPrepack != nil) {
-            self.cveart = String(describing: forPrepack?.cveart)
-            self.cvecor = String(describing: forPrepack?.cvecor)
-            self.pck = String(describing: forPrepack?.pck)
-            self.p1 = String(describing: forPrepack?.p1)
-            self.p2 = String(describing: forPrepack?.p2)
-            self.p3 = String(describing: forPrepack?.p3)
-            self.p4 = String(describing: forPrepack?.p4)
-            self.p5 = String(describing: forPrepack?.p5)
-            self.p6 = String(describing: forPrepack?.p6)
-            self.p7 = String(describing: forPrepack?.p7)
-            self.p8 = String(describing: forPrepack?.p8)
-            self.p9 = String(describing: forPrepack?.p9)
-            self.p10 = String(describing: forPrepack?.p10)
-            self.p11 = String(describing: forPrepack?.p11)
-            self.p12 = String(describing: forPrepack?.p12)
-            self.p13 = String(describing: forPrepack?.p13)
-            self.p14 = String(describing: forPrepack?.p14)
-            self.p15 = String(describing: forPrepack?.p15)
+            self.cveart = forPrepack?.cveart as String!
+            self.cvecor = forPrepack?.cvecor as String!
+            self.pck = forPrepack?.pck as String!
+            self.p1 = forPrepack?.p1 as String!
+            self.p2 = forPrepack?.p2 as String!
+            self.p3 = forPrepack?.p3 as String!
+            self.p4 = forPrepack?.p4 as String!
+            self.p5 = forPrepack?.p5 as String!
+            self.p6 = forPrepack?.p6 as String!
+            self.p7 = forPrepack?.p7 as String!
+            self.p8 = forPrepack?.p8 as String!
+            self.p9 = forPrepack?.p9 as String!
+            self.p10 = forPrepack?.p10 as String!
+            self.p11 = forPrepack?.p11 as String!
+            self.p12 = forPrepack?.p12 as String!
+            self.p13 = forPrepack?.p13 as String!
+            self.p14 = forPrepack?.p14 as String!
+            self.p15 = forPrepack?.p15 as String!
         } else {
             self.cveart = ""
             self.cvecor = ""

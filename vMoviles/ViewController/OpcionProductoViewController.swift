@@ -17,6 +17,12 @@ class OpcionProductoViewController: UIViewController, UIScrollViewDelegate {
     @IBOutlet weak var lblEstilo: UILabel!
     @IBOutlet weak var lblCorrida: UILabel!
     
+    @IBOutlet weak var img0: UIImageView!
+    @IBOutlet weak var img1: UIImageView!
+    @IBOutlet weak var img2: UIImageView!
+    @IBOutlet weak var img3: UIImageView!
+    @IBOutlet weak var img4: UIImageView!
+    
     let VIEW_SIZE: CGFloat = 990
     
     var _claveProd: String!
@@ -57,6 +63,8 @@ class OpcionProductoViewController: UIViewController, UIScrollViewDelegate {
             
             opcionView.imageView.image = ProductoDatos(_database: self._app.databaseImg).CargarImagen(clave: item.clave)
             
+            self.AsignaImagen(image: opcionView.imageView.image, index:index)
+            
             self.scrollView.addSubview(opcionView)
             
             opcionView.frame.size.width = VIEW_SIZE
@@ -64,6 +72,29 @@ class OpcionProductoViewController: UIViewController, UIScrollViewDelegate {
             opcionView.frame.origin.x = CGFloat(index) * VIEW_SIZE
         }
 
+    }
+    
+    func AsignaImagen(image: UIImage?, index:Int) {
+        
+        switch(index) {
+            case 0:
+                self.img0.image = image
+                self.img0.layer.position.x = 495
+            case 1:
+                self.img1.image = image
+                self.img1.layer.position.x = 495
+                self.img0.layer.position.x = 405
+            case 2:
+                self.img2.image = image
+                self.img1.layer.position.x = 405
+                self.img0.layer.position.x = 305
+            case 3:
+                self.img3.image = image
+            case 4:
+                self.img4.image = image
+            default:
+                print("No imagen")
+        }
     }
     
     //Se carga la descripcion del tipo de pedido

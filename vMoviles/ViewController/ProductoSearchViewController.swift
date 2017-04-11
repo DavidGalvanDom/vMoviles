@@ -39,7 +39,6 @@ class ProductoSearchViewController : UIViewController,  UITableViewDelegate, UIT
         // Inicializa las vistas y querys couchbase lite:
         iniciaBaseDatos()
         
-        
     }
     
     override func viewDidAppear(_ animated: Bool) {
@@ -49,9 +48,7 @@ class ProductoSearchViewController : UIViewController,  UITableViewDelegate, UIT
             DispatchQueue.main.async {
                 self.searchController.searchBar.becomeFirstResponder()
             }
-            
         }
-
     }
 
     override func didReceiveMemoryWarning() {

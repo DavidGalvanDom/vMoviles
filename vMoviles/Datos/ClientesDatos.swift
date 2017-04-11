@@ -25,7 +25,7 @@ class ClienteDatos
                 if type == "cliente" {
                     let razonso = doc["razonsocial"] as? String
                     let id = doc["id"] as? String
-                    emit("\(String(describing: id)) - \(razonso ?? "")", nil)
+                    emit("\(id as String!) - \(razonso ?? "")", nil)
                 }
             }, version: "1.8")
         }
