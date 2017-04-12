@@ -12,6 +12,7 @@ class ClienteDetalleViewController: UIViewController {
 
     var pedidoDetalle: PedidoDetalleViewController? = nil
     var _storyboard: UIStoryboard!
+    var _app: AppDelegate!
     
     @IBOutlet weak var lblNombre: UILabel!
     @IBOutlet weak var lblCiudad: UILabel!
@@ -26,8 +27,8 @@ class ClienteDetalleViewController: UIViewController {
         self.creaNavegador()
         self.configureView()
         
-        let app = UIApplication.shared.delegate as! AppDelegate
-        guard let root = app.window?.rootViewController, let storyboard = root.storyboard else {
+        self._app = UIApplication.shared.delegate as! AppDelegate
+        guard let root = self._app.window?.rootViewController, let storyboard = root.storyboard else {
             return
         }
         
@@ -103,39 +104,23 @@ class ClienteDetalleViewController: UIViewController {
         //Toolbar Derecho
         let barCompania = UIBarButtonItem(image: UIImage(named:"icoCompania"), style: .plain, target: self, action: #selector(onShowCompanias))
         
-        let barProductos = UIBarButtonItem(image: UIImage(named:"Zapato2"), style: .plain, target: self, action: #selector(onShowProductos))
-        
-        let barPedidos =  UIBarButtonItem(image: UIImage(named:"Pedido2"), style: .plain, target: self, action: #selector(onShowPedidos))
-        
-        
         barCompania.imageInsets = UIEdgeInsetsMake(5, 5, 5, 5)
         barCompania.tintColor = .black
         
-        barProductos.imageInsets = UIEdgeInsetsMake(9, 2, 9, 2)
-        barProductos.tintColor = .black
-        
-        barPedidos.imageInsets = UIEdgeInsetsMake(9, 2, 9, 2)
-        barPedidos.tintColor = .black
-        
-        self.navigationItem.rightBarButtonItems = [barCompania, barProductos,barPedidos]
+        self.navigationItem.rightBarButtonItems = [barCompania]
         
     }
 
     func onShowCompanias() {
-        let app = UIApplication.shared.delegate as! AppDelegate
-        app.showCompanias()
+        self._app.showInicial()
     }
     
-    func onShowPedidos() {
+    func onShowInicio() {
         self.splitViewController?.preferredDisplayMode = .primaryHidden
         let pedidoDetalle = _storyboard?.instantiateViewController(withIdentifier: "sbPedidoDetalle")
         
         self.navigationController?.pushViewController(pedidoDetalle!, animated: true)
 
-    }
-    
-    func onShowProductos() {
-    
     }
     
 }

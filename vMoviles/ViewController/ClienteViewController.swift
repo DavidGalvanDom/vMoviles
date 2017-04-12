@@ -61,9 +61,7 @@ class ClienteViewController: UITableViewController,UISearchResultsUpdating {
             let indexPath = self.tableView.indexPathForSelectedRow
             if indexPath!.row >= 0 {
                 let cliente = Cliente(for: (clienteRows?[indexPath!.row].document)!)
-                
                 let controller = (segue.destination as! UINavigationController).topViewController as! ClienteDetalleViewController
-                
                 controller.detalleCliente = cliente
                 controller.navigationItem.leftBarButtonItem = self.splitViewController?.displayModeButtonItem
                 controller.navigationItem.leftItemsSupplementBackButton = true

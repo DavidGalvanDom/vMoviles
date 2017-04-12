@@ -10,6 +10,7 @@ import UIKit
 
 class InicialViewController: UIViewController {
     var _storyboard: UIStoryboard!
+   // var overlay : UIView?
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -95,20 +96,24 @@ class InicialViewController: UIViewController {
         
         self.navigationController?.pushViewController(detailViewController!, animated: true)
          */
+        
+        let app = UIApplication.shared.delegate as! AppDelegate
+        app.showProductos()
+
+        
     }
     
-    //Split view de Pedidos
+    // Pedidos
     func onShowPedidos () {
         let pedidoViewController = _storyboard?.instantiateViewController(withIdentifier: "sbPedidos")
-        
         self.navigationController?.pushViewController(pedidoViewController!, animated: true)
-
     }
     
     //Splitview de clietnes
     func onShowClientes() {
-        let app = UIApplication.shared.delegate as! AppDelegate
-        app.showSplitView(viewName: "test")
+        
+       let app = UIApplication.shared.delegate as! AppDelegate
+        app.showClientes()
         
       /*  let detailViewController = _storyboard?.instantiateViewController(withIdentifier: "sbClientesDetalle")
         

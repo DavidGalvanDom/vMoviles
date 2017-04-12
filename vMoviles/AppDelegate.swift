@@ -31,15 +31,16 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UISplitViewControllerDele
     var compania: String!
     var cveCompania: String!
     var config: Configuracion!
-
+    var showMensaje = false
+    
 
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplicationLaunchOptionsKey: Any]?) -> Bool {
         
-        let splitViewController = self.window!.rootViewController as! UISplitViewController
+       /* let splitViewController = self.window!.rootViewController as! UISplitViewController
         let navigationController = splitViewController.viewControllers[splitViewController.viewControllers.count-1] as! UINavigationController
         navigationController.topViewController!.navigationItem.leftBarButtonItem = splitViewController.displayModeButtonItem
-        splitViewController.delegate = self
+        splitViewController.delegate = self*/
         
         // Habilita el log para monitorear la replicacion
         if kLoggingEnabled {
@@ -216,11 +217,35 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UISplitViewControllerDele
             NotificationCenter.default.removeObserver(
                 self, name: NSNotification.Name.cblReplicationChange, object: pullerimg)
         }
+        
+        showMensaje = false
+
     }
     
     func replicationProgress(notification: NSNotification) {
         UIApplication.shared.isNetworkActivityIndicatorVisible =
             (pusher.status == .active || puller.status == .active || pullerimg.status == .active)
+       /*
+        //Oculta mensaje
+        if UIApplication.shared.isNetworkActivityIndicatorVisible == false {
+            Ui.hideReplicando( onController: self.window!.rootViewController!)
+            showMensaje = false
+        }
+        
+        //Despliega mensaje de Sincronizando datos
+        if UIApplication.shared.isNetworkActivityIndicatorVisible  && showMensaje == false {
+            Ui.showReplicando( onController: self.window!.rootViewController!,
+                               withMessage:"Sincronizando datos...",
+                               onComplete: {
+                                //Cuando termina de cargar el sincronizando valida si ya termino para ocultar la ventana
+                                if UIApplication.shared.isNetworkActivityIndicatorVisible == false {
+                                    Ui.hideReplicando( onController: self.window!.rootViewController!)
+                                    NSLog("hide oncompleate:")
+                                }
+            })
+            showMensaje = true
+        }
+        */
         
         let error = pusher.lastError as NSError?;
         if (error != syncError) {
@@ -251,26 +276,36 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UISplitViewControllerDele
         CBLManager.enableLogging("SyncVerbose")
     }
     
+    //Despliega la lista principal
+    func showInicial() {
+        let storyboard = UIStoryboard(name: "Main", bundle: nil)
+        let controller = storyboard.instantiateInitialViewController()
+        window!.rootViewController = controller
+        //controller?.performSegue(withIdentifier: "segueCompania", sender: nil)
+    }
+    
     func showCompanias() {
-        guard let root = window?.rootViewController, let storyboard = root.storyboard else {
-            return
-        }
-        
-        let controller = storyboard.instantiateViewController(withIdentifier: "navCompanias")
-        
+        let storyboard = UIStoryboard(name: "Main", bundle: nil)
+        let controller = storyboard.instantiateInitialViewController()
         window!.rootViewController = controller
     }
     
-    func showSplitView(viewName: String)
+    func showClientes()
     {
-        guard let root = window?.rootViewController, let storyboard = root.storyboard else {
-            return
-        }
-        
+        let storyboard = UIStoryboard(name: "Clientes", bundle: nil)
         // Override point for customization after application launch.
         let controller = storyboard.instantiateInitialViewController()
         window!.rootViewController = controller
     }
+    
+    func showProductos()
+    {
+        let storyboard = UIStoryboard(name: "Productos", bundle: nil)
+        // Override point for customization after application launch.
+        let controller = storyboard.instantiateInitialViewController()
+        window!.rootViewController = controller
+    }
+
     
     func formatCurrency(_ value: String?) -> String {
         guard value != nil else { return "$0.00" }

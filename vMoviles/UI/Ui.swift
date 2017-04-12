@@ -6,7 +6,6 @@
 //  Copyright © 2016 Couchbase. All rights reserved.
 //
 
-import Foundation
 
 class Ui {
     class func showTextInputDialog(
@@ -22,7 +21,27 @@ class Ui {
             dialog.onOkAction = onOkAction
             dialog.show(controller: controller)
     }
+    
+    class func showReplicando (
+        onController controller: UIViewController,
+        withMessage message: String?,
+        onComplete completeAction: (() -> Void)? = nil) {
+        
+        let alert = UIAlertController(title: nil, message: message, preferredStyle: .alert)
+        
+        let loadingIndicator = UIActivityIndicatorView(frame: CGRect(x: 10, y: 5, width: 40, height: 50))
+        loadingIndicator.hidesWhenStopped = true
+        loadingIndicator.activityIndicatorViewStyle = UIActivityIndicatorViewStyle.gray
+        loadingIndicator.startAnimating();
+        
+        alert.view.addSubview(loadingIndicator)
+        controller.present(alert, animated: true, completion: completeAction)
+    }
 
+    class func hideReplicando ( onController controller: UIViewController) {
+        controller.dismiss(animated: false, completion: nil)
+    }
+    
     class func showEncryptionErrorDialog(
         onController controller: UIViewController,
         onMigrateAction migrateAction: @escaping ((String) -> Void),

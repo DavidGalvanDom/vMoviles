@@ -10,9 +10,13 @@ import UIKit
 
 class ProductoDetalleViewController: UIViewController {
 
+    var _app: AppDelegate!
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         
+        self._app = UIApplication.shared.delegate as! AppDelegate
+
         self.creaNavegador()
         // Do any additional setup after loading the view.
     }
@@ -35,7 +39,7 @@ class ProductoDetalleViewController: UIViewController {
         
         
         //Toolbar Derecho
-        let barCompania = UIBarButtonItem(image: UIImage(named:"icoCompania"), style: .plain, target: self, action: #selector(onShowCompanias))
+        let barCompania = UIBarButtonItem(image: UIImage(named:"icoCompania"), style: .plain, target: self, action: #selector(onShowInicial))
         
         let barClientes = UIBarButtonItem(image: UIImage(named:"User2"), style: .plain, target: self, action: #selector(onClientes))
         
@@ -55,11 +59,10 @@ class ProductoDetalleViewController: UIViewController {
         
     }
     
-    func onShowCompanias ()
-    {
-        
+    func onShowInicial() {
+        self._app.showInicial()
     }
-
+    
     func onShowPedidos ()
     {
     
