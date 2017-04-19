@@ -29,13 +29,7 @@ class ClienteViewController: UITableViewController,UISearchResultsUpdating {
         // Inicializa las vistas y querys couchbase lite:
         iniciaBaseDatos()
 
-        if let split = self.splitViewController {
-            let controllers = split.viewControllers
-            self.detailViewController = (controllers[controllers.count-1] as! UINavigationController).topViewController as? ClienteDetalleViewController
-        }
-
-
-        // Do any additional setup after loading the view.
+       self.splitViewController?.maximumPrimaryColumnWidth = 320
     }
 
     override func didReceiveMemoryWarning() {
@@ -105,28 +99,6 @@ class ClienteViewController: UITableViewController,UISearchResultsUpdating {
         tableView.reloadData()
     }
     
-    /*
-    func ocultamuestraClientes() {
-        let app = UIApplication.shared.delegate as! AppDelegate
-        if dbChangeObserver == nil {
-            dbChangeObserver = NotificationCenter.default.addObserver(
-            forName: NSNotification.Name.cblDatabaseChange, object: app.database, queue: nil) { note in
-                // Review: Can optimize this by executing in the background dispatch queue:
-                if let changes = note.userInfo!["changes"] as? [CBLDatabaseChange] {
-                    for change in changes {
-                        if change.source == nil {
-                            return
-                        }
-                        if change.documentID == moderatorDocId {
-                            self.ocultamuestraClientes()
-                            return
-                        }
-                    }
-                }
-            }
-        }
-    }*/
-        
     // MARK: - UITableViewController
     
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {

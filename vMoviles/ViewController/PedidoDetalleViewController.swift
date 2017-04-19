@@ -324,7 +324,7 @@ class PedidoDetalleViewController: UIViewController, SearchClienteDelegate, Sear
             if(self._pedido.cliente != nil) {
                 let vc = self._storyboard.instantiateViewController(withIdentifier: "sbPedidoProducto") as! PedidoProductoViewController
                 
-                vc.preferredContentSize = CGSize(width: 950, height: 550)
+                vc.preferredContentSize = CGSize(width: 950, height: 420)
                 vc.modalPresentationStyle = .formSheet
                 vc.modalTransitionStyle = .crossDissolve
                 vc._listaPrecios =  self._pedido.cliente?.listaprec as String!
@@ -718,6 +718,7 @@ class PedidoDetalleViewController: UIViewController, SearchClienteDelegate, Sear
     @IBAction func onBuscarEmbarque(_ sender: Any) {
         self.buscarEmbarque()
     }
+    
     //Popup para buscar cliente
     @IBAction func onBuscarCliente(_ sender: Any) {
         self.buscarCliente()
@@ -761,7 +762,7 @@ class PedidoDetalleViewController: UIViewController, SearchClienteDelegate, Sear
         if(self._pedido.cliente != nil) {
             let vc = _storyboard.instantiateViewController(withIdentifier: "sbPedidoProducto") as! PedidoProductoViewController
             
-            vc.preferredContentSize = CGSize(width: 950, height: 550)
+            vc.preferredContentSize = CGSize(width: 950, height: 420)
             vc.modalPresentationStyle = .formSheet
             vc.modalTransitionStyle = .crossDissolve
             vc._listaPrecios =  self._pedido.cliente?.listaprec as String?

@@ -57,6 +57,52 @@ class ProductoDatos
         return productoLiveQuery
     }
     
+    //Lista de productos que pertenecen a la lista de precios cero
+    func setupProdCeroViewAndQuery() -> CBLLiveQuery {
+        let view = database.viewNamed("productoslstPrecioCero")
+        if view.mapBlock == nil {
+            view.setMapBlock({ (doc, emit) in
+                let type = doc["type"] as? String
+                let tpc = doc["tpc"] as? String
+                if (type == "producto" && tpc == "0"){
+                    let clave = doc["clave"] as? String
+                    let descripcion = doc["descripcion"] as? String
+                    let estilo = doc["estilo"] as? String
+                    emit([estilo,clave,"\(clave as String!) - \(descripcion ?? "")"], nil)
+                }
+            }, version: "1.1")
+        }
+        
+        let productoLiveQuery = view.createQuery().asLive()
+        productoLiveQuery.descending = false
+        
+        return productoLiveQuery
+    }
+    
+    func setupProdCeroLineaViewAndQuery() -> CBLLiveQuery {
+        let view = database.viewNamed("productoslstPrecioCeroLinea")
+        if view.mapBlock == nil {
+            view.setMapBlock({ (doc, emit) in
+                let type = doc["type"] as? String
+                let tpc = doc["tpc"] as? String
+                if (type == "producto" && tpc == "0"){
+                    let clave = doc["clave"] as? String
+                    let descripcion = doc["descripcion"] as? String
+                    let linea = doc["linea"] as? String
+                    emit([linea,clave,"\(clave as String!) - \(descripcion ?? "")"], nil)
+                }
+            }, version: "1.0")
+        }
+        
+        let productoLiveQuery = view.createQuery().asLive()
+        productoLiveQuery.descending = false
+        
+        return productoLiveQuery
+    }
+
+    
+    
+    
     //Se carga el producto con la clave seleccionada
     func CargarProducto (clave: String)-> CBLDocument? {
         if database.existingDocument(withID: clave) != nil {

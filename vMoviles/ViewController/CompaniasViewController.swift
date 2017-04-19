@@ -15,6 +15,7 @@ class CompaniasViewController: UIViewController,  UITableViewDelegate, UITableVi
     
     var _companias: [Compania] = []
     var _storyboard: UIStoryboard!
+    var _app: AppDelegate!
 
     
     override func viewDidLoad() {
@@ -27,20 +28,17 @@ class CompaniasViewController: UIViewController,  UITableViewDelegate, UITableVi
         tableView.dataSource = self
         
         // Get database and username:
-        let app = UIApplication.shared.delegate as! AppDelegate
-        guard let root = app.window?.rootViewController, let storyboard = root.storyboard else {
+        self._app = UIApplication.shared.delegate as! AppDelegate
+        guard let root = self._app.window?.rootViewController, let storyboard = root.storyboard else {
             return
         }
         
         _storyboard = storyboard
-        self.lblVendedor.text = app.config!.nombreVendedor as String
+        self.lblVendedor.text = self._app.config!.nombreVendedor as String
         
-        if(app.config!.agente == "-1") {
+        if(self._app.config!.agente == "-1") {
             self.configuraApp()
         }
-        //Solo en caso de utilizar el splitview controller
-        //self.splitViewController?.preferredDisplayMode = .primaryHidden
-
     }
 
     //Popup para configurar la informacion del agente
@@ -53,6 +51,8 @@ class CompaniasViewController: UIViewController,  UITableViewDelegate, UITableVi
         vc.modalPresentationStyle = .formSheet
         vc.modalTransitionStyle = .crossDissolve
         self.present(vc, animated: true, completion: { _ in })
+        
+         self.lblVendedor.text = self._app.config!.nombreVendedor as String
     }
     
     // MARK: Delegates de la Tabla

@@ -41,8 +41,46 @@ class RowPedidoProducto  {
     var p13: String
     var p14: String
     var p15: String
-    var imagen: UIImage
-    var corrida : Corrida
+    var imagen: UIImage!
+    var corrida : Corrida!
+    
+    init (cveart:String, pielcolor: String,estilo: String, opcion: String,precio: Double, linea: String, img: UIImage) {
+        self.renglon = 0
+       
+        self.cveart = cveart
+        self.pielcolor = pielcolor
+        self.opcion = opcion
+        self.estilo = estilo
+        self.linea = linea
+        self.precio = precio
+        self.imagen = img
+        self.tpc = ""
+        self.semana = ""
+        self.semanaCliente = ""
+        self.pares = 0
+        self.precioCalle = 0
+        self.precioCCom = 0
+        self.ts = ""
+        self.pck = ""
+        self.estatus = "N"
+        self.numPck = 0
+        self.p1 = ""
+        self.p2 = ""
+        self.p3 = ""
+        self.p4 = ""
+        self.p5 = ""
+        self.p6 = ""
+        self.p7 = ""
+        self.p8 = ""
+        self.p9 = ""
+        self.p10 = ""
+        self.p11 = ""
+        self.p12 = ""
+        self.p13 = ""
+        self.p14 = ""
+        self.p15 = ""
+
+    }
     
     init(renglon: Int, cveart:String, img: UIImage, pielcolor: String, tpc:String,corrida: Corrida) {
         

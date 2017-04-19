@@ -33,14 +33,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UISplitViewControllerDele
     var config: Configuracion!
     var showMensaje = false
     
-
-
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplicationLaunchOptionsKey: Any]?) -> Bool {
-        
-       /* let splitViewController = self.window!.rootViewController as! UISplitViewController
-        let navigationController = splitViewController.viewControllers[splitViewController.viewControllers.count-1] as! UINavigationController
-        navigationController.topViewController!.navigationItem.leftBarButtonItem = splitViewController.displayModeButtonItem
-        splitViewController.delegate = self*/
         
         // Habilita el log para monitorear la replicacion
         if kLoggingEnabled {
@@ -225,7 +218,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UISplitViewControllerDele
     func replicationProgress(notification: NSNotification) {
         UIApplication.shared.isNetworkActivityIndicatorVisible =
             (pusher.status == .active || puller.status == .active || pullerimg.status == .active)
-       /*
+       
         //Oculta mensaje
         if UIApplication.shared.isNetworkActivityIndicatorVisible == false {
             Ui.hideReplicando( onController: self.window!.rootViewController!)
@@ -245,7 +238,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UISplitViewControllerDele
             })
             showMensaje = true
         }
-        */
+ 
         
         let error = pusher.lastError as NSError?;
         if (error != syncError) {

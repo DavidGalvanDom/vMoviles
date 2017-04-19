@@ -29,7 +29,6 @@ class ProductoSearchViewController : UIViewController,  UITableViewDelegate, UIT
         searchController.searchResultsUpdater = self
         searchController.dimsBackgroundDuringPresentation = false
         
-        
         self.tableView.delegate = self
         self.tableView.dataSource = self
         self.tableView.tableHeaderView = searchController.searchBar
