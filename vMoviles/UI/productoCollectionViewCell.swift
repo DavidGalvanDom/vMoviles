@@ -17,12 +17,11 @@ class productoCollectionViewCell: UICollectionViewCell {
     @IBOutlet weak var imageSelected: UIImageView!
     
     var clave: String!
+    var onClickImg: (() -> ())?
     
     var productoImage: UIImage? {
         didSet {
-            image.image = productoImage
-            image.layer.cornerRadius = 16
-            image.layer.masksToBounds = true
+            self.image.image = productoImage
         }
     }
     
@@ -32,4 +31,10 @@ class productoCollectionViewCell: UICollectionViewCell {
         }
     }
     
+    @IBAction func onDetalle(_ sender: Any) {
+        if let action = onClickImg {
+            action()
+        }
+    }
+
 }
