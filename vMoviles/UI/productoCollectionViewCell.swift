@@ -17,6 +17,7 @@ class productoCollectionViewCell: UICollectionViewCell {
     @IBOutlet weak var imageSelected: UIImageView!
     
     var clave: String!
+    var estilo:String!
     var onClickImg: (() -> ())?
     
     var productoImage: UIImage? {

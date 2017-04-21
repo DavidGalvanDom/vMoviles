@@ -118,7 +118,7 @@ class OpcionProductoViewController: UIViewController, UIScrollViewDelegate {
                     self.lblCategoria.text = doc?["categoria"] as? String
                     self.lblLinea.text = doc?["linea"] as? String
                     self.lblEstilo.text = doc?["estilo"] as? String
-                    self.lblCorrida.text = doc?["corrida"] as? String
+                    self.CargarDescripcionCorrida(idCorrida: (doc?["corrida"] as? String)!)
                 }
             }
         }
@@ -128,6 +128,28 @@ class OpcionProductoViewController: UIViewController, UIScrollViewDelegate {
                                  withMessage: "Error al cargar las opciones",
                                  withError: nil)
         }
+    }
+    
+    func CargarDescripcionCorrida(idCorrida: String ) {
+        let corridaQuery = CorridaDatos(_database: _app.database).setupViewAndQuery()
+        
+        corridaQuery.startKey = idCorrida
+        corridaQuery.endKey = idCorrida
+        
+        do {
+            let result  = try corridaQuery.run()
+            let doc = result.nextRow()?.document
+            if( doc != nil) {
+                self.lblCorrida.text = doc?["cvecor"] as? String
+            }
+        }
+        catch {
+            Ui.showMessageDialog(onController: self,
+                                 withTitle: "Error",
+                                 withMessage: "Error al tratar de cargar la descripcion de la corrida",
+                withError: nil)
+        }
+
     }
 
     func FormatoLabel ()

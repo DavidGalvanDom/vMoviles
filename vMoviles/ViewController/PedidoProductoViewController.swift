@@ -173,7 +173,6 @@ class PedidoProductoViewController: UIViewController, SearchProductoDelegate, Pr
             if( doc != nil) {
                 self._corridaSelected = Corrida(for: (doc)!)
                 self._corridaSelected.objectId = doc?["_id"] as! String
-                NSLog(self._corridaSelected.objectId as String)
                 
                 lblC1.text = doc?["c1"] as? String
                 lblC2.text = doc?["c2"] as? String

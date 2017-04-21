@@ -188,14 +188,17 @@ class ProductoDetalleViewController: UIViewController {
     }
     
     func detalleImagen(cell : productoCollectionViewCell) {
-        let storyboard = UIStoryboard(name: "Productos", bundle: nil)
+        let storyboard = UIStoryboard(name: "Main", bundle: nil)
         
-        let vc = storyboard.instantiateViewController(withIdentifier: "sbProductoInfo") as! ProductoInfoViewController
+        let vc = storyboard.instantiateViewController(withIdentifier: "sbOpcionProducto") as! OpcionProductoViewController
         
-        vc.preferredContentSize = CGSize(width: 950, height: 550)
+        vc._claveProd = cell.clave
+        vc._estilo = cell.estilo
+        vc._listaPrecios  = "0"
+        vc._app = self._app
+        vc.preferredContentSize = CGSize(width: 990, height: 690)
         vc.modalPresentationStyle = .formSheet
         vc.modalTransitionStyle = .coverVertical
-        vc.imageInfo = ProductoDatos(_database: self._app.databaseImg).CargarImagen(clave: cell.clave)
         self.present(vc, animated: true, completion: { _ in })
         
     }
@@ -231,6 +234,7 @@ extension ProductoDetalleViewController: UICollectionViewDelegate, UICollectionV
         cell.lblEstilo.text = "\(doc["linea"]!)"
         cell.lblCosto.text = " $ \(costo)"
         cell.clave = clave
+        cell.estilo = doc["estilo"] as! String
         
         //Se carga la imagen
         if( _app.databaseImg != nil) {

@@ -24,6 +24,8 @@ class CompaniasViewController: UIViewController,  UITableViewDelegate, UITableVi
         _companias.append( Compania(id: "vmozono-vmimages", descripcion: "Ozono"))
         _companias.append( Compania(id: "vmepi-vmimagepi", descripcion: "Episodio"))
         
+        self.view.backgroundColor = UIColor(patternImage: UIImage(named: "ozono-temporada")!)
+        
         tableView.delegate = self
         tableView.dataSource = self
         
@@ -66,6 +68,7 @@ class CompaniasViewController: UIViewController,  UITableViewDelegate, UITableVi
         
         let compania = _companias[indexPath.row]
         cell.textLabel?.text = compania._descripcion
+       
         
         return cell
     }
@@ -74,6 +77,11 @@ class CompaniasViewController: UIViewController,  UITableViewDelegate, UITableVi
         let app = UIApplication.shared.delegate as! AppDelegate
         app.cveCompania = _companias[indexPath.row]._id
         app.compania = _companias[indexPath.row]._descripcion
+    }
+    
+    func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath) {
+        cell.backgroundColor = .clear
+        cell.contentView.backgroundColor = UIColor(white: 1, alpha: 0.5)
     }
     
     //Secaptura la compñia seleccionada para iniciar la sincronizacion
