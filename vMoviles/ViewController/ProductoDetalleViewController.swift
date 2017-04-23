@@ -15,13 +15,15 @@ class ProductoDetalleViewController: UIViewController {
     var dbChangeObserver: AnyObject?
     var _editar: Bool! = false
     var _linea: String!
-    var _estilo: String!
+    var _tipo: [String] = []
+    var _categoria: [String] = []
     var _app: AppDelegate!
     var _listaProdSelected: [RowPedidoProducto] = []
     
     @IBOutlet weak var lblNumProdSele: UILabel!
     @IBOutlet weak var txtBuscar: UITextField!
     @IBOutlet weak var collectionView: UICollectionView!
+    @IBOutlet weak var lblTotal: UILabel!
     
     let _selectColor = UIColor  (red:255.0,green:255.0,blue:255.0,alpha:128.0)
     
@@ -43,7 +45,7 @@ class ProductoDetalleViewController: UIViewController {
         self.navigationItem.leftItemsSupplementBackButton = true
         
         // Inicializa las vistas y querys couchbase lite:
-        iniciaBaseDatos()
+        self.iniciaBaseDatos()
     }
     
     deinit {
@@ -68,30 +70,30 @@ class ProductoDetalleViewController: UIViewController {
     // Datos
     // MARK: - Database
     func iniciaBaseDatos() {
-
-        if self._estilo != "" {
+        
+        if self._linea != "" {
             productoLiveQuery = ProductoDatos(_database: _app.database).setupProdCeroViewAndQuery()
-            productoLiveQuery.startKey = [self._estilo]
-            productoLiveQuery.endKey = [self._estilo]
+            productoLiveQuery.startKey = [self._linea]
+            productoLiveQuery.endKey = [self._linea]
             productoLiveQuery.prefixMatchLevel = 1
         } else {
-        
-            if self._linea != "" {
-                productoLiveQuery = ProductoDatos(_database: _app.database).setupProdCeroLineaViewAndQuery()
-                productoLiveQuery.startKey = [self._linea]
-                productoLiveQuery.endKey = [self._linea]
-                productoLiveQuery.prefixMatchLevel = 1
-            } else {
-                productoLiveQuery = ProductoDatos(_database: _app.database).setupProdCeroViewAndQuery()
-            }
+            productoLiveQuery = ProductoDatos(_database: _app.database).setupProdCeroCategoViewAndQuery()
+            
+            
+            //productoLiveQuery.keys = ["D","C"]
+            productoLiveQuery.startKey = ["A"]
+            productoLiveQuery.endKey = ["A"]
+            productoLiveQuery.prefixMatchLevel = 1
         }
-
+        
         productoLiveQuery.addObserver(self, forKeyPath: "rows", options: .new, context: nil)
         productoLiveQuery.start()
     }
     
     func recargarProductos() {
-        productoRows = productoLiveQuery.rows?.allObjects as? [CBLQueryRow] ?? nil
+        self.productoRows = productoLiveQuery.rows?.allObjects as? [CBLQueryRow] ?? nil
+        let total = productoRows?.count ?? 0
+        self.lblTotal.text = " \(total)"
         collectionView.reloadData()
     }
 
@@ -106,19 +108,14 @@ class ProductoDetalleViewController: UIViewController {
         navigationItem.titleView = imageView
         
         //Toolbar Derecho
-        let barCompania = UIBarButtonItem(image: UIImage(named:"icoCompania"), style: .plain, target: self, action: #selector(onShowInicial))
-        
         let brRptProductos = UIBarButtonItem(image: UIImage(named:"rptProducto"), style: .plain, target: self, action: #selector(onRptProductos))
         
         let barEditar = UIBarButtonItem(title: "Editar", style: .plain, target: self, action: #selector(onEditar))
         
-        barCompania.imageInsets = UIEdgeInsetsMake(5, 5, 5, 5)
-        barCompania.tintColor = .gray
-        
         brRptProductos.imageInsets = UIEdgeInsetsMake(2, 2, 2, 2)
         brRptProductos.tintColor = .gray
         
-        self.navigationItem.rightBarButtonItems = [barCompania, brRptProductos, barEditar]
+        self.navigationItem.rightBarButtonItems = [brRptProductos, barEditar]
         
     }
     
@@ -202,13 +199,16 @@ class ProductoDetalleViewController: UIViewController {
         self.present(vc, animated: true, completion: { _ in })
         
     }
- 
-    func onShowInicial() {
-        self._app.showInicial()
-    }
     
     @IBAction func onBuscar(_ sender: Any) {
+        let text = self.txtBuscar.text ?? ""
         
+        if !text.isEmpty {
+            productoLiveQuery.postFilter = NSPredicate(format: "key3 CONTAINS[cd] %@", text)
+        } else {
+            productoLiveQuery.postFilter = nil
+        }
+        productoLiveQuery.queryOptionsChanged()
     }
 }
 

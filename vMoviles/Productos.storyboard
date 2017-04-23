@@ -22,13 +22,13 @@
                         <rect key="frame" x="0.0" y="0.0" width="320" height="768"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
-                            <tableView clipsSubviews="YES" contentMode="scaleToFill" fixedFrame="YES" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="default" rowHeight="44" sectionHeaderHeight="28" sectionFooterHeight="28" translatesAutoresizingMaskIntoConstraints="NO" id="iVF-BJ-LYW">
-                                <rect key="frame" x="0.0" y="140" width="320" height="628"/>
+                            <tableView clipsSubviews="YES" contentMode="scaleToFill" fixedFrame="YES" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="default" rowHeight="44" sectionHeaderHeight="44" sectionFooterHeight="10" translatesAutoresizingMaskIntoConstraints="NO" id="iVF-BJ-LYW">
+                                <rect key="frame" x="0.0" y="100" width="320" height="668"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                 <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                                 <prototypes>
-                                    <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" selectionStyle="blue" accessoryType="checkmark" hidesAccessoryWhenEditing="NO" indentationLevel="1" indentationWidth="0.0" reuseIdentifier="productoListCell" id="cey-fd-4mF" customClass="productoFiltroTableViewCell" customModule="vMoviles" customModuleProvider="target">
-                                        <rect key="frame" x="0.0" y="28" width="320" height="44"/>
+                                    <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" selectionStyle="blue" accessoryType="checkmark" hidesAccessoryWhenEditing="NO" indentationLevel="1" indentationWidth="0.0" reuseIdentifier="productoListCell" focusStyle="custom" id="cey-fd-4mF" customClass="productoFiltroTableViewCell" customModule="vMoviles" customModuleProvider="target">
+                                        <rect key="frame" x="0.0" y="44" width="320" height="44"/>
                                         <autoresizingMask key="autoresizingMask"/>
                                         <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="cey-fd-4mF" id="GLB-EE-gtF">
                                             <rect key="frame" x="0.0" y="0.0" width="281" height="43.5"/>
@@ -54,8 +54,8 @@
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                 <state key="normal" title="Buscar"/>
                                 <connections>
-                                    <action selector="onBuscar:" destination="BK0-rg-Uwi" eventType="touchUpInside" id="qVC-4M-gay"/>
-                                    <segue destination="OrO-eK-ipj" kind="showDetail" identifier="segueDetalleProd" id="IG8-8a-Not"/>
+                                    <action selector="onBuscar:" destination="BK0-rg-Uwi" eventType="touchUpInside" id="glQ-k3-n4L"/>
+                                    <segue destination="OrO-eK-ipj" kind="showDetail" identifier="segueDetalleProd" id="PJL-Bb-tRl"/>
                                 </connections>
                             </button>
                             <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" placeholder="Línea" textAlignment="natural" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="UGg-Y6-sxD">
@@ -91,7 +91,7 @@
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <collectionView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" dataMode="prototypes" translatesAutoresizingMaskIntoConstraints="NO" id="Q6N-Zq-s2L">
-                                <rect key="frame" x="0.0" y="115" width="702.5" height="644"/>
+                                <rect key="frame" x="0.0" y="115" width="703" height="644"/>
                                 <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                                 <constraints>
                                     <constraint firstAttribute="height" constant="644" id="3Qe-3a-7Dh"/>
@@ -236,6 +236,7 @@
                     <connections>
                         <outlet property="collectionView" destination="Q6N-Zq-s2L" id="9v8-py-65Y"/>
                         <outlet property="lblNumProdSele" destination="joI-Ie-iPb" id="tmY-8D-ERH"/>
+                        <outlet property="lblTotal" destination="Abj-u9-Wsl" id="d4i-2M-CCi"/>
                         <outlet property="txtBuscar" destination="szs-q1-KOt" id="BLk-S3-jlD"/>
                     </connections>
                 </viewController>
@@ -281,6 +282,7 @@
                 <splitViewController id="8rx-9E-v6X" sceneMemberID="viewController">
                     <connections>
                         <segue destination="mAm-09-nDf" kind="relationship" relationship="masterViewController" id="mvt-WF-YNQ"/>
+                        <segue destination="OrO-eK-ipj" kind="relationship" relationship="detailViewController" id="RUt-yI-xhY"/>
                     </connections>
                 </splitViewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="4Aj-LY-L0P" userLabel="First Responder" sceneMemberID="firstResponder"/>
@@ -291,4 +293,7 @@
     <resources>
         <image name="WebSearch" width="100" height="100"/>
     </resources>
+    <inferredMetricsTieBreakers>
+        <segue reference="PJL-Bb-tRl"/>
+    </inferredMetricsTieBreakers>
 </document>

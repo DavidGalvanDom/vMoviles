@@ -65,10 +65,32 @@ class ProductoDatos
                 let type = doc["type"] as? String
                 let tpc = doc["tpc"] as? String
                 if (type == "producto" && tpc == "0"){
-                    let clave = doc["clave"] as? String
-                    let descripcion = doc["descripcion"] as? String
+                    let catego = doc["catego"] as? String
+                    let categoria = doc["categoria"] as? String
+                    let linea = doc["linea"] as? String
                     let estilo = doc["estilo"] as? String
-                    emit([estilo,clave,"\(clave as String!) - \(descripcion ?? "")"], nil)
+                    emit([linea,catego,categoria,estilo], nil)
+                }
+            }, version: "1.2")
+        }
+        
+        let productoLiveQuery = view.createQuery().asLive()
+        productoLiveQuery.descending = false
+        
+        return productoLiveQuery
+    }
+    
+    //Lista de productos que pertenecen a la lista de precios cero
+    func setupProdCeroCategoViewAndQuery() -> CBLLiveQuery {
+        let view = database.viewNamed("productoslstPrecioCeroCatego")
+        if view.mapBlock == nil {
+            view.setMapBlock({ (doc, emit) in
+                let type = doc["type"] as? String
+                let tpc = doc["tpc"] as? String
+                if (type == "producto" && tpc == "0"){
+                    let catego = doc["catego"] as? String
+                    let estilo = doc["estilo"] as? String
+                    emit([catego,estilo], nil)
                 }
             }, version: "1.1")
         }
@@ -78,30 +100,7 @@ class ProductoDatos
         
         return productoLiveQuery
     }
-    
-    func setupProdCeroLineaViewAndQuery() -> CBLLiveQuery {
-        let view = database.viewNamed("productoslstPrecioCeroLinea")
-        if view.mapBlock == nil {
-            view.setMapBlock({ (doc, emit) in
-                let type = doc["type"] as? String
-                let tpc = doc["tpc"] as? String
-                if (type == "producto" && tpc == "0"){
-                    let clave = doc["clave"] as? String
-                    let descripcion = doc["descripcion"] as? String
-                    let linea = doc["linea"] as? String
-                    emit([linea,clave,"\(clave as String!) - \(descripcion ?? "")"], nil)
-                }
-            }, version: "1.0")
-        }
-        
-        let productoLiveQuery = view.createQuery().asLive()
-        productoLiveQuery.descending = false
-        
-        return productoLiveQuery
-    }
 
-    
-    
     
     //Se carga el producto con la clave seleccionada
     func CargarProducto (clave: String)-> CBLDocument? {
@@ -144,6 +143,31 @@ class ProductoDatos
         opcionesEstiloQuery.descending = false
         
         return opcionesEstiloQuery
+    }
+    
+    //Se genera la vista para categorias del producot para centro de costos 0
+    func CargarCategorias() -> CBLQuery {
+        let view = database.viewNamed("productosCategorias")
+        if view.mapBlock == nil {
+            view.setMapBlock({ (doc, emit) in
+                let type = doc["type"] as? String
+                let tpc = doc["tpc"] as? String
+                if (type == "producto" && tpc == "0") {
+                    let categoria = doc["categoria"] as? String
+                    emit(categoria ?? "", nil)
+                }
+            },
+            reduce: { (keys, values, rereduce)  in
+                return values.count
+            },
+            version: "1.2")
+        }
+        
+        let categoriasQuery = view.createQuery()
+        categoriasQuery.descending = false
+        
+        return categoriasQuery
+
     }
 
     

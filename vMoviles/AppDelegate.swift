@@ -226,7 +226,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UISplitViewControllerDele
         }
         
         //Despliega mensaje de Sincronizando datos
-        if UIApplication.shared.isNetworkActivityIndicatorVisible  && showMensaje == false {
+       /* if UIApplication.shared.isNetworkActivityIndicatorVisible  && showMensaje == false {
             Ui.showReplicando( onController: self.window!.rootViewController!,
                                withMessage:"Sincronizando datos...",
                                onComplete: {
@@ -237,7 +237,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UISplitViewControllerDele
                                 }
             })
             showMensaje = true
-        }
+        }*/
  
         
         let error = pusher.lastError as NSError?;
