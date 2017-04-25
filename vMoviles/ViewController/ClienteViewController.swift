@@ -15,6 +15,7 @@ class ClienteViewController: UITableViewController,UISearchResultsUpdating {
     var dbChangeObserver: AnyObject?
     var searchController: UISearchController!
     var detailViewController: ClienteDetalleViewController? = nil
+    var _app: AppDelegate!
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -25,9 +26,10 @@ class ClienteViewController: UITableViewController,UISearchResultsUpdating {
         searchController.dimsBackgroundDuringPresentation = false
         self.tableView.tableHeaderView = searchController.searchBar
 
-        
+        self._app = UIApplication.shared.delegate as! AppDelegate
+        self.creaNavegador()
         // Inicializa las vistas y querys couchbase lite:
-        iniciaBaseDatos()
+        self.iniciaBaseDatos()
 
        self.splitViewController?.maximumPrimaryColumnWidth = 320
     }
@@ -46,6 +48,23 @@ class ClienteViewController: UITableViewController,UISearchResultsUpdating {
         if dbChangeObserver != nil {
             NotificationCenter.default.removeObserver(dbChangeObserver!)
         }
+    }
+    
+    //Se crean los opciones de navegacion
+    func creaNavegador() {
+        
+        //Toolbar Derecho
+        let barCompania = UIBarButtonItem(image: UIImage(named:"icoCompania"), style: .plain, target: self, action: #selector(onShowCompanias))
+        
+        barCompania.imageInsets = UIEdgeInsetsMake(5, 5, 5, 5)
+        barCompania.tintColor = .black
+        
+        self.navigationItem.rightBarButtonItems = [barCompania]
+        
+    }
+    
+    func onShowCompanias() {
+        self._app.showInicial()
     }
     
     // MARK: - Segues

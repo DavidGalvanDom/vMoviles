@@ -8,17 +8,25 @@
 
 import UIKit
 
-class PedidoViewController: UIViewController,  UITableViewDelegate, UITableViewDataSource  ,UISearchResultsUpdating {
+class PedidoViewController: UIViewController {
 
+    @IBOutlet weak var viewPedidoTodos: UIView!
+    @IBOutlet weak var viewPedido: UIView!
+    @IBOutlet weak var tableViewTodos: UITableView!
     @IBOutlet weak var tableView: UITableView!
     @IBOutlet weak var segment: UISegmentedControl!
-    
+       
     var searchController: UISearchController!
+    var searchControllerTodos: UISearchController!
     var _storyboard: UIStoryboard!
     var _app: AppDelegate!
     var _pedidoLiveQuery: CBLLiveQuery!
+    var _pedidoLiveQueryTodos: CBLLiveQuery!
     var _dbChangeObserver: AnyObject?
     var _lstPedidos: [CBLQueryRow]?
+    var _lstPedidosTodos: [CBLQueryRow]?
+    var _flipeTable: Bool = true
+    var _observando: String = "rows"
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -33,9 +41,17 @@ class PedidoViewController: UIViewController,  UITableViewDelegate, UITableViewD
         searchController.searchResultsUpdater = self
         searchController.dimsBackgroundDuringPresentation = false
         
+        searchControllerTodos = UISearchController(searchResultsController: nil)
+        searchControllerTodos.searchResultsUpdater = self
+        searchControllerTodos.dimsBackgroundDuringPresentation = false
+        
         self.tableView.delegate = self
         self.tableView.dataSource = self
         self.tableView.tableHeaderView = searchController.searchBar
+    
+        self.tableViewTodos.delegate = self
+        self.tableViewTodos.dataSource = self
+        self.tableViewTodos.tableHeaderView = searchControllerTodos.searchBar
         
         self._app = UIApplication.shared.delegate as! AppDelegate
 
@@ -54,8 +70,18 @@ class PedidoViewController: UIViewController,  UITableViewDelegate, UITableViewD
     
     func TerminaObservable() {
         if self._pedidoLiveQuery != nil {
-            self._pedidoLiveQuery.removeObserver(self, forKeyPath: "rows")
+            
+            if self._pedidoLiveQuery.observationInfo != nil {
+                self._pedidoLiveQuery.removeObserver(self, forKeyPath: "rows")
+            }
             self._pedidoLiveQuery.stop()
+        }
+        
+        if self._pedidoLiveQueryTodos != nil {
+            if self._pedidoLiveQueryTodos.observationInfo != nil {
+                self._pedidoLiveQueryTodos.removeObserver(self, forKeyPath: "rows")
+            }
+            self._pedidoLiveQueryTodos.stop()
         }
         
         if self._dbChangeObserver != nil {
@@ -66,8 +92,17 @@ class PedidoViewController: UIViewController,  UITableViewDelegate, UITableViewD
     // MARK: KNO
     override func observeValue(forKeyPath keyPath: String?, of object: Any?,
                                change: [NSKeyValueChangeKey : Any]?, context: UnsafeMutableRawPointer?) {
-        if object as? NSObject == self._pedidoLiveQuery {
-            self.RecargarPedidos()
+        
+        if self._observando == "rows" {
+            if object as? NSObject == self._pedidoLiveQuery {
+                self.RecargarPedidos()
+            }
+        }
+        
+        if self._observando == "todos" {
+            if object as? NSObject == self._pedidoLiveQueryTodos {
+                self.RecargarPedidosTodos()
+            }
         }
     }
     
@@ -81,7 +116,7 @@ class PedidoViewController: UIViewController,  UITableViewDelegate, UITableViewD
             self._pedidoLiveQuery.endKey = [ESTATUS_PEDIDO_CAPTURADO]
             self._pedidoLiveQuery.prefixMatchLevel = 1
         }
-        
+        self._observando = "rows"
         self._pedidoLiveQuery.addObserver(self, forKeyPath: "rows", options: .new, context: nil)
         self._pedidoLiveQuery.start()
     }
@@ -89,6 +124,11 @@ class PedidoViewController: UIViewController,  UITableViewDelegate, UITableViewD
     func RecargarPedidos() {
         self._lstPedidos = self._pedidoLiveQuery.rows?.allObjects as? [CBLQueryRow] ?? nil
         self.tableView.reloadData()
+    }
+    
+    func RecargarPedidosTodos() {
+        self._lstPedidosTodos = self._pedidoLiveQueryTodos.rows?.allObjects as? [CBLQueryRow] ?? nil
+        self.tableViewTodos.reloadData()
     }
     
     //Se crean los opciones de navegacion
@@ -137,56 +177,6 @@ class PedidoViewController: UIViewController,  UITableViewDelegate, UITableViewD
     func backController() {
         _ = self.navigationController?.popViewController(animated: true)
     }
-    
-    // MARK: - UISearchController
-    func updateSearchResults(for searchController: UISearchController) {
-        let text = self.searchController.searchBar.text ?? ""
-        
-        if !text.isEmpty {
-            self._pedidoLiveQuery.postFilter = NSPredicate(format: "key1 CONTAINS[cd] %@", text)
-        } else {
-            self._pedidoLiveQuery.postFilter = nil
-        }
-        self._pedidoLiveQuery.queryOptionsChanged()
-    }
-
-    // MARK: - UITableViewController
-    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return self._lstPedidos?.count ?? 0
-    }
-    
-    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: "pedidoListCell", for: indexPath) as! lstPedidosTableViewCell
-        
-        let doc = self._lstPedidos![indexPath.row].document!
-        let folio = doc["folio"] as! NSString
-        
-        cell.lblFolio?.text = folio as String
-        cell.lblFechaCliente.text = doc["fechainicio"] as? String
-        cell.lblFechaCreacion.text = doc["fechaCreacion"] as? String
-        cell.lblPares.text = doc["pares"] as? String
-        cell.lblTotal.text = doc["total"] as? String
-        cell.lblEstatus.text = doc["estatus"] as? String
-        if (doc["razonsocial"] as? String) != nil {
-            cell.lblNomCliente.text = doc["razonsocial"] as? String
-        }
-        return cell
-    }
-    
-    //Mostrar detalle de un pedido existente
-    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        if indexPath.row >= 0 {
-            
-            let pedido = self.EditaPedido(forDoc: (self._lstPedidos?[indexPath.row].document)!)
-            
-            let controller = _storyboard?.instantiateViewController(withIdentifier: "sbPedidosDetalle") as! PedidoDetalleViewController
-            
-            controller._pedido = pedido
-            
-            self.navigationController?.pushViewController(controller, animated: true)
-        }
-    }
-
     
     //Convierte el objeto al Modelo de pedido
     func EditaPedido(forDoc: CBLDocument) -> Pedido {
@@ -283,6 +273,44 @@ class PedidoViewController: UIViewController,  UITableViewDelegate, UITableViewD
         return nil
     }
     
+    //Se cargan los status de los pedidos 
+    func filtraTodos() {
+        
+        self.TerminaObservable()
+        self._pedidoLiveQueryTodos = PedidoDatos(_database: self._app.database).setupStatusPedidoViewAndQuery()
+        
+        self._observando = "todos"
+        self._pedidoLiveQueryTodos.addObserver(self, forKeyPath: "rows", options: [.new,.old], context: nil)
+        
+        self._pedidoLiveQueryTodos.start()
+    }
+    
+    func filtrarTableView (index: Int) {
+        self.TerminaObservable()
+        self._pedidoLiveQuery = PedidoDatos(_database: self._app.database).setupViewAndQuery()
+        
+        switch(index){
+        case 0:
+            if( self._pedidoLiveQuery  != nil ) {
+                self._pedidoLiveQuery.startKey = [ESTATUS_PEDIDO_CAPTURADO]
+                self._pedidoLiveQuery.endKey = [ESTATUS_PEDIDO_CAPTURADO]
+                self._pedidoLiveQuery.prefixMatchLevel = 1
+            }
+        case 1:
+            
+            if( self._pedidoLiveQuery  != nil ) {
+                self._pedidoLiveQuery.startKey = [ESTATUS_PEDIDO_ENVIADO]
+                self._pedidoLiveQuery.endKey = [ESTATUS_PEDIDO_ENVIADO]
+                self._pedidoLiveQuery.prefixMatchLevel = 1
+            }
+        default:
+            print("default")
+        }
+        self._observando = "rows"
+        self._pedidoLiveQuery.addObserver(self, forKeyPath: "rows", options: .new, context: nil)
+        self._pedidoLiveQuery.start()
+    }
+    
     //Crear nuevo pedido
     func onNuevo()
     {
@@ -292,32 +320,122 @@ class PedidoViewController: UIViewController,  UITableViewDelegate, UITableViewD
     }
     
     @IBAction func onCambiaSegment(_ sender: UISegmentedControl) {
-        
-        self.TerminaObservable()
-        self._pedidoLiveQuery = PedidoDatos(_database: self._app.database).setupViewAndQuery()
-        
-        switch(sender.selectedSegmentIndex){
-            case 0:
-                if( self._pedidoLiveQuery  != nil ) {
-                    self._pedidoLiveQuery.startKey = [ESTATUS_PEDIDO_CAPTURADO]
-                    self._pedidoLiveQuery.endKey = [ESTATUS_PEDIDO_CAPTURADO]
-                    self._pedidoLiveQuery.prefixMatchLevel = 1
-                }
-
-            case 1:
-            
-                if( self._pedidoLiveQuery  != nil ) {
-                    self._pedidoLiveQuery.startKey = [ESTATUS_PEDIDO_ENVIADO]
-                    self._pedidoLiveQuery.endKey = [ESTATUS_PEDIDO_ENVIADO]
-                    self._pedidoLiveQuery.prefixMatchLevel = 1
-                }
-
-            default:
-                print("default")
+        var executaTransition :Bool = true
+        switch sender.selectedSegmentIndex {
+        case 0,1:
+            self.filtrarTableView(index: sender.selectedSegmentIndex)
+            executaTransition = self._flipeTable ? false : true
+        case 2:
+            //Status de pedidos tableView Totods
+            self.filtraTodos()
+        default:
+            print("default")
         }
         
-        self._pedidoLiveQuery.addObserver(self, forKeyPath: "rows", options: .new, context: nil)
-        self._pedidoLiveQuery.start()
-
+        if executaTransition {
+            self._flipeTable = !self._flipeTable
+            let fromView = self._flipeTable ? self.viewPedidoTodos: self.viewPedido
+            let toView = self._flipeTable ? self.viewPedido : self.viewPedidoTodos
+            UIView.transition(from: fromView!, to: toView!, duration: 0.5, options: [.transitionFlipFromRight, .showHideTransitionViews])
+        }
     }
+}
+
+// MARK: - UITableViewController
+extension PedidoViewController : UITableViewDelegate, UITableViewDataSource,UISearchResultsUpdating {
+
+    // MARK: - UISearchController
+    func updateSearchResults(for searchController: UISearchController) {
+        if self._observando == "rows" {
+            let text = self.searchController.searchBar.text ?? ""
+
+            if !text.isEmpty {
+                self._pedidoLiveQuery.postFilter = NSPredicate(format: "key1 CONTAINS[cd] %@", text)
+            } else {
+                self._pedidoLiveQuery.postFilter = nil
+            }
+            self._pedidoLiveQuery.queryOptionsChanged()
+        } else {
+            let text = self.searchControllerTodos.searchBar.text ?? ""
+
+            if !text.isEmpty {
+                self._pedidoLiveQueryTodos.postFilter = NSPredicate(format: "key1 CONTAINS[cd] %@", text)
+            } else {
+                self._pedidoLiveQueryTodos.postFilter = nil
+            }
+            self._pedidoLiveQueryTodos.queryOptionsChanged()
+        }
+    }
+    
+    // MARK: - UITableViewController
+    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        
+        if tableView == self.tableView {
+            return   self._lstPedidos?.count ?? 0
+        }
+        
+        if tableView == self.tableViewTodos {
+             return  self._lstPedidosTodos?.count ?? 0
+        }
+        
+        return 0
+    }
+    
+    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        
+        if tableView == self.tableView {
+            let cell = tableView.dequeueReusableCell(withIdentifier: "pedidoListCell", for: indexPath) as! lstPedidosTableViewCell
+            
+            let doc = self._lstPedidos![indexPath.row].document!
+            let folio = doc["folio"] as! NSString
+            
+            cell.lblFolio?.text = folio as String
+            cell.lblFechaCliente.text = doc["fechainicio"] as? String
+            cell.lblFechaCreacion.text = doc["fechaCreacion"] as? String
+            cell.lblPares.text = doc["pares"] as? String
+            cell.lblTotal.text = doc["total"] as? String
+            cell.lblEstatus.text = doc["estatus"] as? String
+            if (doc["razonsocial"] as? String) != nil {
+                cell.lblNomCliente.text = doc["razonsocial"] as? String
+            }
+            
+            return cell
+        } else {
+            let cellTodos = tableView.dequeueReusableCell(withIdentifier: "pedidoListCellTodos", for: indexPath) as! pedidoTodosTableViewCell
+            
+            let doc = self._lstPedidosTodos![indexPath.row].document!
+            let pedido = doc["pedido"] as! NSString
+
+            cellTodos.lblFolio.text = pedido as String
+            cellTodos.lblPares.text = doc["pares"] as? String
+            cellTodos.lblCte.text = doc["cte"] as? String
+            cellTodos.lblStatus.text = doc["status"] as? String
+            cellTodos.lblSemana.text = doc["semana"] as? String
+            cellTodos.lblFechaCap.text = doc["fhcap"] as? String
+            cellTodos.lblEstilo.text = " \(doc["estilo"] ?? "") - \(doc["opcion"] ?? "") "
+            cellTodos.lblTipo.text = doc["tipo"] as? String
+            cellTodos.lblRenglon.text = doc["renglon"] as? String
+            cellTodos.lblOrdenCte.text = doc["ordencte"] as? String
+            cellTodos.lblObse.text = doc["obs"] as? String
+
+            return cellTodos
+        }
+        
+    }
+    
+    //Mostrar detalle de un pedido existente
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        
+        if indexPath.row >= 0  && tableView == self.tableView {
+            
+            let pedido = self.EditaPedido(forDoc: (self._lstPedidos?[indexPath.row].document)!)
+            
+            let controller = _storyboard?.instantiateViewController(withIdentifier: "sbPedidosDetalle") as! PedidoDetalleViewController
+            
+            controller._pedido = pedido
+            
+            self.navigationController?.pushViewController(controller, animated: true)
+        }
+    }
+
 }

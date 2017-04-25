@@ -20,6 +20,7 @@ class ProductoDetalleViewController: UIViewController {
     var _app: AppDelegate!
     var _listaProdSelected: [RowPedidoProducto] = []
     
+    @IBOutlet weak var lblMensaje: UILabel!
     @IBOutlet weak var lblNumProdSele: UILabel!
     @IBOutlet weak var txtBuscar: UITextField!
     @IBOutlet weak var collectionView: UICollectionView!
@@ -70,7 +71,8 @@ class ProductoDetalleViewController: UIViewController {
     // Datos
     // MARK: - Database
     func iniciaBaseDatos() {
-        
+         var inicioLetra : String = ""
+         var finLetra : String = ""
         if self._linea != "" {
             productoLiveQuery = ProductoDatos(_database: _app.database).setupProdCeroViewAndQuery()
             productoLiveQuery.startKey = [self._linea]
@@ -79,24 +81,64 @@ class ProductoDetalleViewController: UIViewController {
         } else {
             productoLiveQuery = ProductoDatos(_database: _app.database).setupProdCeroCategoViewAndQuery()
             
-            
-            //productoLiveQuery.keys = ["D","C"]
-            productoLiveQuery.startKey = ["A"]
-            productoLiveQuery.endKey = ["A"]
+            if self._tipo.count > 0 {
+                
+                for tipo in self._tipo {
+                    let startIndex = tipo.index(tipo.startIndex, offsetBy: 0)
+                    let endIndex = tipo.index(tipo.startIndex, offsetBy: 0)
+                    let letra = tipo[startIndex...endIndex]
+                    
+                    switch (letra) {
+                    case "A":
+                        inicioLetra = "A"
+                        finLetra = finLetra == "D" || finLetra == "C" ? finLetra : "A"
+                    case "C":
+                        inicioLetra = inicioLetra == "A" ? inicioLetra : "C"
+                        finLetra = finLetra == "D" ? finLetra : "C"
+                    case "D":
+                        inicioLetra = inicioLetra == "A" || inicioLetra == "C" ? inicioLetra : "D"
+                        finLetra = "D"
+                    default:
+                        inicioLetra = "A"
+                        finLetra = "A"
+                    }
+                }
+                
+                productoLiveQuery.startKey = [inicioLetra]
+                productoLiveQuery.endKey = [finLetra]
+            }
             productoLiveQuery.prefixMatchLevel = 1
         }
         
         productoLiveQuery.addObserver(self, forKeyPath: "rows", options: .new, context: nil)
         productoLiveQuery.start()
+        
     }
     
     func recargarProductos() {
         self.productoRows = productoLiveQuery.rows?.allObjects as? [CBLQueryRow] ?? nil
+        
+        if self._categoria.count > 0 {
+            self.productoRows = self.productoRows?.filter { self.filtraCategorias(rowQuery: $0) }
+        }
+        
         let total = productoRows?.count ?? 0
         self.lblTotal.text = " \(total)"
         collectionView.reloadData()
+            
+        lblMensaje.text = total < 1 ? "No se encontro información.":""
+            
     }
 
+    func filtraCategorias (rowQuery: CBLQueryRow) -> Bool {
+        for categoria in self._categoria {
+            if(categoria == rowQuery.document?["categoria"] as! String){
+                return true
+            }
+        }
+        return false
+    }
+    
     //Se crean los opciones de navegacion
     func creaNavegador() {
         
@@ -204,7 +246,7 @@ class ProductoDetalleViewController: UIViewController {
         let text = self.txtBuscar.text ?? ""
         
         if !text.isEmpty {
-            productoLiveQuery.postFilter = NSPredicate(format: "key3 CONTAINS[cd] %@", text)
+            productoLiveQuery.postFilter = NSPredicate(format: "key2 CONTAINS[cd] %@", text)
         } else {
             productoLiveQuery.postFilter = nil
         }

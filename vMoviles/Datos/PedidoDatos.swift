@@ -35,6 +35,25 @@ class PedidoDatos
         return productoLiveQuery
     }
     
+    func setupStatusPedidoViewAndQuery() ->  CBLLiveQuery{
+        let view = database.viewNamed("stpedido")
+        if view.mapBlock == nil {
+            view.setMapBlock({ (doc, emit) in
+                let type = doc["type"] as? String
+                if type == "stpedido" {
+                    let key = "\(doc["pedido"]  as! String)-\(doc["estilo"] as! String)"
+                    let estatus = doc["status"] as? String
+                    emit([estatus ?? "",key], nil)
+                }
+            }, version: "1.1")
+        }
+        
+        let productoTodosLiveQuery = view.createQuery().asLive()
+        productoTodosLiveQuery.descending = true
+        
+        return productoTodosLiveQuery
+    }
+    
     //Regresa el documento con los datos del pedido
     func CargarPedido (folio: String) -> CBLDocument? {
         

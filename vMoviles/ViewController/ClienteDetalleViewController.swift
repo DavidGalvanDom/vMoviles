@@ -20,6 +20,7 @@ class ClienteDetalleViewController: UIViewController {
     @IBOutlet weak var lblRFC: UILabel!
     @IBOutlet weak var lblIdClient: UILabel!
     @IBOutlet weak var tableView: UITableView!
+    @IBOutlet weak var lblMensaje: UILabel!
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -112,6 +113,26 @@ class ClienteDetalleViewController: UIViewController {
                 "zventa": detalle.zventa
             ]
             
+            if let label = self.lblMensaje {
+                label.text = ""
+            }
+            
+        } else {
+            if let label = self.lblMensaje {
+                label.text = "Seleccione un Cliente."
+            }
+
+            if let label = self.lblNombre {
+                label.text = ""
+            }
+            
+            if let label = self.lblRFC {
+                label.text = ""
+            }
+            
+            if let label = self.lblIdClient {
+                label.text = "0"
+            }
         }
     }
     
@@ -132,18 +153,6 @@ class ClienteDetalleViewController: UIViewController {
         imageView.image = image
         navigationItem.titleView = imageView
         
-        //Toolbar Derecho
-        let barCompania = UIBarButtonItem(image: UIImage(named:"icoCompania"), style: .plain, target: self, action: #selector(onShowCompanias))
-        
-        barCompania.imageInsets = UIEdgeInsetsMake(5, 5, 5, 5)
-        barCompania.tintColor = .black
-        
-        self.navigationItem.rightBarButtonItems = [barCompania]
-        
-    }
-
-    func onShowCompanias() {
-        self._app.showInicial()
     }
     
     func onShowInicio() {

@@ -66,12 +66,11 @@ class ProductoDatos
                 let tpc = doc["tpc"] as? String
                 if (type == "producto" && tpc == "0"){
                     let catego = doc["catego"] as? String
-                    let categoria = doc["categoria"] as? String
                     let linea = doc["linea"] as? String
                     let estilo = doc["estilo"] as? String
-                    emit([linea,catego,categoria,estilo], nil)
+                    emit([linea,catego,estilo], nil)
                 }
-            }, version: "1.2")
+            }, version: "1.2.2")
         }
         
         let productoLiveQuery = view.createQuery().asLive()
@@ -89,10 +88,11 @@ class ProductoDatos
                 let tpc = doc["tpc"] as? String
                 if (type == "producto" && tpc == "0"){
                     let catego = doc["catego"] as? String
+                    let categoria = doc["categoria"] as? String
                     let estilo = doc["estilo"] as? String
-                    emit([catego,estilo], nil)
+                    emit([catego,categoria,estilo], nil)
                 }
-            }, version: "1.1")
+            }, version: "1.1.2")
         }
         
         let productoLiveQuery = view.createQuery().asLive()
