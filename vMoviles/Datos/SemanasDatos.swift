@@ -21,10 +21,15 @@ class SemanasDatos
         let doc = database.document(withID: "semana")
         var prop = doc?.properties
         
-        semanas["semanae"] = (prop?["semanae"] as! String)
-        semanas["semanas"] = (prop?["semanas"] as! String)
-        semanas["semanar"] = (prop?["semanar"] as! String)
-        
+        if prop != nil {
+            semanas["semanae"] = (prop?["semanae"] as! String)
+            semanas["semanas"] = (prop?["semanas"] as! String)
+            semanas["semanar"] = (prop?["semanar"] as! String)
+        } else {
+            semanas["semanae"] = "201701"
+            semanas["semanas"] = "201701"
+            semanas["semanar"] = "201701"
+        }
         return semanas
 
     }

@@ -36,7 +36,11 @@ class ProductoDetalleViewController: UIViewController {
         self.collectionView.dataSource = self
         
         //Se comparta igual que el tableview y no mande error cellForItemAtIndexPath
-        self.collectionView.isPrefetchingEnabled = false
+        if #available(iOS 10.0, *) {
+            self.collectionView.isPrefetchingEnabled = false
+        } else {
+            // Fallback on earlier versions
+        }
         self.collectionView.allowsMultipleSelection = false
         
         self.creaNavegador()
@@ -286,7 +290,7 @@ extension ProductoDetalleViewController: UICollectionViewDelegate, UICollectionV
                 if let attachment = rev?.attachmentNamed("\(clave).jpg"), let data = attachment.content {
                     let digest = attachment.metadata["digest"] as! String
                     let scale = UIScreen.main.scale
-                    let thumbnail = Image.square(image: UIImage(data: data, scale: scale), withSize: 85.0,
+                    let thumbnail = Image.square(image: UIImage(data: data, scale: scale), withSize: 176,
                                                  withCacheName: digest, onComplete: { (thumbnail) -> Void in
                                                     self.updateImage(image: thumbnail, withDigest: digest, atIndexPath: indexPath)
                     })

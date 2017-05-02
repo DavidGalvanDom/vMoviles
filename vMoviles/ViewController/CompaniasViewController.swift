@@ -92,8 +92,8 @@ class CompaniasViewController: UIViewController,  UITableViewDelegate, UITableVi
             let comIndex = tableView.indexPathForSelectedRow?.row
         {
             let app = UIApplication.shared.delegate as! AppDelegate
-            app.stopReplication()
-            app.startReplication(compania: _companias[comIndex]._id)
+                app.stopReplication()
+                app.startReplication(compania: _companias[comIndex]._id)
         }
     }
     

@@ -9,7 +9,7 @@
 import UIKit
 
 let kSyncEnabled = true
-let kLoggingEnabled = true
+let kLoggingEnabled = false
 let kUsePrebuiltDb = false
 let kConflictResolution = false
 let ESTATUS_PEDIDO_CAPTURADO = "Capturado"
@@ -218,7 +218,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UISplitViewControllerDele
     func replicationProgress(notification: NSNotification) {
         UIApplication.shared.isNetworkActivityIndicatorVisible =
             (pusher.status == .active || puller.status == .active || pullerimg.status == .active)
-       
+       /*
         //Oculta mensaje
         if UIApplication.shared.isNetworkActivityIndicatorVisible == false {
             Ui.hideReplicando( onController: self.window!.rootViewController!)
@@ -226,7 +226,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UISplitViewControllerDele
         }
         
         //Despliega mensaje de Sincronizando datos
-       /* if UIApplication.shared.isNetworkActivityIndicatorVisible  && showMensaje == false {
+        if UIApplication.shared.isNetworkActivityIndicatorVisible  && showMensaje == false {
             Ui.showReplicando( onController: self.window!.rootViewController!,
                                withMessage:"Sincronizando datos...",
                                onComplete: {
@@ -237,8 +237,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UISplitViewControllerDele
                                 }
             })
             showMensaje = true
-        }*/
- 
+        }
+ */
         
         let error = pusher.lastError as NSError?;
         if (error != syncError) {

@@ -762,7 +762,7 @@ class PedidoDetalleViewController: UIViewController, SearchClienteDelegate, Sear
         if(self._pedido.cliente != nil) {
             let vc = _storyboard.instantiateViewController(withIdentifier: "sbPedidoProducto") as! PedidoProductoViewController
             
-            vc.preferredContentSize = CGSize(width: 950, height: 420)
+            vc.preferredContentSize = CGSize(width: 950, height: 440)
             vc.modalPresentationStyle = .formSheet
             vc.modalTransitionStyle = .crossDissolve
             vc._listaPrecios =  self._pedido.cliente?.listaprec as String?

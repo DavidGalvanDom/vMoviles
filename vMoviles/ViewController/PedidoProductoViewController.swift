@@ -77,8 +77,9 @@ class PedidoProductoViewController: UIViewController, SearchProductoDelegate, Pr
             return
         }
         
-        EventosText()
-        DespliegaCorrida()
+        self.EventosText()
+        self.DespliegaCorrida()
+        self.FormatoLabel()
         
         lblRenglon.text = String(_renglon)
         _storyboard = storyboard
@@ -106,6 +107,40 @@ class PedidoProductoViewController: UIViewController, SearchProductoDelegate, Pr
         super.didReceiveMemoryWarning()
         
         // Dispose of any resources that can be recreated.
+    }
+    
+    func FormatoLabel() {
+        self.lblC1.layer.borderWidth = 1.0
+        self.lblC1.layer.cornerRadius = 6
+        self.lblC2.layer.borderWidth = 1.0
+        self.lblC2.layer.cornerRadius = 6
+        self.lblC3.layer.borderWidth = 1.0
+        self.lblC3.layer.cornerRadius = 6
+        self.lblC4.layer.borderWidth = 1.0
+        self.lblC4.layer.cornerRadius = 6
+        self.lblC5.layer.borderWidth = 1.0
+        self.lblC5.layer.cornerRadius = 6
+        self.lblC6.layer.borderWidth = 1.0
+        self.lblC6.layer.cornerRadius = 6
+        self.lblC7.layer.borderWidth = 1.0
+        self.lblC7.layer.cornerRadius = 6
+        
+        self.lblC8.layer.cornerRadius = 6
+        self.lblC8.layer.borderWidth = 1.0
+        self.lblC9.layer.cornerRadius = 6
+        self.lblC9.layer.borderWidth = 1.0
+        self.lblC10.layer.cornerRadius = 6
+        self.lblC10.layer.borderWidth = 1.0
+        self.lblC11.layer.cornerRadius = 6
+        self.lblC11.layer.borderWidth = 1.0
+        self.lblC12.layer.cornerRadius = 6
+        self.lblC12.layer.borderWidth = 1.0
+        self.lblC13.layer.cornerRadius = 6
+        self.lblC13.layer.borderWidth = 1.0
+        self.lblC14.layer.cornerRadius = 6
+        self.lblC14.layer.borderWidth = 1.0
+        self.lblC15.layer.cornerRadius = 6
+        self.lblC15.layer.borderWidth = 1.0
     }
     
     //Eventos para hacer el sumarizado de total de pares
@@ -311,7 +346,7 @@ class PedidoProductoViewController: UIViewController, SearchProductoDelegate, Pr
         
     }
     
-    //Prosucto seleccionado de la lista de productos deletegate
+    //Producto seleccionado de la lista de productos deletegate
     func productoSeleccionado(sender: Producto, image: UIImage?)
     {
         self._productoSelected = sender
@@ -327,11 +362,8 @@ class PedidoProductoViewController: UIViewController, SearchProductoDelegate, Pr
         self.txtPielColor.isEnabled = false
         self.txtPares.isEnabled = false
         
-        if(image != nil){
-            self.imagenProd.setImage(image, for: .normal)
-        } else {
-            self.imagenProd.setImage(UIImage(named: "noImage"), for: .normal)
-        }
+        let imgProd = ProductoDatos(_database: self._app.databaseImg).CargarImagen(clave: sender.clave as String)
+        self.imagenProd.setImage(imgProd, for: .normal)
         
         self.imagenProd.imageView?.contentMode = .scaleAspectFit
         self.imagenProd.imageEdgeInsets = UIEdgeInsetsMake(200, 200, 200, 200)
@@ -483,32 +515,19 @@ class PedidoProductoViewController: UIViewController, SearchProductoDelegate, Pr
             self.txtTs.text = _productoSelected.tiposervicio as String
             
             //Se carga la imagen el producto y se despliega en la interfaz
-            let docImg = self._app.databaseImg.document(withID: claveProd)
-            let rev = docImg?.currentRevision
             
-            if let attachment = rev?.attachmentNamed("\(claveProd).jpg"), let data = attachment.content {
-                let digest = attachment.metadata["digest"] as! String
-                let scale = UIScreen.main.scale
-                
-                let thumbnail = Image.square(image: UIImage(data: data, scale: scale), withSize: 85.0,
-                                             withCacheName: digest, onComplete: { (thumbnail) -> Void in self.imagenProd.setImage(thumbnail, for: .normal) })
-                
-                if(thumbnail != nil){
-                    self.imagenProd.setImage(thumbnail, for: .normal)
-                } else {
-                    self.imagenProd.setImage(UIImage(named: "noImage"), for: .normal)
-                }
-                
-                //Expande la imagen al tamaño del boton
-                self.imagenProd.imageView?.contentMode = .scaleAspectFit
-                self.imagenProd.imageEdgeInsets = UIEdgeInsetsMake(200, 200, 200, 200)
-                self.imagenProd.layer.cornerRadius = 16
-                self.imagenProd.layer.masksToBounds = true
-                self.imagenProd.isUserInteractionEnabled = true
-
-            }
-        }
-        else {
+            let imgProd = ProductoDatos(_database: self._app.databaseImg).CargarImagen(clave: claveProd)
+            self.imagenProd.setImage(imgProd, for: .normal)
+            
+            
+            //Expande la imagen al tamaño del boton
+            self.imagenProd.imageView?.contentMode = .scaleAspectFit
+            self.imagenProd.imageEdgeInsets = UIEdgeInsetsMake(200, 200, 200, 200)
+            self.imagenProd.layer.cornerRadius = 16
+            self.imagenProd.layer.masksToBounds = true
+            self.imagenProd.isUserInteractionEnabled = true
+            
+        } else {
             
             self._productoSelected = nil
             self.imagenProd.setImage(UIImage(named: "noImage"), for: .normal)
@@ -562,7 +581,6 @@ class PedidoProductoViewController: UIViewController, SearchProductoDelegate, Pr
                 withError: nil)
 
         }
-        
     }
     
     @IBAction func txtInterroga(_ sender: Any) {

@@ -194,8 +194,9 @@ class PedidoViewController: UIViewController {
         pedido.observacion = forDoc["observacion"] as! String
         
         var total:String = forDoc["total"] as! String
-        total = total.replacingOccurrences(of: "$", with: "")
         total = total.replacingOccurrences(of: ",", with: "")
+        total = total.replacingOccurrences(of: "$", with: "")
+        total = total.replacingOccurrences(of: "PMX", with: "")
         
         pedido.total = Double(total)!
         
@@ -220,6 +221,8 @@ class PedidoViewController: UIViewController {
         if let rowCorrida = CorridaDatos(_database: self._app.database).CargarCorrida(idDocument: cveCorrida) {
             
             let corrida = Corrida(for: rowCorrida)
+            corrida?.objectId = rowCorrida["_id"] as! String
+            
             let claveProd = item["cveart"] as! String
             imgRow = UIImage(named: "noImage")
             
@@ -427,8 +430,9 @@ extension PedidoViewController : UITableViewDelegate, UITableViewDataSource,UISe
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         
         if indexPath.row >= 0  && tableView == self.tableView {
-            
-            let pedido = self.EditaPedido(forDoc: (self._lstPedidos?[indexPath.row].document)!)
+        
+            let doc = (self._lstPedidos?[indexPath.row].document)!
+            let pedido = self.EditaPedido(forDoc: doc )
             
             let controller = _storyboard?.instantiateViewController(withIdentifier: "sbPedidosDetalle") as! PedidoDetalleViewController
             
