@@ -8,8 +8,11 @@
 
 import UIKit
 
-class PedidoDetalleViewController: UIViewController, SearchClienteDelegate, SearchEmbarqueDelegate, PedidoProductoDelegate, UITableViewDelegate, UITableViewDataSource {
+class PedidoDetalleViewController: UIViewController, SearchClienteDelegate, SearchEmbarqueDelegate, PedidoProductoDelegate{
    
+    @IBOutlet weak var pickerTipoPedido: UIPickerView!
+    @IBOutlet weak var pickerCondicionPago: UIPickerView!
+    @IBOutlet weak var scrollView: UIScrollView!
     @IBOutlet weak var lblRfc: UILabel!
     @IBOutlet weak var txtCliente: UITextField!
     @IBOutlet weak var lblCuenta: UILabel!
@@ -34,6 +37,8 @@ class PedidoDetalleViewController: UIViewController, SearchClienteDelegate, Sear
     var _semanas: Dictionary<String, Any> = [:]
     var _app: AppDelegate!
     var _pedido: Pedido!
+    var _lstTipoPedidos: [CBLQueryRow]?
+    var _lstCondicionPago: [CBLQueryRow]?
     var _tipo: String = "Nuevo" //Si se edita o es nuevo
 
     override func viewDidLoad() {
@@ -57,6 +62,12 @@ class PedidoDetalleViewController: UIViewController, SearchClienteDelegate, Sear
         
         self.creaNavegador()
         self.btnBuscarCliente.isEnabled = (self._pedido.detalle.count < 1)
+        
+        //Se agregaron atributos en runtime en el storyboard para que funcione el scrollview
+        //para captura del encavezado del pedido
+        self.scrollView.isPagingEnabled = true
+        self.scrollView.showsHorizontalScrollIndicator = false
+        
     }
     
     func IniciaEditar () {
@@ -344,33 +355,7 @@ class PedidoDetalleViewController: UIViewController, SearchClienteDelegate, Sear
         }
         
     }
-    
-    // MARK: Delegates de la Tabla
-    
-    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return self._pedido.detalle.count
-    }
-    
-    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: "celPedidoDetalle", for: indexPath) as! pedidoTableViewCell
-        
-        let renglon = self._pedido.detalle[indexPath.row]
-        
-        self.IniciaDatosRenglon(cell: cell, renglon: renglon)
-        self.DespliegaCorrida(cell: cell)
-        self.FormatoLabel(cell: cell)
-        
-        return cell
-    }
-    
-    func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCellEditingStyle, forRowAt indexPath: IndexPath) {
-        if editingStyle == UITableViewCellEditingStyle.delete {
-            self._pedido.detalle.remove(at: indexPath.row)
-            tableView.deleteRows(at: [indexPath], with: UITableViewRowAnimation.automatic)
-            self.CalculaTotales()
-        }
-    }
-    
+
     // MARK: Funciones generales
     func CalculaTotales()
     {
@@ -484,6 +469,22 @@ class PedidoDetalleViewController: UIViewController, SearchClienteDelegate, Sear
             renglon["p13"] =  item.p13
             renglon["p14"] =  item.p14
             renglon["p15"] =  item.p15
+            
+            renglon["c1"] =  item.corrida.c1
+            renglon["c2"] =  item.corrida.c2
+            renglon["c3"] =  item.corrida.c3
+            renglon["c4"] =  item.corrida.c4
+            renglon["c5"] =  item.corrida.c5
+            renglon["c6"] =  item.corrida.c6
+            renglon["c7"] =  item.corrida.c7
+            renglon["c8"] =  item.corrida.c8
+            renglon["c9"] =  item.corrida.c9
+            renglon["c10"] =  item.corrida.c10
+            renglon["c11"] =  item.corrida.c11
+            renglon["c12"] =  item.corrida.c12
+            renglon["c13"] =  item.corrida.c13
+            renglon["c14"] =  item.corrida.c14
+            renglon["c15"] =  item.corrida.c15
             
             renglones.append(renglon)
         }
@@ -785,6 +786,75 @@ class PedidoDetalleViewController: UIViewController, SearchClienteDelegate, Sear
             self.lblEstatus.text = ESTATUS_PEDIDO_CAPTURADO
         } else {
             self.lblEstatus.text = ESTATUS_PEDIDO_ENVIADO
+        }
+    }
+    
+    @IBAction func onDetalle(_ sender: Any) {
+        
+    }
+    
+
+}
+
+// MARK: - UIPickerView
+//http://juanmorillios.com/usando-uipickerview-swift-3-version-8-0-8a218a-ios-10/
+extension PedidoDetalleViewController : UIPickerViewDataSource, UIPickerViewDelegate {
+    
+    func numberOfComponents(in pickerView: UIPickerView) -> Int {
+        return 2
+    }
+    
+    func pickerView(_ pickerView: UIPickerView, numberOfRowsInComponent component: Int) -> Int {
+        
+        if pickerView == self.pickerTipoPedido {
+            return (self._lstTipoPedidos?.count)!
+        } else {
+            return (self._lstCondicionPago?.count)!
+        }
+    }
+    
+    func pickerView(_ pickerView: UIPickerView, titleForRow row: Int, forComponent component: Int) -> String? {
+        if pickerView == self.pickerTipoPedido  {
+             let doc = self._lstTipoPedidos![row].document!
+            return doc["descripcion"] as? String
+        } else {
+            let docPago = self._lstCondicionPago![row].document!
+            return docPago["descripcion"] as? String
+        }
+    }
+    
+    //Item seleccionado
+    func pickerView(_ pickerView: UIPickerView, didSelectRow row: Int, inComponent component: Int) {
+        NSLog("Renglon - \(row)")
+    }
+}
+
+// MARK: - UITableViewController
+extension PedidoDetalleViewController : UITableViewDelegate, UITableViewDataSource {
+
+    // MARK: Delegates de la Tabla
+    
+    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        return self._pedido.detalle.count
+    }
+    
+    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        let cell = tableView.dequeueReusableCell(withIdentifier: "celPedidoDetalle", for: indexPath) as! pedidoTableViewCell
+        
+        let renglon = self._pedido.detalle[indexPath.row]
+        
+        self.IniciaDatosRenglon(cell: cell, renglon: renglon)
+        self.DespliegaCorrida(cell: cell)
+        self.FormatoLabel(cell: cell)
+        
+        return cell
+    }
+    
+    func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCellEditingStyle, forRowAt indexPath: IndexPath) {
+        if editingStyle == UITableViewCellEditingStyle.delete {
+            self._pedido.detalle.remove(at: indexPath.row)
+            tableView.deleteRows(at: [indexPath], with: UITableViewRowAnimation.automatic)
+            self.CalculaTotales()
         }
     }
 

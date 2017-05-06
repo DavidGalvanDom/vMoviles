@@ -8,7 +8,7 @@
 
 import UIKit
 
-class CompaniasViewController: UIViewController,  UITableViewDelegate, UITableViewDataSource  {
+class CompaniasViewController: UIViewController  {
 
     @IBOutlet weak var tableView: UITableView!
     @IBOutlet weak var lblVendedor: UILabel!
@@ -25,7 +25,7 @@ class CompaniasViewController: UIViewController,  UITableViewDelegate, UITableVi
         _companias.append( Compania(id: "vmepi-vmimagepi", descripcion: "Episodio"))
         
         self.view.backgroundColor = UIColor(patternImage: UIImage(named: "ozono-temporada")!)
-        
+
         tableView.delegate = self
         tableView.dataSource = self
         
@@ -57,33 +57,6 @@ class CompaniasViewController: UIViewController,  UITableViewDelegate, UITableVi
          self.lblVendedor.text = self._app.config!.nombreVendedor as String
     }
     
-    // MARK: Delegates de la Tabla
-    
-    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return _companias.count
-    }
-    
-    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: "companiaCell", for: indexPath)
-        
-        let compania = _companias[indexPath.row]
-        cell.textLabel?.text = compania._descripcion
-       
-        
-        return cell
-    }
-
-    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        let app = UIApplication.shared.delegate as! AppDelegate
-        app.cveCompania = _companias[indexPath.row]._id
-        app.compania = _companias[indexPath.row]._descripcion
-    }
-    
-    func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath) {
-        cell.backgroundColor = .clear
-        cell.contentView.backgroundColor = UIColor(white: 1, alpha: 0.5)
-    }
-    
     //Secaptura la compñia seleccionada para iniciar la sincronizacion
     //se sincroniza informacion he imagenes
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
@@ -102,4 +75,37 @@ class CompaniasViewController: UIViewController,  UITableViewDelegate, UITableVi
         self.configuraApp()
     }
     
+}
+
+// MARK: - UITableViewController
+extension CompaniasViewController : UITableViewDelegate, UITableViewDataSource {
+
+    // MARK: Delegates de la Tabla
+    
+    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        return _companias.count
+    }
+    
+    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        let cell = tableView.dequeueReusableCell(withIdentifier: "companiaCell", for: indexPath)
+        
+        let compania = _companias[indexPath.row]
+        cell.textLabel?.text = compania._descripcion
+        
+        
+        return cell
+    }
+    
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        let app = UIApplication.shared.delegate as! AppDelegate
+        app.cveCompania = _companias[indexPath.row]._id
+        app.compania = _companias[indexPath.row]._descripcion
+    }
+    
+    func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath) {
+        cell.backgroundColor = .clear
+        cell.contentView.backgroundColor = UIColor(white: 1, alpha: 0.5)
+    }
+
+
 }

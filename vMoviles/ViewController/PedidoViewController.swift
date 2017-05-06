@@ -329,7 +329,7 @@ class PedidoViewController: UIViewController {
             self.filtrarTableView(index: sender.selectedSegmentIndex)
             executaTransition = self._flipeTable ? false : true
         case 2:
-            //Status de pedidos tableView Totods
+            //Status de pedidos tableView todos
             self.filtraTodos()
         default:
             print("default")
