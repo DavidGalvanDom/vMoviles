@@ -20,6 +20,12 @@ class Pedido {
     var vendedor:String!
     var estatus:String!
     var fechaCreacion:String!
+    var ordenCompra:String!
+    var tipoPedido:String!
+    var idtipoPedido:String!
+    var condicionPago:String!
+    var idcondicionPago:String!
+    
     var detalle:[RowPedidoProducto] = []
     var cliente: Cliente?
     var embarque: Embarque?

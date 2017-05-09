@@ -23,7 +23,7 @@ class CondicionesPagoDatos
             view.setMapBlock({ (doc, emit) in
                 let type = doc["type"] as? String
                 if type == "condicionp" {
-                    let idCon = doc["pk"] as? String
+                    let idCon = doc["id"] as? String
                     emit(idCon ?? "0", nil)
                 }
             }, version: "1.0")

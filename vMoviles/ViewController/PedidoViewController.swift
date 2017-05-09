@@ -192,7 +192,12 @@ class PedidoViewController: UIViewController {
         pedido.pares = Int(forDoc["pares"] as! String)
         pedido.estatus = forDoc["estatus"] as! String
         pedido.observacion = forDoc["observacion"] as! String
-        
+        pedido.idtipoPedido = forDoc["idtipopedido"] as! String
+        pedido.idcondicionPago = forDoc["idcondipago"] as! String
+        pedido.condicionPago = forDoc["condipago"] as! String
+        pedido.tipoPedido = forDoc["tipopedido"] as! String
+        pedido.ordenCompra  = forDoc["ordencom"] as! String
+
         var total:String = forDoc["total"] as! String
         total = total.replacingOccurrences(of: ",", with: "")
         total = total.replacingOccurrences(of: "$", with: "")

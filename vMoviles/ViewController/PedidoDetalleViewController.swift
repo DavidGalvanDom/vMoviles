@@ -10,8 +10,17 @@ import UIKit
 
 class PedidoDetalleViewController: UIViewController, SearchClienteDelegate, SearchEmbarqueDelegate, PedidoProductoDelegate{
    
-    @IBOutlet weak var pickerTipoPedido: UIPickerView!
-    @IBOutlet weak var pickerCondicionPago: UIPickerView!
+    @IBOutlet weak var viewDetalle: UIScrollView!
+    @IBOutlet weak var lblMsgPares: UILabel!
+    @IBOutlet weak var lblMsgTotal: UILabel!
+    @IBOutlet weak var lblCondicionPago: UILabel!
+    @IBOutlet weak var lblTipoPedido: UILabel!
+    @IBOutlet weak var txtComentario: UITextView!
+    @IBOutlet weak var txtOrdenCompra: UITextField!
+    @IBOutlet weak var txtTipoPedido: UITextField!
+    @IBOutlet weak var txtCondicionPago: UITextField!
+    @IBOutlet weak var viewDos: UIView!
+    @IBOutlet weak var viewUno: UIView!
     @IBOutlet weak var scrollView: UIScrollView!
     @IBOutlet weak var lblRfc: UILabel!
     @IBOutlet weak var txtCliente: UITextField!
@@ -26,19 +35,22 @@ class PedidoDetalleViewController: UIViewController, SearchClienteDelegate, Sear
     @IBOutlet weak var tableView: UITableView!
     @IBOutlet weak var lblTotal: UILabel!
     @IBOutlet weak var lblPares: UILabel!
-    @IBOutlet weak var txtComentario: UITextField!
     @IBOutlet weak var chkEnviar: UISwitch!
     @IBOutlet weak var lblEstatus: UILabel!
     @IBOutlet weak var btnNuevoProd: UIButton!
     @IBOutlet weak var btnBuscarCliente: UIButton!
+    @IBOutlet weak var btnOcultaDetalle: UIButton!
+    
+    var pickerTipoPedido: UIPickerView!
+    var pickerCondicionPago: UIPickerView!
     
     var _storyboard: UIStoryboard!
     var _dateFormatter = DateFormatter()
     var _semanas: Dictionary<String, Any> = [:]
     var _app: AppDelegate!
     var _pedido: Pedido!
-    var _lstTipoPedidos: [CBLQueryRow]?
-    var _lstCondicionPago: [CBLQueryRow]?
+    var _lstTipoPedidos: [TipoPedido] = []
+    var _lstCondicionPago: [CondicionesPago] = []
     var _tipo: String = "Nuevo" //Si se edita o es nuevo
 
     override func viewDidLoad() {
@@ -53,6 +65,18 @@ class PedidoDetalleViewController: UIViewController, SearchClienteDelegate, Sear
         self._storyboard = storyboard
         self.tableView.delegate = self
         self.tableView.dataSource = self
+        self.scrollView.delegate = self
+        
+        self.pickerTipoPedido = UIPickerView()
+        self.pickerCondicionPago = UIPickerView()
+
+        self.pickerTipoPedido.dataSource = self
+        self.pickerTipoPedido.delegate = self
+        self.pickerCondicionPago.dataSource = self
+        self.pickerCondicionPago.delegate = self
+        
+        self.txtCondicionPago.inputView = self.pickerCondicionPago
+        self.txtTipoPedido.inputView = self.pickerTipoPedido
         
         if(self._pedido == nil) {
             self.IniciaNuevo()
@@ -68,6 +92,9 @@ class PedidoDetalleViewController: UIViewController, SearchClienteDelegate, Sear
         self.scrollView.isPagingEnabled = true
         self.scrollView.showsHorizontalScrollIndicator = false
         
+        //Se cargan las listas
+        self.CargarListaTipoPedido()
+        self.CargarListaCondicionesPago()
     }
     
     func IniciaEditar () {
@@ -79,6 +106,12 @@ class PedidoDetalleViewController: UIViewController, SearchClienteDelegate, Sear
         self.lblPares.text = "\(self._pedido.pares!)"
         self.lblTotal.text = self._app.formatCurrency("\(self._pedido.total)")
         self.txtComentario.text = self._pedido.observacion
+        
+        self.txtCondicionPago.text  = self._pedido.idcondicionPago
+        self.txtTipoPedido.text  = self._pedido.idtipoPedido
+        self.lblCondicionPago.text  = self._pedido.condicionPago
+        self.lblTipoPedido.text = self._pedido.tipoPedido
+        self.txtOrdenCompra.text = self._pedido.ordenCompra
         
         self.lblEstatus.text = self._pedido.estatus
         chkEnviar.isOn = self._pedido.estatus == ESTATUS_PEDIDO_CAPTURADO ? true : false
@@ -103,20 +136,11 @@ class PedidoDetalleViewController: UIViewController, SearchClienteDelegate, Sear
         self._tipo = "Nuevo"
         self.lblFolio.text = self._app.config.folio as String
         self.AsignarFechas()
-        self.CrearLinea()
         self.CargarSemanas()
         
         self._pedido = Pedido(folio: self.lblFolio.text!)
         self._pedido.estatus = ESTATUS_PEDIDO_CAPTURADO
         self._pedido.fechaCreacion = self._dateFormatter.string(from: Date())
-    }
-    
-    func CrearLinea()
-    {
-        let lineView = UIView(frame: CGRect(x:275,y:170,width:730, height:1.0))
-        lineView.layer.borderWidth = 1.0
-        lineView.layer.borderColor = UIColor.gray.cgColor
-        self.view.addSubview(lineView)
     }
     
     //Se calculan las fechas del nuevo pedido
@@ -137,6 +161,19 @@ class PedidoDetalleViewController: UIViewController, SearchClienteDelegate, Sear
         self._semanas = semDatos.CargarSemanas()
     }
     
+    func CambiaTamanoVistas(opcion: Int) {
+        switch(opcion){
+            case 0:
+                self.viewUno.frame = CGRect(x: 8, y: 0, width: 985, height: 140)
+                self.viewDos.frame = CGRect(x: 1000, y: 0, width: 1045, height: 140)
+            case 1:
+                self.viewUno.frame = CGRect(x: 8, y: 0, width: 1045, height: 140)
+                self.viewDos.frame = CGRect(x: 1060, y: 0, width: 985, height: 140)
+            default:
+                self.viewUno.frame = CGRect(x: 8, y: 0, width: 985, height: 140)
+                self.viewDos.frame = CGRect(x: 1000, y: 0, width: 1045, height: 140)
+        }
+    }
     
     //Se crean los opciones de navegacion
     func creaNavegador() {
@@ -195,6 +232,15 @@ class PedidoDetalleViewController: UIViewController, SearchClienteDelegate, Sear
             self.navigationItem.rightBarButtonItems = [brRptPedido,brRptProductos]
             self.btnNuevoProd.isHidden = true
         }
+        
+        //Formato vistas
+        self.viewUno.layer.borderWidth = 1.0
+        self.viewUno.layer.cornerRadius = 6
+        self.viewUno.layer.borderColor = UIColor.lightGray.cgColor
+        
+        self.viewDos.layer.borderWidth = 1.0
+        self.viewDos.layer.cornerRadius = 6
+        self.viewDos.layer.borderColor = UIColor.lightGray.cgColor
     }
     
     func DespliegaCorrida (cell: pedidoTableViewCell) {
@@ -390,7 +436,14 @@ class PedidoDetalleViewController: UIViewController, SearchClienteDelegate, Sear
         properties["fechaCreacion"] = CBLJSON.jsonObject(with: Date())
         properties["renglones"] =  self.RenglonesPedidoDB()
         properties["observacion"] =  self.txtComentario.text ?? ""
-           
+        
+        properties["idcondipago"] = self.txtCondicionPago.text ?? ""
+        properties["idtipopedido"] = self.txtTipoPedido.text ?? ""
+        properties["condipago"] = self.lblCondicionPago.text ?? ""
+        properties["tipopedido"] = self.lblTipoPedido.text ?? ""
+        properties["ordencom"] = self.txtOrdenCompra.text ?? ""
+
+        
         let doc = self._app.database.createDocument()
         
         do {
@@ -419,6 +472,11 @@ class PedidoDetalleViewController: UIViewController, SearchClienteDelegate, Sear
                 nr["fechaCreacion"] = CBLJSON.jsonObject(with: Date())
                 nr["renglones"] =  self.RenglonesPedidoDB()
                 nr["observacion"] =  self.txtComentario.text ?? ""
+                nr["idcondipago"] = self.txtCondicionPago.text ?? ""
+                nr["idtipopedido"] = self.txtTipoPedido.text ?? ""
+                nr["condipago"] = self.lblCondicionPago.text ?? ""
+                nr["tipopedido"] = self.lblTipoPedido.text ?? ""
+                nr["ordencom"] = self.txtOrdenCompra.text ?? ""
                 
                 return true
             }
@@ -516,7 +574,7 @@ class PedidoDetalleViewController: UIViewController, SearchClienteDelegate, Sear
         if(self.txtFechaCancelada.text?.isEmpty)!{
             Ui.showMessageDialog(onController: self,
                                  withTitle: "Información",
-                                 withMessage: "Capture la fecha de cancelacioón.",
+                                 withMessage: "Capture la fecha de cancelación.",
                                  withError: nil)
             return false
         }
@@ -545,7 +603,69 @@ class PedidoDetalleViewController: UIViewController, SearchClienteDelegate, Sear
             return false
         }
         
+        if(self.txtCondicionPago.text?.isEmpty)!{
+            Ui.showMessageDialog(onController: self,
+                                 withTitle: "Información",
+                                 withMessage: "Capture la condicion de pago.",
+                                 withError: nil)
+            self.txtCondicionPago.becomeFirstResponder()
+            return false
+        }
+
+        if(self.txtTipoPedido.text?.isEmpty)!{
+            Ui.showMessageDialog(onController: self,
+                                 withTitle: "Información",
+                                 withMessage: "Capture el tipo de pedido.",
+                                 withError: nil)
+            
+            self.txtTipoPedido.becomeFirstResponder()
+            return false
+        }
+        
         return true
+    }
+    
+    //Se carga el listado de condiciones de pago
+    func CargarListaCondicionesPago() {
+        let condicionPagoQuery = CondicionesPagoDatos(_database: _app.database).setupViewAndQuery()
+        
+        do {
+            
+            let result  = try condicionPagoQuery.run()
+            
+            while let doc = result.nextRow()?.document {
+                let conPago = CondicionesPago(for: doc)
+                self._lstCondicionPago.append(conPago!)
+            }
+        }
+        catch {
+            Ui.showMessageDialog(onController: self,
+                                 withTitle: "Error",
+                                 withMessage: "Error al cargar lista condiciones de pago.",
+                                 withError: nil)
+        }
+    }
+    
+    //Se carga la descripcion del tipo de pedido
+    func CargarListaTipoPedido () {
+        let tipoPedidoQuery = TipoPedidoDatos(_database: _app.database).setupViewAndQuery()
+        
+        do {
+            
+            let result  = try tipoPedidoQuery.run()
+            
+            while let doc = result.nextRow()?.document {
+                let pedido = TipoPedido(for: doc)
+                self._lstTipoPedidos.append(pedido!)
+            }
+            
+        }
+        catch {
+            Ui.showMessageDialog(onController: self,
+                                 withTitle: "Error",
+                                 withMessage: "Error al cargar lista tipo pedido.",
+                                 withError: nil)
+        }
     }
     
     //Regresar a companias
@@ -597,6 +717,28 @@ class PedidoDetalleViewController: UIViewController, SearchClienteDelegate, Sear
                                  withMessage: "Debe seleccionar un Cliente",
                                  withError: nil)
         }
+    }
+    
+    func OcultaDetalle() {
+        self.viewDetalle.isHidden = true
+        self.btnOcultaDetalle.setTitle("Muestra detalle", for: .normal)
+        self.tableView.frame = CGRect(x: 0, y: 180, width: 1024, height: 580)
+        self.btnNuevoProd.layer.position.y = 150
+        self.lblMsgPares.layer.position.y = 150
+        self.lblMsgTotal.layer.position.y = 150
+        self.lblTotal.layer.position.y = 150
+        self.lblPares.layer.position.y = 150
+    }
+    
+    func MuestraDetalle() {
+        self.viewDetalle.isHidden = false
+        self.btnOcultaDetalle.setTitle( "Oculta detalle", for: .normal)
+        self.tableView.frame = CGRect(x: 0, y: 315, width: 1024, height: 455)
+        self.btnNuevoProd.layer.position.y = 285
+        self.lblMsgPares.layer.position.y = 285
+        self.lblMsgTotal.layer.position.y = 285
+        self.lblTotal.layer.position.y = 285
+        self.lblPares.layer.position.y = 285
     }
     
     func embarqueSeleccionado(sender: Embarque)
@@ -790,42 +932,81 @@ class PedidoDetalleViewController: UIViewController, SearchClienteDelegate, Sear
     }
     
     @IBAction func onDetalle(_ sender: Any) {
-        
+        if self.viewDetalle.isHidden {
+            self.MuestraDetalle()
+        } else {
+            self.OcultaDetalle()
+        }
     }
-    
+}
 
+// MARK: - ScrollView
+extension PedidoDetalleViewController: UIScrollViewDelegate {
+    func scrollViewDidScroll(_ scrollView: UIScrollView) {
+        let numPagina = self.scrollView.contentOffset.x / 1024
+        
+        if numPagina == 0 {
+            self.CambiaTamanoVistas(opcion: Int(numPagina))
+        }
+        
+        if numPagina == 1 {
+            self.CambiaTamanoVistas(opcion: Int(numPagina))
+        }
+    }
 }
 
 // MARK: - UIPickerView
-//http://juanmorillios.com/usando-uipickerview-swift-3-version-8-0-8a218a-ios-10/
 extension PedidoDetalleViewController : UIPickerViewDataSource, UIPickerViewDelegate {
     
     func numberOfComponents(in pickerView: UIPickerView) -> Int {
-        return 2
+        return 1
     }
     
     func pickerView(_ pickerView: UIPickerView, numberOfRowsInComponent component: Int) -> Int {
         
         if pickerView == self.pickerTipoPedido {
-            return (self._lstTipoPedidos?.count)!
-        } else {
-            return (self._lstCondicionPago?.count)!
+            return self._lstTipoPedidos.count
         }
+        
+        if pickerView == self.pickerCondicionPago {
+            return self._lstCondicionPago.count
+        }
+        
+        return 0
     }
     
     func pickerView(_ pickerView: UIPickerView, titleForRow row: Int, forComponent component: Int) -> String? {
         if pickerView == self.pickerTipoPedido  {
-             let doc = self._lstTipoPedidos![row].document!
+             let doc = self._lstTipoPedidos[row].document!
             return doc["descripcion"] as? String
-        } else {
-            let docPago = self._lstCondicionPago![row].document!
+        }
+        
+        if pickerView == self.pickerCondicionPago {
+            let docPago = self._lstCondicionPago[row].document!
             return docPago["descripcion"] as? String
         }
+        
+        return " no data "
     }
     
     //Item seleccionado
     func pickerView(_ pickerView: UIPickerView, didSelectRow row: Int, inComponent component: Int) {
-        NSLog("Renglon - \(row)")
+        if pickerView == self.pickerTipoPedido  {
+            if self._lstTipoPedidos.count > 0 {
+                let doc = self._lstTipoPedidos[row].document!
+                self.txtTipoPedido.text = doc["id"] as? String
+                self.lblTipoPedido.text = doc["descripcion"] as? String
+            }
+        }
+        
+        if pickerView == self.pickerCondicionPago  {
+            if self._lstCondicionPago.count > 0 {
+                let docPago = self._lstCondicionPago[row].document!
+                
+                self.lblCondicionPago.text =  docPago["descripcion"] as? String
+                self.txtCondicionPago.text =  docPago["id"] as? String
+            }
+        }
     }
 }
 
