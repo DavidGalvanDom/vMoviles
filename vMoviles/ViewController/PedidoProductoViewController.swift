@@ -446,6 +446,7 @@ class PedidoProductoViewController: UIViewController, SearchProductoDelegate, Pr
                                  withTitle: "Información",
                                  withMessage: "La semana no puede ir vacia.",
                                  withError: nil)
+            self.txtSemana.becomeFirstResponder()
             return false
         } else {
             if self.txtSemana.text?.characters.count != 6 {
@@ -453,10 +454,20 @@ class PedidoProductoViewController: UIViewController, SearchProductoDelegate, Pr
                                      withTitle: "Información",
                                      withMessage: "El dato de la semana es erroneo, deben ser 6 números.",
                                      withError: nil)
+                
+                self.txtSemana.becomeFirstResponder()
+                return false
+            }
+            
+            if Int( self.txtSemana.text ?? " ") == nil {
+                Ui.showMessageDialog(onController: self,
+                                     withTitle: "Información",
+                                     withMessage: "El dato de la semana es erroneo, deben ser númerico.",
+                                     withError: nil)
+                self.txtSemana.becomeFirstResponder()
                 return false
             }
         }
-
         
         return true
     }

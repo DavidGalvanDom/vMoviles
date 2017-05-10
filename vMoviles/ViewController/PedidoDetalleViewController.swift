@@ -436,13 +436,11 @@ class PedidoDetalleViewController: UIViewController, SearchClienteDelegate, Sear
         properties["fechaCreacion"] = CBLJSON.jsonObject(with: Date())
         properties["renglones"] =  self.RenglonesPedidoDB()
         properties["observacion"] =  self.txtComentario.text ?? ""
-        
         properties["idcondipago"] = self.txtCondicionPago.text ?? ""
         properties["idtipopedido"] = self.txtTipoPedido.text ?? ""
         properties["condipago"] = self.lblCondicionPago.text ?? ""
         properties["tipopedido"] = self.lblTipoPedido.text ?? ""
         properties["ordencom"] = self.txtOrdenCompra.text ?? ""
-
         
         let doc = self._app.database.createDocument()
         
@@ -603,12 +601,25 @@ class PedidoDetalleViewController: UIViewController, SearchClienteDelegate, Sear
             return false
         }
         
+        let leftOfset = CGPoint( x:self.scrollView.contentSize.width - self.scrollView.bounds.size.width,y: 0)
+        
         if(self.txtCondicionPago.text?.isEmpty)!{
             Ui.showMessageDialog(onController: self,
                                  withTitle: "Información",
                                  withMessage: "Capture la condicion de pago.",
                                  withError: nil)
             self.txtCondicionPago.becomeFirstResponder()
+            self.scrollView.setContentOffset(leftOfset, animated: true)
+            return false
+        }
+        
+        if Int(self.txtCondicionPago.text ?? " ") == nil  {
+            Ui.showMessageDialog(onController: self,
+                                 withTitle: "Información",
+                                 withMessage: "El dato de condicion de pago no es valido.",
+                                 withError: nil)
+            self.txtCondicionPago.becomeFirstResponder()
+            self.scrollView.setContentOffset(leftOfset, animated: true)
             return false
         }
 
@@ -619,6 +630,7 @@ class PedidoDetalleViewController: UIViewController, SearchClienteDelegate, Sear
                                  withError: nil)
             
             self.txtTipoPedido.becomeFirstResponder()
+            self.scrollView.setContentOffset(leftOfset, animated: true)
             return false
         }
         
@@ -830,7 +842,7 @@ class PedidoDetalleViewController: UIViewController, SearchClienteDelegate, Sear
     }
     
     func onGuardar() {
-        if(self.ValidarPedido()){
+        if(self.ValidarPedido()) {
             if(self._tipo == "Nuevo") {
                 _ = self.GuardarNuevoPedido()
                 let dataConfig = ConfiguracionDatos()
@@ -844,6 +856,10 @@ class PedidoDetalleViewController: UIViewController, SearchClienteDelegate, Sear
             }
             
             _ = self.navigationController?.popViewController(animated: true)
+        } else {
+            if self.viewDetalle.isHidden {
+                self.MuestraDetalle()
+            }
         }
     }
     
@@ -944,7 +960,6 @@ class PedidoDetalleViewController: UIViewController, SearchClienteDelegate, Sear
 extension PedidoDetalleViewController: UIScrollViewDelegate {
     func scrollViewDidScroll(_ scrollView: UIScrollView) {
         let numPagina = self.scrollView.contentOffset.x / 1024
-        
         if numPagina == 0 {
             self.CambiaTamanoVistas(opcion: Int(numPagina))
         }
