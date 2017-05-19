@@ -166,8 +166,10 @@ class ProductoSearchViewController : UIViewController,  UITableViewDelegate, UIT
         let rev = docImg?.currentRevision
         
         if let revDigest = rev?.attachmentNamed("\(clave).jpg")?.metadata["digest"] as? String, digest == revDigest {
-            let cell = tableView.cellForRow(at: indexPath) as! productoTableViewCell
-            cell.productoImage = image
+            
+            if  let cell = tableView.cellForRow(at: indexPath) as? productoTableViewCell {
+                cell.productoImage = image
+            }
         }
     }
 

@@ -129,7 +129,7 @@ class ClienteViewController: UITableViewController,UISearchResultsUpdating {
         
         let doc = clienteRows![indexPath.row].document!
         cell.textLabel?.text = "\(doc["id"]!) - \(doc["razonsocial"]!) "
-        cell.detailTextLabel?.text = "\(doc["apostal"]!) - \(doc["ciudad"]!) - \(doc["estado"]!)"
+        cell.detailTextLabel?.text = "\(doc["listaprec"]!) - \(doc["ciudad"]!) - \(doc["estado"]!)"
         return cell
     }
     

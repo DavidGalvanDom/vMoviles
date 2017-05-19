@@ -14,14 +14,13 @@ class InicialViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        
-        self.view.backgroundColor = UIColor(patternImage: UIImage(named: "ozono-temporada")!)
-        
+    
         let app = UIApplication.shared.delegate as! AppDelegate
         guard let root = app.window?.rootViewController, let storyboard = root.storyboard else {
             return
         }
-        
+        self.view.backgroundColor = UIColor(patternImage: app.imgTemporada )
+
         _storyboard = storyboard
 
         self.splitViewController?.preferredDisplayMode = .primaryHidden

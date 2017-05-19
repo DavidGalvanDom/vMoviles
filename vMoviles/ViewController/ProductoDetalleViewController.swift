@@ -13,13 +13,13 @@ class ProductoDetalleViewController: UIViewController {
     var productoRows : [CBLQueryRow]?
     var productoLiveQuery: CBLLiveQuery!
     var dbChangeObserver: AnyObject?
+    var _articulosPorSelec: [String] = []
     var _editar: Bool! = false
     var _linea: String!
     var _tipo: [String] = []
     var _categoria: [String] = []
     var _app: AppDelegate!
-    var _listaProdSelected: [RowPedidoProducto] = []
-    
+        
     @IBOutlet weak var lblMensaje: UILabel!
     @IBOutlet weak var lblNumProdSele: UILabel!
     @IBOutlet weak var txtBuscar: UITextField!
@@ -31,6 +31,8 @@ class ProductoDetalleViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
+        self.lblMensaje.text = "Cargando informacion..."
+        self._articulosPorSelec.removeAll()
         self._app = UIApplication.shared.delegate as! AppDelegate
         self.collectionView.delegate = self
         self.collectionView.dataSource = self
@@ -41,13 +43,15 @@ class ProductoDetalleViewController: UIViewController {
         } else {
             // Fallback on earlier versions
         }
-        self.collectionView.allowsMultipleSelection = false
         
+        self.collectionView.allowsMultipleSelection = false
         self.creaNavegador()
         
         self.splitViewController?.preferredDisplayMode = .allVisible
         self.navigationItem.leftBarButtonItem = self.splitViewController?.displayModeButtonItem
         self.navigationItem.leftItemsSupplementBackButton = true
+        
+        lblNumProdSele.text = "\(self._app.listaProdSelected.count)"
         
         // Inicializa las vistas y querys couchbase lite:
         self.iniciaBaseDatos()
@@ -163,6 +167,16 @@ class ProductoDetalleViewController: UIViewController {
         
         self.navigationItem.rightBarButtonItems = [brRptProductos, barEditar]
         
+        if self._app.listaProdSelected.count > 0 {
+            barEditar.title = "Cancelar"
+            self._editar = true
+            self.collectionView.allowsMultipleSelection = true
+            //Este arreglo solo indica que productos deben aparecer como seleccionados
+            //en caso de que aparescan en el filtro activo
+            for prod in self._app.listaProdSelected {
+                self._articulosPorSelec.append(prod.cveart)
+            }
+        }
     }
     
     func onEditar(sender: UIBarButtonItem) {
@@ -170,8 +184,14 @@ class ProductoDetalleViewController: UIViewController {
             self._editar = false
             self.collectionView.allowsMultipleSelection = false
             sender.title = "Editar"
-            self._listaProdSelected.removeAll()
+            self._app.listaProdSelected.removeAll()
             self.lblNumProdSele.text = "0"
+            //las celdas que estan visibles se quita la imagen
+            for cell in self.collectionView.visibleCells {
+                let cellView = cell as! productoCollectionViewCell
+                self.DesSeleccionaProducto(cell: cellView)
+            }
+            self._articulosPorSelec.removeAll()
         } else {
             self._editar = true
             self.collectionView.allowsMultipleSelection = true
@@ -191,9 +211,9 @@ class ProductoDetalleViewController: UIViewController {
         
         if let revDigest = rev?.attachmentNamed("\(clave).jpg")?.metadata["digest"] as? String, digest == revDigest {
                         
-            let cell = self.collectionView.cellForItem(at: indexPath) as! productoCollectionViewCell
-            cell.productoImage = image
-            
+            if let cell = self.collectionView.cellForItem(at: indexPath) as? productoCollectionViewCell {
+                cell.productoImage = image
+            }
         }
     }
     
@@ -209,7 +229,7 @@ class ProductoDetalleViewController: UIViewController {
    
     //Solo se envian los productos seleccionados
     func onRptProductos() {
-        if(self._listaProdSelected.count > 0) {
+        if(self._app.listaProdSelected.count > 0) {
             let storyboard = UIStoryboard(name: "Main", bundle: nil)
 
             let vc = storyboard.instantiateViewController(withIdentifier: "sbViewRptProducto") as! ReporteProdViewController
@@ -219,7 +239,7 @@ class ProductoDetalleViewController: UIViewController {
             vc.modalTransitionStyle = .crossDissolve
             vc._email = ""
             vc._folio = "000"
-            vc._rowPedidoProductos = self._listaProdSelected
+            vc._productosDetalle = self._app.listaProdSelected
             self.present(vc, animated: true, completion: { _ in })
             
         } else {
@@ -281,6 +301,10 @@ extension ProductoDetalleViewController: UICollectionViewDelegate, UICollectionV
         cell.lblCosto.text = " $ \(costo)"
         cell.clave = clave
         cell.estilo = doc["estilo"] as! String
+        cell.layer.cornerRadius = 16
+        cell.layer.masksToBounds = true
+        cell.layer.borderWidth = 2.0
+        cell.layer.borderColor = UIColor.lightGray.cgColor
         
         //Se carga la imagen
         if( _app.databaseImg != nil) {
@@ -302,19 +326,19 @@ extension ProductoDetalleViewController: UICollectionViewDelegate, UICollectionV
             }
         }
         
-        cell.layer.cornerRadius = 16
-        cell.layer.masksToBounds = true
-        cell.layer.borderWidth = 2.0
-        cell.layer.borderColor = UIColor.lightGray.cgColor
-        
         if self._editar {
             if cell.isSelected == true {
                 self.SeleccionaProducto(cell: cell)
             } else {
-                self.DesSeleccionaProducto(cell: cell)
+                //Validar si existe en la coleccion para seleccionarlo de alguna otra busqueda
+                if let index = self._articulosPorSelec.index(where: { $0 == clave}) {
+                    self.SeleccionaProducto(cell: cell)
+                    self.collectionView.selectItem(at: indexPath, animated: true, scrollPosition: .centeredVertically)
+                    self._articulosPorSelec.remove(at: index)
+                } else {
+                    self.DesSeleccionaProducto(cell: cell)
+                }
             }
-        } else {
-            self.DesSeleccionaProducto(cell: cell)
         }
         
         return cell
@@ -329,11 +353,11 @@ extension ProductoDetalleViewController: UICollectionViewDelegate, UICollectionV
             if cell.isSelected == true {
                 self.SeleccionaProducto(cell: cell)
                 let doc = productoRows![indexPath.row].document!
-                let row = RowPedidoProducto(cveart: doc["clave"] as! String, pielcolor: doc["descripcion"] as! String, estilo: doc["estilo"] as! String, opcion: doc["opcion"] as! String, precio: (doc["costo"] as! NSString).doubleValue ,linea: doc["linea"] as! String, img: (cell.image.image)!)
+                let row = ProductoDetalle(cveart: doc["clave"] as! String, pielcolor: doc["descripcion"] as! String, estilo: doc["estilo"] as! String, opcion: doc["opcion"] as! String, precio: (doc["costo"] as! NSString).doubleValue ,linea: doc["linea"] as! String, img: (cell.image.image)!,isSelected: true)
                 
-                self._listaProdSelected.append(row)
+                self._app.listaProdSelected.append(row)
                 
-                lblNumProdSele.text = "\(self._listaProdSelected.count)"
+                lblNumProdSele.text = "\(self._app.listaProdSelected.count)"
             }
         } else {
             detalleImagen(cell: cell)
@@ -346,13 +370,12 @@ extension ProductoDetalleViewController: UICollectionViewDelegate, UICollectionV
             let cell = collectionView.cellForItem(at: indexPath) as! productoCollectionViewCell
             self.DesSeleccionaProducto(cell: cell)
         
-            if let index = self._listaProdSelected.index(where: {$0.cveart == cell.clave}){
-                self._listaProdSelected.remove(at: index)
+            if let index = self._app.listaProdSelected.index(where: {$0.cveart == cell.clave}){
+                self._app.listaProdSelected.remove(at: index)
             }
         
-            lblNumProdSele.text = "\(self._listaProdSelected.count)"
+            lblNumProdSele.text = "\(self._app.listaProdSelected.count)"
         }
     }
-    
     
 }

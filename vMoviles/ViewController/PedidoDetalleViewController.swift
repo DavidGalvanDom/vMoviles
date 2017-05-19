@@ -52,6 +52,7 @@ class PedidoDetalleViewController: UIViewController, SearchClienteDelegate, Sear
     var _lstTipoPedidos: [TipoPedido] = []
     var _lstCondicionPago: [CondicionesPago] = []
     var _tipo: String = "Nuevo" //Si se edita o es nuevo
+    var _existenCambios: Bool = false
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -85,7 +86,6 @@ class PedidoDetalleViewController: UIViewController, SearchClienteDelegate, Sear
         }
         
         self.creaNavegador()
-        self.btnBuscarCliente.isEnabled = (self._pedido.detalle.count < 1)
         
         //Se agregaron atributos en runtime en el storyboard para que funcione el scrollview
         //para captura del encavezado del pedido
@@ -120,6 +120,7 @@ class PedidoDetalleViewController: UIViewController, SearchClienteDelegate, Sear
         
         if doc != nil {
             let cliente = Cliente(for: (doc)!)
+            self._pedido.cliente = cliente
             self.clienteSeleccionado(sender: cliente!)
         }
         
@@ -141,6 +142,7 @@ class PedidoDetalleViewController: UIViewController, SearchClienteDelegate, Sear
         self._pedido = Pedido(folio: self.lblFolio.text!)
         self._pedido.estatus = ESTATUS_PEDIDO_CAPTURADO
         self._pedido.fechaCreacion = self._dateFormatter.string(from: Date())
+        self._existenCambios = true
     }
     
     //Se calculan las fechas del nuevo pedido
@@ -241,6 +243,46 @@ class PedidoDetalleViewController: UIViewController, SearchClienteDelegate, Sear
         self.viewDos.layer.borderWidth = 1.0
         self.viewDos.layer.cornerRadius = 6
         self.viewDos.layer.borderColor = UIColor.lightGray.cgColor
+    }
+    
+    //Al cambiar el cliente se actuliza la lista de precios
+    func ActualizaListraPrecios() {
+        if let cliente =  self._pedido.cliente {
+            let listaPrec = cliente.listaprec as String
+            
+            let productoQuery = ProductoDatos(_database: self._app.database).setupLstPrecioProdViewAndQuery()
+            
+            for detalle in self._pedido.detalle {
+                let cveart = detalle.cveart
+                
+                if detalle.tpc != listaPrec {
+                    
+                    do {
+                        productoQuery.startKey = [listaPrec,cveart]
+                        productoQuery.endKey = [listaPrec,cveart]
+                        
+                        // var erro: NSError?
+                        let result  = try productoQuery.run()
+                        
+                        let doc = result.nextRow()?.document
+                        if( doc != nil) {
+                            //self.config = Configuracion(for: (doc)!)
+                            if let producto = Producto(for: doc!) {
+                                detalle.precio = (producto.costo).doubleValue
+                                detalle.precioCalle = (producto.precioca).doubleValue
+                                detalle.precioCCom = (producto.preciocc).doubleValue
+                                detalle.tpc = listaPrec
+                            }
+                        }
+                    }
+                    catch {
+                        NSLog("Error al cargar la lista de precios")
+                    }
+                }
+            }
+            self.CalculaTotales()
+            self.tableView.reloadData()
+        }
     }
     
     func DespliegaCorrida (cell: pedidoTableViewCell) {
@@ -435,6 +477,7 @@ class PedidoDetalleViewController: UIViewController, SearchClienteDelegate, Sear
         properties["estatus"] = self.chkEnviar.isOn ?  ESTATUS_PEDIDO_CAPTURADO : ESTATUS_PEDIDO_ENVIADO
         properties["fechaCreacion"] = CBLJSON.jsonObject(with: Date())
         properties["renglones"] =  self.RenglonesPedidoDB()
+        
         properties["observacion"] =  self.txtComentario.text ?? ""
         properties["idcondipago"] = self.txtCondicionPago.text ?? ""
         properties["idtipopedido"] = self.txtTipoPedido.text ?? ""
@@ -680,9 +723,36 @@ class PedidoDetalleViewController: UIViewController, SearchClienteDelegate, Sear
         }
     }
     
+    //Se genera la coleccion para el reporte
+    func GeneraProductoDetalle() -> [ProductoDetalle] {
+        var lstProdDetalle : [ProductoDetalle] = []
+        //Se generan los renglones
+        for item in self._pedido.detalle {
+            lstProdDetalle.append( ProductoDetalle(cveart:item.cveart,pielcolor:item.pielcolor, estilo: item.estilo, opcion: item.opcion,precio: item.precio,linea: item.linea,img: item.imagen, isSelected:false))
+        }
+        
+        return lstProdDetalle
+    }
+    
     //Regresar a companias
     func backController() {
-        _ = self.navigationController?.popViewController(animated: true)
+        
+        if self._existenCambios {
+            
+            Ui.showMessageYesNoDialog(onController: self,
+                                 withTitle: "Informacion",
+                                 withMessage: "¿Desea guardar los cambios?",
+                                 withError: nil,
+                                 onYes: {
+                                    self.onGuardar()
+                                 },
+                                 onNo:  {
+                                    _ = self.navigationController?.popViewController(animated: true)
+                                 }
+            )
+        } else {
+            _ = self.navigationController?.popViewController(animated: true)
+        }
     }
 
     func buscarCliente() {
@@ -693,21 +763,36 @@ class PedidoDetalleViewController: UIViewController, SearchClienteDelegate, Sear
         vc.modalPresentationStyle = .formSheet
         vc.modalTransitionStyle = .crossDissolve
         vc.delegate = self
+        
         self.present(vc, animated: true, completion: { _ in })
     }
     
     func clienteSeleccionado(sender: Cliente)
     {
+        if let clienteAnterior = self._pedido.cliente {
+            if clienteAnterior.listaprec != sender.listaprec {
+                //Se cambia la lista de precios de los productos existentes en el pedido
+                self.ActualizaListraPrecios()
+            }
+            
+            if clienteAnterior != sender {
+                //Se remueve la info de embarque
+                self._pedido.embarque = nil
+                self._pedido.idembarque = ""
+                self.txtEmbarque.text = ""
+                self.lblEmbarDireccion.text = ""
+            
+                self._existenCambios = true
+            }
+        }
+        
         self._pedido.cliente = sender
         self._pedido.idcliente = sender.id as String
-        txtCliente.text = sender.id as String
-        lblRfc.text = sender.razonsocial as String
-        lblCuenta.text = sender.cxcobs as String
-        lblCalificacion.text = sender.clasif as String
-        
-        txtEmbarque.text = ""
-        lblEmbarDireccion.text = ""
-        self._pedido.embarque = nil
+        self.txtCliente.text = sender.id as String
+        self.lblRfc.text = sender.razonsocial as String
+        self.lblCuenta.text = sender.cxcobs as String
+        self.lblCalificacion.text = sender.clasif as String
+      
     }
     
     func buscarEmbarque()
@@ -729,6 +814,15 @@ class PedidoDetalleViewController: UIViewController, SearchClienteDelegate, Sear
                                  withMessage: "Debe seleccionar un Cliente",
                                  withError: nil)
         }
+    }
+    
+    func embarqueSeleccionado(sender: Embarque)
+    {
+        self._pedido.embarque = sender
+        self._pedido.idembarque = sender.embarque as String
+        self.txtEmbarque.text = sender.embarque as String
+        self.lblEmbarDireccion.text = sender.direccion as String
+        self._existenCambios = true
     }
     
     func OcultaDetalle() {
@@ -753,30 +847,26 @@ class PedidoDetalleViewController: UIViewController, SearchClienteDelegate, Sear
         self.lblPares.layer.position.y = 285
     }
     
-    func embarqueSeleccionado(sender: Embarque)
-    {
-        self._pedido.embarque = sender
-        self._pedido.idembarque = sender.embarque as String
-        txtEmbarque.text = sender.embarque as String
-        lblEmbarDireccion.text = sender.direccion as String
-    }
-    
     func fechaInicioValueChanged(sender:UIDatePicker) {
         txtFechaIni.text = self._dateFormatter.string(from: sender.date)
+        self._existenCambios = true
     }
     
     func fechaFinValueChanged(sender:UIDatePicker) {
         txtFechaFin.text = self._dateFormatter.string(from: sender.date)
+        self._existenCambios = true
     }
    
     func fechaCancelaValueChanged(sender:UIDatePicker) {
         txtFechaCancelada.text = self._dateFormatter.string(from: sender.date)
+        self._existenCambios = true
     }
     
     //Se agrega a la coleccion el producto
     func PedidoProductoSeleccionado (sender: RowPedidoProducto) {
         var encontroRenglon: Bool = false
         var index: Int = 0
+
         //Se valida si el pedido ya existe
         for item in self._pedido.detalle {
             
@@ -793,8 +883,8 @@ class PedidoDetalleViewController: UIViewController, SearchClienteDelegate, Sear
             self._pedido.detalle.append(sender)
         }
         
-        self.btnBuscarCliente.isEnabled = (self._pedido.detalle.count < 1)
         self.CalculaTotales()
+        self._existenCambios = true
         self.tableView.reloadData()
     }
     
@@ -830,7 +920,7 @@ class PedidoDetalleViewController: UIViewController, SearchClienteDelegate, Sear
             vc.modalTransitionStyle = .crossDissolve
             vc._email = self._pedido.cliente?.email as String!
             vc._folio = self.lblFolio.text
-            vc._rowPedidoProductos = self._pedido.detalle
+            vc._productosDetalle = self.GeneraProductoDetalle()
             self.present(vc, animated: true, completion: { _ in })
             
         } else {
@@ -945,6 +1035,8 @@ class PedidoDetalleViewController: UIViewController, SearchClienteDelegate, Sear
         } else {
             self.lblEstatus.text = ESTATUS_PEDIDO_ENVIADO
         }
+        
+        self._existenCambios = true
     }
     
     @IBAction func onDetalle(_ sender: Any) {
@@ -1011,6 +1103,7 @@ extension PedidoDetalleViewController : UIPickerViewDataSource, UIPickerViewDele
                 let doc = self._lstTipoPedidos[row].document!
                 self.txtTipoPedido.text = doc["id"] as? String
                 self.lblTipoPedido.text = doc["descripcion"] as? String
+                self._existenCambios = true
             }
         }
         
@@ -1020,6 +1113,7 @@ extension PedidoDetalleViewController : UIPickerViewDataSource, UIPickerViewDele
                 
                 self.lblCondicionPago.text =  docPago["descripcion"] as? String
                 self.txtCondicionPago.text =  docPago["id"] as? String
+                self._existenCambios = true
             }
         }
     }
@@ -1051,6 +1145,7 @@ extension PedidoDetalleViewController : UITableViewDelegate, UITableViewDataSour
             self._pedido.detalle.remove(at: indexPath.row)
             tableView.deleteRows(at: [indexPath], with: UITableViewRowAnimation.automatic)
             self.CalculaTotales()
+            self._existenCambios = true
         }
     }
 

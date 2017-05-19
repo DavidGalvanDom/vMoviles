@@ -12,6 +12,7 @@ class ProductoViewController:  UIViewController {
 
     @IBOutlet weak var tableView: UITableView!
     @IBOutlet weak var txtLinea: UITextField!
+    @IBOutlet weak var cmdBorrarFiltro: UIButton!
     
     let _secciones = [ "TIPO", "CATEGORIA"]
     var _items = [["DAMA", "CABALLERO", "ACCESORIO"],[]]
@@ -26,6 +27,7 @@ class ProductoViewController:  UIViewController {
         self.tableView.delegate = self
         self.tableView.dataSource = self
         self.tableView.allowsMultipleSelection = true
+        self.cmdBorrarFiltro.isHidden = true
         
         self._app = UIApplication.shared.delegate as! AppDelegate
         self.splitViewController?.maximumPrimaryColumnWidth = 320
@@ -36,6 +38,12 @@ class ProductoViewController:  UIViewController {
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
         // Dispose of any resources that can be recreated.
+    }
+    
+    deinit {
+        if self._app.listaProdSelected.count > 0 {
+            self._app.listaProdSelected.removeAll()
+        }
     }
     
     //Se crean los opciones de navegacion
@@ -86,8 +94,37 @@ class ProductoViewController:  UIViewController {
     }
     
     @IBAction func onBuscar(_ sender: Any) {
+        
     }
     
+    @IBAction func onBorrarFiltro(_ sender: Any) {
+        
+        self.txtLinea.text = ""
+        self._categoriaSelected.removeAll()
+        self._tipoSelected.removeAll()
+        let numPadre = _itemsSelected.count-1
+        
+        for indexPadre in 0...numPadre  {
+            let numHijos = self._itemsSelected[indexPadre].count-1
+            
+            for index in 0...numHijos
+            {
+                self._itemsSelected[indexPadre][index] = false
+            }
+        }
+        
+        for cell in self.tableView.visibleCells{
+            if cell.isSelected {
+                let cellView = cell as! productoFiltroTableViewCell
+                cellView.accessoryType = .none
+                cellView.setSelected(false, animated: true)
+                cellView.seleccionado = false
+            }
+        }
+        
+        self.cmdBorrarFiltro.isHidden = true
+        self.tableView.reloadData()
+    }
 }
 
 // MARK: - UITableViewController
@@ -119,7 +156,6 @@ extension ProductoViewController : UITableViewDelegate, UITableViewDataSource {
         cell.seleccionado = false
         cell.accessoryType = .none
         self._itemsSelected[indexPath.section][indexPath.row] = false
-
         
         if indexPath.section == 0 {
             if let index = self._tipoSelected.index(where: {$0 == cell.lblDetalle.text!}){
@@ -138,7 +174,8 @@ extension ProductoViewController : UITableViewDelegate, UITableViewDataSource {
     
         self._itemsSelected[indexPath.section][indexPath.row] = true
         cell.accessoryType = .checkmark
-        
+        self.cmdBorrarFiltro.isHidden = false
+
         if indexPath.section == 0 {
             self._tipoSelected.append(cell.lblDetalle.text!)
         } else {

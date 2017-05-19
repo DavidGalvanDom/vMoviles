@@ -15,7 +15,7 @@ class ReporteProdViewController: UIViewController, UIWebViewDelegate, MFMailComp
     @IBOutlet weak var webView: UIWebView!
     var _folio:String!
     var _email:String!
-    var _rowPedidoProductos: [RowPedidoProducto] = []
+    var _productosDetalle: [ProductoDetalle] = []
 
     
     override func viewDidLoad() {
@@ -47,7 +47,7 @@ class ReporteProdViewController: UIViewController, UIWebViewDelegate, MFMailComp
             var contents =  try String(contentsOfFile: filePath, encoding: .utf8)
             
             
-            for item in self._rowPedidoProductos {
+            for item in self._productosDetalle {
                 index = index + 1
                 htmlNew = htmlNew + self.crearRenglon(item: item, index: index)
             }
@@ -67,7 +67,7 @@ class ReporteProdViewController: UIViewController, UIWebViewDelegate, MFMailComp
         
     }
     
-    func crearRenglon( item: RowPedidoProducto, index: Int) -> String {
+    func crearRenglon( item: ProductoDetalle, index: Int) -> String {
         var row: String = ""
         
         // Se convierta la imagen a NSData

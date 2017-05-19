@@ -85,6 +85,30 @@ class Ui {
             controller.present(alert, animated: true, completion: nil)
     }
     
+    
+    class func showMessageYesNoDialog(
+        onController controller: UIViewController,
+        withTitle title: String?,
+        withMessage message: String?,
+        withError error: NSError? = nil,
+        onYes yesAction: (() -> Void)? = nil,
+        onNo noAction: (() -> Void)? = nil) {
+        
+        let alert = UIAlertController(title: title, message: message, preferredStyle: .alert)
+        alert.addAction(UIAlertAction(title: "Si", style: .default) { (_) in
+            if let action = yesAction {
+                action()
+            }
+        })
+        alert.addAction(UIAlertAction(title: "No", style: .cancel) { (_) in
+            if let action = noAction {
+                action()
+            }
+        })
+        controller.present(alert, animated: true, completion: nil)
+    }
+    
+    
     class func showImageActionSheet(
         onController controller: UIViewController,
         withImagePickerDelegate delegate:

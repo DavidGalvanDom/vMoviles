@@ -24,8 +24,6 @@ class CompaniasViewController: UIViewController  {
         _companias.append( Compania(id: "vmozono-vmimages", descripcion: "Ozono"))
         _companias.append( Compania(id: "vmepi-vmimagepi", descripcion: "Episodio"))
         
-        self.view.backgroundColor = UIColor(patternImage: UIImage(named: "ozono-temporada")!)
-
         tableView.delegate = self
         tableView.dataSource = self
         
@@ -35,12 +33,27 @@ class CompaniasViewController: UIViewController  {
             return
         }
         
+        self.CargarImagenTemporada()
+        
         _storyboard = storyboard
         self.lblVendedor.text = self._app.config!.nombreVendedor as String
         
         if(self._app.config!.agente == "-1") {
             self.configuraApp()
         }
+    }
+    
+    func CargarImagenTemporada() {
+        
+        do {
+            try self._app.openDatabase(companias: ["vmozono","vmimages"])
+            self._app.imgTemporada  = ProductoDatos(_database: self._app.databaseImg).CargarImagen(clave: "temporada")
+        
+            self.view.backgroundColor = UIColor(patternImage:self._app.imgTemporada )
+        } catch let error as NSError {
+            Ui.showMessageDialog(onController: self, withTitle: "Error", withMessage: "No se pudo cargar la imagen de temporada", withError: error)
+        }
+    
     }
 
     //Popup para configurar la informacion del agente
@@ -57,7 +70,7 @@ class CompaniasViewController: UIViewController  {
          self.lblVendedor.text = self._app.config!.nombreVendedor as String
     }
     
-    //Secaptura la compñia seleccionada para iniciar la sincronizacion
+    //Se captura la compñia seleccionada para iniciar la sincronizacion
     //se sincroniza informacion he imagenes
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         

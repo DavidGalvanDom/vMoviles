@@ -20,11 +20,13 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UISplitViewControllerDele
 
     var window: UIWindow?
     
+    var listaProdSelected: [ProductoDetalle] = []
     var database: CBLDatabase!
     var databaseImg: CBLDatabase! 
     var pusher: CBLReplication!
     var puller: CBLReplication!
     var pullerimg: CBLReplication!
+    var imgTemporada: UIImage!
     var syncError: NSError?
     var conflictsLiveQuery: CBLLiveQuery?
     var accessDocuments: Array<CBLDocument> = [];

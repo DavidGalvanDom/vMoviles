@@ -37,6 +37,26 @@ class ProductoDatos
     }
     
     //Productos que pertenecen a una lista de precios
+    func setupLstPrecioProdViewAndQuery() ->  CBLQuery{
+        let view = database.viewNamed("articulolstPrecio")
+        if view.mapBlock == nil {
+            view.setMapBlock({ (doc, emit) in
+                let type = doc["type"] as? String
+                if (type == "producto"){
+                    let clave = doc["clave"] as? String
+                    let tpc = doc["tpc"] as? String
+                    emit([tpc,clave], nil)
+                }
+            }, version: "1.0")
+        }
+        
+        let productoQuery = view.createQuery()
+        
+        return productoQuery
+    }
+
+    
+    //Productos que pertenecen a una lista de precios
     func setupLstPrecioViewAndQuery() ->  CBLLiveQuery{
         let view = database.viewNamed("productoslstPrecio")
         if view.mapBlock == nil {
@@ -58,6 +78,7 @@ class ProductoDatos
     }
     
     //Lista de productos que pertenecen a la lista de precios cero
+    //para catalogo de productos
     func setupProdCeroViewAndQuery() -> CBLLiveQuery {
         let view = database.viewNamed("productoslstPrecioCero")
         if view.mapBlock == nil {
@@ -80,6 +101,7 @@ class ProductoDatos
     }
     
     //Lista de productos que pertenecen a la lista de precios cero
+    //para el catalog de productos
     func setupProdCeroCategoViewAndQuery() -> CBLLiveQuery {
         let view = database.viewNamed("productoslstPrecioCeroCatego")
         if view.mapBlock == nil {
@@ -101,7 +123,6 @@ class ProductoDatos
         return productoLiveQuery
     }
 
-    
     //Se carga el producto con la clave seleccionada
     func CargarProducto (clave: String)-> CBLDocument? {
         if database.existingDocument(withID: clave) != nil {
@@ -167,8 +188,5 @@ class ProductoDatos
         categoriasQuery.descending = false
         
         return categoriasQuery
-
     }
-
-    
 }
