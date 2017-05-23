@@ -95,16 +95,17 @@ class Ui {
         onNo noAction: (() -> Void)? = nil) {
         
         let alert = UIAlertController(title: title, message: message, preferredStyle: .alert)
-        alert.addAction(UIAlertAction(title: "Si", style: .default) { (_) in
-            if let action = yesAction {
-                action()
-            }
-        })
         alert.addAction(UIAlertAction(title: "No", style: .cancel) { (_) in
             if let action = noAction {
                 action()
             }
         })
+        alert.addAction(UIAlertAction(title: "Si", style: .default) { (_) in
+            if let action = yesAction {
+                action()
+            }
+        })
+
         controller.present(alert, animated: true, completion: nil)
     }
     

@@ -110,37 +110,37 @@ class PedidoProductoViewController: UIViewController, SearchProductoDelegate, Pr
     }
     
     func FormatoLabel() {
-        self.lblC1.layer.borderWidth = 1.0
+        self.lblC1.layer.borderWidth = 0.2
         self.lblC1.layer.cornerRadius = 6
-        self.lblC2.layer.borderWidth = 1.0
+        self.lblC2.layer.borderWidth = 0.2
         self.lblC2.layer.cornerRadius = 6
-        self.lblC3.layer.borderWidth = 1.0
+        self.lblC3.layer.borderWidth = 0.2
         self.lblC3.layer.cornerRadius = 6
-        self.lblC4.layer.borderWidth = 1.0
+        self.lblC4.layer.borderWidth = 0.2
         self.lblC4.layer.cornerRadius = 6
-        self.lblC5.layer.borderWidth = 1.0
+        self.lblC5.layer.borderWidth = 0.2
         self.lblC5.layer.cornerRadius = 6
-        self.lblC6.layer.borderWidth = 1.0
+        self.lblC6.layer.borderWidth = 0.2
         self.lblC6.layer.cornerRadius = 6
-        self.lblC7.layer.borderWidth = 1.0
+        self.lblC7.layer.borderWidth = 0.2
         self.lblC7.layer.cornerRadius = 6
         
         self.lblC8.layer.cornerRadius = 6
-        self.lblC8.layer.borderWidth = 1.0
+        self.lblC8.layer.borderWidth = 0.2
         self.lblC9.layer.cornerRadius = 6
-        self.lblC9.layer.borderWidth = 1.0
+        self.lblC9.layer.borderWidth = 0.2
         self.lblC10.layer.cornerRadius = 6
-        self.lblC10.layer.borderWidth = 1.0
+        self.lblC10.layer.borderWidth = 0.2
         self.lblC11.layer.cornerRadius = 6
-        self.lblC11.layer.borderWidth = 1.0
+        self.lblC11.layer.borderWidth = 0.2
         self.lblC12.layer.cornerRadius = 6
-        self.lblC12.layer.borderWidth = 1.0
+        self.lblC12.layer.borderWidth = 0.2
         self.lblC13.layer.cornerRadius = 6
-        self.lblC13.layer.borderWidth = 1.0
+        self.lblC13.layer.borderWidth = 0.2
         self.lblC14.layer.cornerRadius = 6
-        self.lblC14.layer.borderWidth = 1.0
+        self.lblC14.layer.borderWidth = 0.2
         self.lblC15.layer.cornerRadius = 6
-        self.lblC15.layer.borderWidth = 1.0
+        self.lblC15.layer.borderWidth = 0.2
     }
     
     //Eventos para hacer el sumarizado de total de pares
@@ -335,7 +335,7 @@ class PedidoProductoViewController: UIViewController, SearchProductoDelegate, Pr
         
         self.txtPK.text = sender.pck as String
         if(self.txtPK.text == "99"){
-            self.txtInterroga.text = "0"
+            self.txtInterroga.text = "1"
             self.txtInterroga.isEnabled = false
         } else {
             self.txtInterroga.text = "1"
@@ -366,11 +366,11 @@ class PedidoProductoViewController: UIViewController, SearchProductoDelegate, Pr
         self.imagenProd.setImage(imgProd, for: .normal)
         
         self.imagenProd.imageView?.contentMode = .scaleAspectFit
-        self.imagenProd.imageEdgeInsets = UIEdgeInsetsMake(200, 200, 200, 200)
+        self.imagenProd.imageEdgeInsets = UIEdgeInsetsMake(0, 0, 0, 0)
         self.imagenProd.layer.cornerRadius = 16
         self.imagenProd.layer.masksToBounds = true
         self.imagenProd.isUserInteractionEnabled = true
-        
+        self.imagenProd.layer.backgroundColor = UIColor.white.cgColor
         
         switch(self.txtTs.text!) {
             case "E":
@@ -385,7 +385,7 @@ class PedidoProductoViewController: UIViewController, SearchProductoDelegate, Pr
         
         self.txtPK.text = "99"
         self.txtPares.text = "0"
-        self.txtInterroga.text = "0"
+        self.txtInterroga.text = "1"
         self.txtC1.text = "0"
         self.txtC2.text = "0"
         self.txtC3.text = "0"
@@ -480,30 +480,31 @@ class PedidoProductoViewController: UIViewController, SearchProductoDelegate, Pr
         self.txtPielColor.isEnabled = false
         self.txtPares.isEnabled = false
         
-        BuscarProducto(claveProd: self._rowPedidoProducto.cveart, tpc: self._listaPrecios!)
-        CargaCorrida()
-
-        self.txtSemana.text = self._rowPedidoProducto.semana
-        self.txtSemanaCli.text = self._rowPedidoProducto.semanaCliente
-        self.txtPares.text = String(self._rowPedidoProducto.pares)
-        self.txtPK.text = self._rowPedidoProducto.pck
-        self.txtInterroga.text = String(self._rowPedidoProducto.numPck)
-        
-        self.txtC1.text = self._rowPedidoProducto.p1
-        self.txtC2.text = self._rowPedidoProducto.p2
-        self.txtC3.text = self._rowPedidoProducto.p3
-        self.txtC4.text = self._rowPedidoProducto.p4
-        self.txtC5.text = self._rowPedidoProducto.p5
-        self.txtC6.text = self._rowPedidoProducto.p6
-        self.txtC7.text = self._rowPedidoProducto.p7
-        self.txtC8.text = self._rowPedidoProducto.p8
-        self.txtC9.text = self._rowPedidoProducto.p9
-        self.txtC10.text = self._rowPedidoProducto.p10
-        self.txtC11.text = self._rowPedidoProducto.p11
-        self.txtC12.text = self._rowPedidoProducto.p12
-        self.txtC13.text = self._rowPedidoProducto.p13
-        self.txtC14.text = self._rowPedidoProducto.p14
-        self.txtC15.text = self._rowPedidoProducto.p15
+        if  BuscarProducto(claveProd: self._rowPedidoProducto.cveart, tpc: self._listaPrecios!) {
+            CargaCorrida()
+            
+            self.txtSemana.text = self._rowPedidoProducto.semana
+            self.txtSemanaCli.text = self._rowPedidoProducto.semanaCliente
+            self.txtPares.text = String(self._rowPedidoProducto.pares)
+            self.txtPK.text = self._rowPedidoProducto.pck
+            self.txtInterroga.text = String(self._rowPedidoProducto.numPck)
+            
+            self.txtC1.text = self._rowPedidoProducto.p1
+            self.txtC2.text = self._rowPedidoProducto.p2
+            self.txtC3.text = self._rowPedidoProducto.p3
+            self.txtC4.text = self._rowPedidoProducto.p4
+            self.txtC5.text = self._rowPedidoProducto.p5
+            self.txtC6.text = self._rowPedidoProducto.p6
+            self.txtC7.text = self._rowPedidoProducto.p7
+            self.txtC8.text = self._rowPedidoProducto.p8
+            self.txtC9.text = self._rowPedidoProducto.p9
+            self.txtC10.text = self._rowPedidoProducto.p10
+            self.txtC11.text = self._rowPedidoProducto.p11
+            self.txtC12.text = self._rowPedidoProducto.p12
+            self.txtC13.text = self._rowPedidoProducto.p13
+            self.txtC14.text = self._rowPedidoProducto.p14
+            self.txtC15.text = self._rowPedidoProducto.p15
+        }
         
     }
     
@@ -514,7 +515,9 @@ class PedidoProductoViewController: UIViewController, SearchProductoDelegate, Pr
         claveProd = claveProd.leftPadding(toLength: 10, withPad: "0")
         claveProd = claveProd + self.txtOpcion.text!.leftPadding(toLength: 2, withPad: "0")
         
-        self.BuscarProducto(claveProd: claveProd, tpc: self._listaPrecios)
+        if self.BuscarProducto(claveProd: claveProd, tpc: self._listaPrecios) {
+            CargaCorrida()
+        }
     }
     
     func BuscarPorOpcion(opcion:String) {
@@ -524,12 +527,14 @@ class PedidoProductoViewController: UIViewController, SearchProductoDelegate, Pr
         claveProd = claveProd.leftPadding(toLength: 10, withPad: "0")
         claveProd = claveProd + opcion.leftPadding(toLength: 2, withPad: "0")
         
-        self.BuscarProducto(claveProd: claveProd, tpc: self._listaPrecios)
+        if self.BuscarProducto(claveProd: claveProd, tpc: self._listaPrecios) {
+            CargaCorrida()
+        }
     }
     
     //Se carga toda la informacion del producto y se despliega la imagen
     // tpc = Lista de precios del cliente 
-    func BuscarProducto(claveProd: String, tpc: String) {
+    func BuscarProducto(claveProd: String, tpc: String) -> Bool{
         let idProd = "prod-\(claveProd)-\(tpc)"
         if let doc = ProductoDatos(_database: self._app.database).CargarProducto(clave: idProd) {
         
@@ -550,10 +555,13 @@ class PedidoProductoViewController: UIViewController, SearchProductoDelegate, Pr
             
             //Expande la imagen al tamaño del boton
             self.imagenProd.imageView?.contentMode = .scaleAspectFit
-            self.imagenProd.imageEdgeInsets = UIEdgeInsetsMake(200, 200, 200, 200)
+            self.imagenProd.imageEdgeInsets = UIEdgeInsetsMake(0, 0, 0, 0)
             self.imagenProd.layer.cornerRadius = 16
             self.imagenProd.layer.masksToBounds = true
             self.imagenProd.isUserInteractionEnabled = true
+            
+            self.imagenProd.layer.backgroundColor = UIColor.white.cgColor
+            return true
             
         } else {
             
@@ -566,6 +574,7 @@ class PedidoProductoViewController: UIViewController, SearchProductoDelegate, Pr
                                  withTitle: "Información",
                                  withMessage: "No se encontro el producto Calve:\(claveProd)",
                                  withError: nil)
+            return false
         }
     }
     
@@ -620,22 +629,28 @@ class PedidoProductoViewController: UIViewController, SearchProductoDelegate, Pr
     
     //Click imagen producto para desplegar las diferentes opciones
     @IBAction func onClickImgProd(_ sender: Any) {
-        let vc = _storyboard.instantiateViewController(withIdentifier: "sbOpcionProducto") as! OpcionProductoViewController
         
-        vc._claveProd = self._productoSelected.clave as String
-        vc._estilo = self._productoSelected.estilo as String
-        vc._listaPrecios  = self._listaPrecios
-        vc._app = self._app
-        vc.preferredContentSize = CGSize(width: 990, height: 690)
-        vc.modalPresentationStyle = .formSheet
-        vc.modalTransitionStyle = .crossDissolve
-        //vc.delegate = self
-        self.present(vc, animated: true, completion: { _ in })
+        if self._productoSelected != nil {
+            
+            let vc = _storyboard.instantiateViewController(withIdentifier: "sbOpcionProducto") as! OpcionProductoViewController
+            
+            vc._claveProd = self._productoSelected.clave as String
+            vc._estilo = self._productoSelected.estilo as String
+            vc._listaPrecios  = self._listaPrecios
+            vc._app = self._app
+            vc.preferredContentSize = CGSize(width: 990, height: 690)
+            vc.modalPresentationStyle = .formSheet
+            vc.modalTransitionStyle = .crossDissolve
+            //vc.delegate = self
+            self.present(vc, animated: true, completion: { _ in })
+        }
     }
     
     //Evento para guardar el nuvo producto
     @IBAction func onGuardar(_ sender: Any) {
         if(ValidaInformacion()){
+            
+            self.CalculaTotalPares()
             
             let pedidoProducto = RowPedidoProducto(renglon: self._renglon, cveart:self.txtClave.text!, img: self.imagenProd.currentImage!, pielcolor: self.txtPielColor.text!, tpc: String(self._productoSelected.tpc), corrida: self._corridaSelected)
             
@@ -684,7 +699,9 @@ class PedidoProductoViewController: UIViewController, SearchProductoDelegate, Pr
         
         if(textField == self.txtClave) {
             if (self.txtClave.text?.characters.count)! > 7 {
-                self.BuscarProducto(claveProd: self.txtClave.text! as String,tpc: self._listaPrecios)
+                if self.BuscarProducto(claveProd: self.txtClave.text! as String,tpc: self._listaPrecios) {
+                    CargaCorrida()
+                }
             }
         } else {
             if(textField == self.txtEstilo) {

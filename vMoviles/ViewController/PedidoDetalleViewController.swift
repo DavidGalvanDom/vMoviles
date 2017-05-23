@@ -130,6 +130,7 @@ class PedidoDetalleViewController: UIViewController, SearchClienteDelegate, Sear
         if docEmbar != nil {
             let embarque = Embarque(for: (docEmbar)!)
             self.embarqueSeleccionado(sender: embarque!)
+            self._existenCambios = false
         }
     }
     
@@ -236,11 +237,11 @@ class PedidoDetalleViewController: UIViewController, SearchClienteDelegate, Sear
         }
         
         //Formato vistas
-        self.viewUno.layer.borderWidth = 1.0
+        self.viewUno.layer.borderWidth = 0.5
         self.viewUno.layer.cornerRadius = 6
         self.viewUno.layer.borderColor = UIColor.lightGray.cgColor
         
-        self.viewDos.layer.borderWidth = 1.0
+        self.viewDos.layer.borderWidth = 0.5
         self.viewDos.layer.cornerRadius = 6
         self.viewDos.layer.borderColor = UIColor.lightGray.cgColor
     }
@@ -309,66 +310,66 @@ class PedidoDetalleViewController: UIViewController, SearchClienteDelegate, Sear
     
     func FormatoLabel (cell: pedidoTableViewCell)
     {
-        cell.lblc1.layer.borderWidth = 1.0
+        cell.lblc1.layer.borderWidth = 0.2
         cell.lblc1.layer.cornerRadius = 6
-        cell.lblc2.layer.borderWidth = 1.0
+        cell.lblc2.layer.borderWidth = 0.2
         cell.lblc2.layer.cornerRadius = 6
-        cell.lblc3.layer.borderWidth = 1.0
+        cell.lblc3.layer.borderWidth = 0.2
         cell.lblc3.layer.cornerRadius = 6
-        cell.lblc4.layer.borderWidth = 1.0
+        cell.lblc4.layer.borderWidth = 0.2
         cell.lblc4.layer.cornerRadius = 6
-        cell.lblc5.layer.borderWidth = 1.0
+        cell.lblc5.layer.borderWidth = 0.2
         cell.lblc5.layer.cornerRadius = 6
-        cell.lblc6.layer.borderWidth = 1.0
+        cell.lblc6.layer.borderWidth = 0.2
         cell.lblc6.layer.cornerRadius = 6
-        cell.lblc7.layer.borderWidth = 1.0
+        cell.lblc7.layer.borderWidth = 0.2
         cell.lblc7.layer.cornerRadius = 6
-        cell.lblc8.layer.borderWidth = 1.0
+        cell.lblc8.layer.borderWidth = 0.2
         cell.lblc8.layer.cornerRadius = 6
-        cell.lblc9.layer.borderWidth = 1.0
+        cell.lblc9.layer.borderWidth = 0.2
         cell.lblc9.layer.cornerRadius = 6
-        cell.lblc10.layer.borderWidth = 1.0
+        cell.lblc10.layer.borderWidth = 0.2
         cell.lblc10.layer.cornerRadius = 6
-        cell.lblc11.layer.borderWidth = 1.0
+        cell.lblc11.layer.borderWidth = 0.2
         cell.lblc11.layer.cornerRadius = 6
-        cell.lblc12.layer.borderWidth = 1.0
+        cell.lblc12.layer.borderWidth = 0.2
         cell.lblc12.layer.cornerRadius = 6
-        cell.lblc13.layer.borderWidth = 1.0
+        cell.lblc13.layer.borderWidth = 0.2
         cell.lblc13.layer.cornerRadius = 6
-        cell.lblc14.layer.borderWidth = 1.0
+        cell.lblc14.layer.borderWidth = 0.2
         cell.lblc14.layer.cornerRadius = 6
-        cell.lblc15.layer.borderWidth = 1.0
+        cell.lblc15.layer.borderWidth = 0.2
         cell.lblc15.layer.cornerRadius = 6
         
-        cell.lblp1.layer.borderWidth = 1.0
+        cell.lblp1.layer.borderWidth = 0.2
         cell.lblp1.layer.cornerRadius = 6
-        cell.lblp2.layer.borderWidth = 1.0
+        cell.lblp2.layer.borderWidth = 0.2
         cell.lblp2.layer.cornerRadius = 6
-        cell.lblp3.layer.borderWidth = 1.0
+        cell.lblp3.layer.borderWidth = 0.2
         cell.lblp3.layer.cornerRadius = 6
-        cell.lblp4.layer.borderWidth = 1.0
+        cell.lblp4.layer.borderWidth = 0.2
         cell.lblp4.layer.cornerRadius = 6
-        cell.lblp5.layer.borderWidth = 1.0
+        cell.lblp5.layer.borderWidth = 0.2
         cell.lblp5.layer.cornerRadius = 6
-        cell.lblp6.layer.borderWidth = 1.0
+        cell.lblp6.layer.borderWidth = 0.2
         cell.lblp6.layer.cornerRadius = 6
-        cell.lblp7.layer.borderWidth = 1.0
+        cell.lblp7.layer.borderWidth = 0.2
         cell.lblp7.layer.cornerRadius = 6
-        cell.lblp8.layer.borderWidth = 1.0
+        cell.lblp8.layer.borderWidth = 0.2
         cell.lblp8.layer.cornerRadius = 6
-        cell.lblp9.layer.borderWidth = 1.0
+        cell.lblp9.layer.borderWidth = 0.2
         cell.lblp9.layer.cornerRadius = 6
-        cell.lblp10.layer.borderWidth = 1.0
+        cell.lblp10.layer.borderWidth = 0.2
         cell.lblp10.layer.cornerRadius = 6
-        cell.lblp11.layer.borderWidth = 1.0
+        cell.lblp11.layer.borderWidth = 0.2
         cell.lblp11.layer.cornerRadius = 6
-        cell.lblp12.layer.borderWidth = 1.0
+        cell.lblp12.layer.borderWidth = 0.2
         cell.lblp12.layer.cornerRadius = 6
-        cell.lblp13.layer.borderWidth = 1.0
+        cell.lblp13.layer.borderWidth = 0.2
         cell.lblp13.layer.cornerRadius = 6
-        cell.lblp14.layer.borderWidth = 1.0
+        cell.lblp14.layer.borderWidth = 0.2
         cell.lblp14.layer.cornerRadius = 6
-        cell.lblp15.layer.borderWidth = 1.0
+        cell.lblp15.layer.borderWidth = 0.2
         cell.lblp15.layer.cornerRadius = 6
     }
     
@@ -423,7 +424,7 @@ class PedidoDetalleViewController: UIViewController, SearchClienteDelegate, Sear
             if(self._pedido.cliente != nil) {
                 let vc = self._storyboard.instantiateViewController(withIdentifier: "sbPedidoProducto") as! PedidoProductoViewController
                 
-                vc.preferredContentSize = CGSize(width: 950, height: 420)
+                vc.preferredContentSize = CGSize(width: 725, height: 690)
                 vc.modalPresentationStyle = .formSheet
                 vc.modalTransitionStyle = .crossDissolve
                 vc._listaPrecios =  self._pedido.cliente?.listaprec as String!
@@ -737,7 +738,9 @@ class PedidoDetalleViewController: UIViewController, SearchClienteDelegate, Sear
     //Regresar a companias
     func backController() {
         
-        if self._existenCambios {
+        if self._existenCambios &&
+           self.btnNuevoProd.isHidden == false
+            {
             
             Ui.showMessageYesNoDialog(onController: self,
                                  withTitle: "Informacion",
@@ -1011,7 +1014,7 @@ class PedidoDetalleViewController: UIViewController, SearchClienteDelegate, Sear
         if(self._pedido.cliente != nil) {
             let vc = _storyboard.instantiateViewController(withIdentifier: "sbPedidoProducto") as! PedidoProductoViewController
             
-            vc.preferredContentSize = CGSize(width: 950, height: 440)
+            vc.preferredContentSize = CGSize(width: 725, height: 690)
             vc.modalPresentationStyle = .formSheet
             vc.modalTransitionStyle = .crossDissolve
             vc._listaPrecios =  self._pedido.cliente?.listaprec as String?
