@@ -67,11 +67,12 @@ class PedidoProductoViewController: UIViewController, SearchProductoDelegate, Pr
     var _estatusProducto: String!
     var _renglon: Int!
     var _rowPedidoProducto: RowPedidoProducto!
-    var _semanas: Dictionary<String, Any> = [:]
+    var _semanas: Dictionary<String, Any>!
     
     override func viewDidLoad() {
         super.viewDidLoad()
 
+        self._semanas = [:]
         let app = UIApplication.shared.delegate as! AppDelegate
         guard let root = app.window?.rootViewController, let storyboard = root.storyboard else {
             return
@@ -106,41 +107,56 @@ class PedidoProductoViewController: UIViewController, SearchProductoDelegate, Pr
         
         super.didReceiveMemoryWarning()
         
+        if self._productoSelected != nil {
+            self._productoSelected = nil
+        }
+        
+        if self._rowPedidoProducto != nil {
+            self._rowPedidoProducto = nil
+        }
+        
+        if self._semanas != nil {
+            self._semanas = nil
+        }
+        
+        if self._corridaSelected != nil {
+            self._corridaSelected = nil
+        }
         // Dispose of any resources that can be recreated.
     }
     
     func FormatoLabel() {
-        self.lblC1.layer.borderWidth = 0.2
-        self.lblC1.layer.cornerRadius = 6
-        self.lblC2.layer.borderWidth = 0.2
-        self.lblC2.layer.cornerRadius = 6
-        self.lblC3.layer.borderWidth = 0.2
-        self.lblC3.layer.cornerRadius = 6
-        self.lblC4.layer.borderWidth = 0.2
-        self.lblC4.layer.cornerRadius = 6
-        self.lblC5.layer.borderWidth = 0.2
-        self.lblC5.layer.cornerRadius = 6
-        self.lblC6.layer.borderWidth = 0.2
-        self.lblC6.layer.cornerRadius = 6
-        self.lblC7.layer.borderWidth = 0.2
-        self.lblC7.layer.cornerRadius = 6
         
+        self.lblC1.layer.borderWidth = 1
+        self.lblC1.layer.cornerRadius = 6
+        self.lblC2.layer.borderWidth = 1
+        self.lblC2.layer.cornerRadius = 6
+        self.lblC3.layer.borderWidth = 1
+        self.lblC3.layer.cornerRadius = 6
+        self.lblC4.layer.borderWidth = 1
+        self.lblC4.layer.cornerRadius = 6
+        self.lblC5.layer.borderWidth = 1
+        self.lblC5.layer.cornerRadius = 6
+        self.lblC6.layer.borderWidth = 1
+        self.lblC6.layer.cornerRadius = 6
+        self.lblC7.layer.borderWidth = 1
+        self.lblC7.layer.cornerRadius = 6
         self.lblC8.layer.cornerRadius = 6
-        self.lblC8.layer.borderWidth = 0.2
+        self.lblC8.layer.borderWidth = 1
         self.lblC9.layer.cornerRadius = 6
-        self.lblC9.layer.borderWidth = 0.2
+        self.lblC9.layer.borderWidth = 1
         self.lblC10.layer.cornerRadius = 6
-        self.lblC10.layer.borderWidth = 0.2
+        self.lblC10.layer.borderWidth = 1
         self.lblC11.layer.cornerRadius = 6
-        self.lblC11.layer.borderWidth = 0.2
+        self.lblC11.layer.borderWidth = 1
         self.lblC12.layer.cornerRadius = 6
-        self.lblC12.layer.borderWidth = 0.2
+        self.lblC12.layer.borderWidth = 1
         self.lblC13.layer.cornerRadius = 6
-        self.lblC13.layer.borderWidth = 0.2
+        self.lblC13.layer.borderWidth = 1
         self.lblC14.layer.cornerRadius = 6
-        self.lblC14.layer.borderWidth = 0.2
+        self.lblC14.layer.borderWidth = 1
         self.lblC15.layer.cornerRadius = 6
-        self.lblC15.layer.borderWidth = 0.2
+        self.lblC15.layer.borderWidth = 1
     }
     
     //Eventos para hacer el sumarizado de total de pares

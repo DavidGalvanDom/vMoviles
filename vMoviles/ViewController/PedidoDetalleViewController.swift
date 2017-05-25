@@ -739,7 +739,7 @@ class PedidoDetalleViewController: UIViewController, SearchClienteDelegate, Sear
     func backController() {
         
         if self._existenCambios &&
-           self.btnNuevoProd.isHidden == false
+           self.btnNuevoProd.isHidden == true
             {
             
             Ui.showMessageYesNoDialog(onController: self,

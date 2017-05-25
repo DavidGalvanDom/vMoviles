@@ -61,6 +61,14 @@ class PedidoViewController: UIViewController {
 
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
+        
+        if self._lstPedidos != nil {
+           self._lstPedidos = nil
+        }
+        
+        if self._lstPedidosTodos != nil {
+            self._lstPedidosTodos = nil
+        }
         // Dispose of any resources that can be recreated.
     }
     
@@ -423,12 +431,11 @@ extension PedidoViewController : UITableViewDelegate, UITableViewDataSource,UISe
             cellTodos.lblEstilo.text = " \(doc["estilo"] ?? "") - \(doc["opcion"] ?? "") "
             cellTodos.lblTipo.text = doc["tipo"] as? String
             cellTodos.lblRenglon.text = doc["renglon"] as? String
-            cellTodos.lblOrdenCte.text = doc["ordencte"] as? String
+            //cellTodos.lblOrdenCte.text = doc["ordencte"] as? String
             cellTodos.lblObse.text = doc["obs"] as? String
 
             return cellTodos
         }
-        
     }
     
     //Mostrar detalle de un pedido existente
@@ -445,6 +452,18 @@ extension PedidoViewController : UITableViewDelegate, UITableViewDataSource,UISe
             
             self.navigationController?.pushViewController(controller, animated: true)
         }
+    }
+    
+    func tableView(_ tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
+        var title: String = ""
+        
+        if tableView != self.tableView {
+            title = " Folio            Renglon         Estilo          Pares     Estatus      Tipo      Semana          Captura        Cliente                  Observacion"
+        } else {
+           title = "   Folio                                                Cliente                                              Creacion          Pares                Total            Estatus           Cliente"
+        }
+        
+        return title
     }
 
 }
