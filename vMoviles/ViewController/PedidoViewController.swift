@@ -15,7 +15,8 @@ class PedidoViewController: UIViewController {
     @IBOutlet weak var tableViewTodos: UITableView!
     @IBOutlet weak var tableView: UITableView!
     @IBOutlet weak var segment: UISegmentedControl!
-       
+    @IBOutlet weak var lblMensaje: UILabel!
+    
     var searchController: UISearchController!
     var searchControllerTodos: UISearchController!
     var _storyboard: UIStoryboard!
@@ -108,8 +109,10 @@ class PedidoViewController: UIViewController {
         }
         
         if self._observando == "todos" {
+            self.lblMensaje.text = "Cargando información..."
             if object as? NSObject == self._pedidoLiveQueryTodos {
                 self.RecargarPedidosTodos()
+                self.lblMensaje.text = ""
             }
         }
     }
@@ -452,15 +455,33 @@ extension PedidoViewController : UITableViewDelegate, UITableViewDataSource,UISe
             
             self.navigationController?.pushViewController(controller, animated: true)
         }
+        
+        if indexPath.row >= 0  && tableView == self.tableViewTodos {
+            let doc = self._lstPedidosTodos![indexPath.row].document!
+            let idpedido = doc["pedido"] as! NSString
+            
+            //cargar el doc en base al id del documento
+            if let doc = PedidoDatos(_database: self._app.database).CargarPedido(folio: String(idpedido)) {
+                let pedido = self.EditaPedido(forDoc: doc )
+                
+                let controller = _storyboard?.instantiateViewController(withIdentifier: "sbPedidosDetalle") as! PedidoDetalleViewController
+                
+                controller._pedido = pedido
+                
+                self.navigationController?.pushViewController(controller, animated: true)
+            }
+            
+        }
     }
     
+    //Encabezado de las tablas
     func tableView(_ tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
         var title: String = ""
         
         if tableView != self.tableView {
-            title = " Folio            Renglon         Estilo          Pares     Estatus      Tipo      Semana          Captura        Cliente                  Observacion"
+            title = " Folio            Renglón         Estilo          Pares     Estatus      Tipo      Semana          Captura        Cliente                  Observación"
         } else {
-           title = "   Folio                                                Cliente                                              Creacion          Pares                Total            Estatus           Cliente"
+           title = "   Folio                                                Cliente                                              Creación          Pares                Total            Estatus           Cliente"
         }
         
         return title

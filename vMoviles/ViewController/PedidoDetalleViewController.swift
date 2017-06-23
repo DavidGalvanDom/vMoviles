@@ -244,6 +244,13 @@ class PedidoDetalleViewController: UIViewController, SearchClienteDelegate, Sear
         self.viewDos.layer.borderWidth = 0.5
         self.viewDos.layer.cornerRadius = 6
         self.viewDos.layer.borderColor = UIColor.lightGray.cgColor
+        
+        self.lblCondicionPago.layer.addBorder(edge: UIRectEdge.bottom, color: UIColor.lightGray, thickness: 0.5)
+        self.lblTipoPedido.layer.addBorder(edge: UIRectEdge.bottom, color: UIColor.lightGray, thickness: 0.5)
+        self.lblRfc.layer.addBorder(edge: UIRectEdge.bottom, color: UIColor.lightGray, thickness: 0.5)
+        self.lblCalificacion.layer.addBorder(edge: UIRectEdge.bottom, color: UIColor.lightGray, thickness: 0.5)
+        self.lblCuenta.layer.addBorder(edge: UIRectEdge.bottom, color: UIColor.lightGray, thickness: 0.5)
+        self.lblEmbarDireccion.layer.addBorder(edge: UIRectEdge.bottom, color: UIColor.lightGray, thickness: 0.5)
     }
     
     //Al cambiar el cliente se actuliza la lista de precios
@@ -739,7 +746,7 @@ class PedidoDetalleViewController: UIViewController, SearchClienteDelegate, Sear
     func backController() {
         
         if self._existenCambios &&
-           self.btnNuevoProd.isHidden == true
+           self.btnNuevoProd.isHidden == false
             {
             
             Ui.showMessageYesNoDialog(onController: self,
@@ -1151,5 +1158,17 @@ extension PedidoDetalleViewController : UITableViewDelegate, UITableViewDataSour
             self._existenCambios = true
         }
     }
+    
+    //Encabezado de las tablas
+    func tableView(_ tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
+        var title: String = ""
+        
+        
+        title = "   Renglón                          Semana                     Clave              TS                          Piel/Color                           Precio         Pares       Pk       ?"
+        
+        
+        return title
+    }
+
 
 }

@@ -91,10 +91,13 @@ class PedidoProductoViewController: UIViewController, SearchProductoDelegate, Pr
         self.txtOpcion.delegate = self
         self.txtEstilo.delegate = self
         
+        self.txtClave.becomeFirstResponder()
+        
         //Se valida el estatus del pedido
         if(self._estatusProducto != ESTATUS_PEDIDO_CAPTURADO) {
             self.btnGuardar.isEnabled = false
         }
+
     }
     
     override func viewDidAppear(_ animated: Bool) {
@@ -369,7 +372,7 @@ class PedidoProductoViewController: UIViewController, SearchProductoDelegate, Pr
         self.txtClave.text = _productoSelected.clave as String
         self.txtOpcion.text = _productoSelected.opcion as String
         self.txtEstilo.text = _productoSelected.estilo as String
-        self.txtPrecio.text = "$ \((_productoSelected.costo).doubleValue)"
+        self.txtPrecio.text = "$ \((_productoSelected.lista).doubleValue)"
         self.txtTs.text = _productoSelected.tiposervicio as String
         self.txtPielColor.text = _productoSelected.descripcion as String
         
@@ -388,17 +391,12 @@ class PedidoProductoViewController: UIViewController, SearchProductoDelegate, Pr
         self.imagenProd.isUserInteractionEnabled = true
         self.imagenProd.layer.backgroundColor = UIColor.white.cgColor
         
-        switch(self.txtTs.text!) {
-            case "E":
-                self.txtSemana.text = self._semanas["semanae"]  as? String
-            case "S":
-                self.txtSemana.text = self._semanas["semanas"]  as? String
-            case "R":
-                self.txtSemana.text = self._semanas["semanar"]  as? String
-            default:
-                self.txtSemana.text = _productoSelected.semanaprod as String
-        }
-        
+        self.SeleccionaSemana()
+        self.IniciaPrepack()
+        self.CargaCorrida()
+    }
+    
+    func IniciaPrepack () {
         self.txtPK.text = "99"
         self.txtPares.text = "0"
         self.txtInterroga.text = "1"
@@ -417,8 +415,19 @@ class PedidoProductoViewController: UIViewController, SearchProductoDelegate, Pr
         self.txtC13.text = "0"
         self.txtC14.text = "0"
         self.txtC15.text = "0"
-        
-        CargaCorrida()
+    }
+    
+    func SeleccionaSemana() {
+        switch(self.txtTs.text!) {
+        case "E":
+            self.txtSemana.text = self._semanas["semanae"]  as? String
+        case "S":
+            self.txtSemana.text = self._semanas["semanas"]  as? String
+        case "R":
+            self.txtSemana.text = self._semanas["semanar"]  as? String
+        default:
+            self.txtSemana.text = _productoSelected.semanaprod as String
+        }
     }
     
     //Se valida que la informacion del producto este completa
@@ -532,7 +541,9 @@ class PedidoProductoViewController: UIViewController, SearchProductoDelegate, Pr
         claveProd = claveProd + self.txtOpcion.text!.leftPadding(toLength: 2, withPad: "0")
         
         if self.BuscarProducto(claveProd: claveProd, tpc: self._listaPrecios) {
-            CargaCorrida()
+            self.SeleccionaSemana()
+            self.IniciaPrepack()
+            self.CargaCorrida()
         }
     }
     
@@ -544,7 +555,9 @@ class PedidoProductoViewController: UIViewController, SearchProductoDelegate, Pr
         claveProd = claveProd + opcion.leftPadding(toLength: 2, withPad: "0")
         
         if self.BuscarProducto(claveProd: claveProd, tpc: self._listaPrecios) {
-            CargaCorrida()
+            self.SeleccionaSemana()
+            self.IniciaPrepack()
+            self.CargaCorrida()
         }
     }
     
@@ -560,7 +573,7 @@ class PedidoProductoViewController: UIViewController, SearchProductoDelegate, Pr
             self.txtPielColor.text = self._productoSelected.descripcion as String
             self.txtOpcion.text = self._productoSelected.opcion as String
             self.txtEstilo.text = self._productoSelected.estilo as String
-            self.txtPrecio.text = "$ \((_productoSelected.costo).doubleValue)"
+            self.txtPrecio.text = "$ \((_productoSelected.lista).doubleValue)"
             self.txtTs.text = _productoSelected.tiposervicio as String
             
             //Se carga la imagen el producto y se despliega en la interfaz
@@ -577,6 +590,9 @@ class PedidoProductoViewController: UIViewController, SearchProductoDelegate, Pr
             self.imagenProd.isUserInteractionEnabled = true
             
             self.imagenProd.layer.backgroundColor = UIColor.white.cgColor
+            
+            self.txtClave.selectedTextRange = self.txtClave.textRange(from: self.txtClave.beginningOfDocument, to: self.txtClave.endOfDocument)
+            
             return true
             
         } else {
@@ -710,15 +726,16 @@ class PedidoProductoViewController: UIViewController, SearchProductoDelegate, Pr
     //Delegate del input clave, opcion
     //Se captura el ENTER
     func textFieldShouldReturn(_ textField: UITextField) -> Bool {
-        //para ocultar el teclado
-        textField.resignFirstResponder()
         
         if(textField == self.txtClave) {
             if (self.txtClave.text?.characters.count)! > 7 {
                 if self.BuscarProducto(claveProd: self.txtClave.text! as String,tpc: self._listaPrecios) {
-                    CargaCorrida()
+                    self.SeleccionaSemana()
+                    self.IniciaPrepack()
+                    self.CargaCorrida()
                 }
             }
+            textField.resignFirstResponder()
         } else {
             if(textField == self.txtEstilo) {
                 self.BuscarPorEstilo(estilo: self.txtEstilo.text ?? "0")
@@ -727,7 +744,7 @@ class PedidoProductoViewController: UIViewController, SearchProductoDelegate, Pr
             }
         }
         
-        return false
+        return true
     }
 
 

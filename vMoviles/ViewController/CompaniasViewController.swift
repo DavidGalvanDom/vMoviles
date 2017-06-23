@@ -43,6 +43,12 @@ class CompaniasViewController: UIViewController  {
         }
     }
     
+    override func viewDidAppear(_ animated: Bool) {
+        if self._app.setInicial {
+            self.performSegue(withIdentifier: "segueCompania", sender: nil)
+        }
+    }
+    
     func CargarImagenTemporada() {
         
         do {
@@ -53,7 +59,6 @@ class CompaniasViewController: UIViewController  {
         } catch let error as NSError {
             Ui.showMessageDialog(onController: self, withTitle: "Error", withMessage: "No se pudo cargar la imagen de temporada", withError: error)
         }
-    
     }
 
     //Popup para configurar la informacion del agente
@@ -77,9 +82,10 @@ class CompaniasViewController: UIViewController  {
         if segue.identifier == "segueCompania",
             let comIndex = tableView.indexPathForSelectedRow?.row
         {
-            let app = UIApplication.shared.delegate as! AppDelegate
-                app.stopReplication()
-                app.startReplication(compania: _companias[comIndex]._id)
+            if !self._app.setInicial {
+                self._app.stopReplication()
+                self._app.startReplication(compania: _companias[comIndex]._id)
+            }
         }
     }
     
@@ -104,15 +110,12 @@ extension CompaniasViewController : UITableViewDelegate, UITableViewDataSource {
         
         let compania = _companias[indexPath.row]
         cell.textLabel?.text = compania._descripcion
-        
-        
         return cell
     }
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        let app = UIApplication.shared.delegate as! AppDelegate
-        app.cveCompania = _companias[indexPath.row]._id
-        app.compania = _companias[indexPath.row]._descripcion
+        self._app.cveCompania = _companias[indexPath.row]._id
+        self._app.compania = _companias[indexPath.row]._descripcion
     }
     
     func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath) {

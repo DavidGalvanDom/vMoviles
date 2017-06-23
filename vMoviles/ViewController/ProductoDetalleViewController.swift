@@ -31,7 +31,7 @@ class ProductoDetalleViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        self.lblMensaje.text = "Cargando informacion..."
+        self.lblMensaje.text = "Cargando información..."
         self._articulosPorSelec.removeAll()
         self._app = UIApplication.shared.delegate as! AppDelegate
         self.collectionView.delegate = self
@@ -294,7 +294,7 @@ extension ProductoDetalleViewController: UICollectionViewDelegate, UICollectionV
         let cell = self.collectionView.dequeueReusableCell(withReuseIdentifier: "viewCellProducto", for: indexPath) as! productoCollectionViewCell
         
         let doc = productoRows![indexPath.row].document!
-        let costo = (doc["costo"] as! NSString).doubleValue
+        let costo = (doc["lista"] as! NSString).doubleValue
         let clave = doc["clave"] as! String
         cell.lblClave.text = "\(doc["estilo"]!) - \(doc["opcion"]!)"
         cell.lblEstilo.text = "\(doc["linea"]!)"
@@ -353,7 +353,7 @@ extension ProductoDetalleViewController: UICollectionViewDelegate, UICollectionV
             if cell.isSelected == true {
                 self.SeleccionaProducto(cell: cell)
                 let doc = productoRows![indexPath.row].document!
-                let row = ProductoDetalle(cveart: doc["clave"] as! String, pielcolor: doc["descripcion"] as! String, estilo: doc["estilo"] as! String, opcion: doc["opcion"] as! String, precio: (doc["costo"] as! NSString).doubleValue ,linea: doc["linea"] as! String, img: (cell.image.image)!,isSelected: true)
+                let row = ProductoDetalle(cveart: doc["clave"] as! String, pielcolor: doc["descripcion"] as! String, estilo: doc["estilo"] as! String, opcion: doc["opcion"] as! String, precio: (doc["lista"] as! NSString).doubleValue ,linea: doc["linea"] as! String, img: (cell.image.image)!,isSelected: true)
                 
                 self._app.listaProdSelected.append(row)
                 

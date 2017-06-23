@@ -10,16 +10,17 @@ import UIKit
 
 class InicialViewController: UIViewController {
     var _storyboard: UIStoryboard!
-   // var overlay : UIView?
+    var _app: AppDelegate!
+
     
     override func viewDidLoad() {
         super.viewDidLoad()
     
-        let app = UIApplication.shared.delegate as! AppDelegate
-        guard let root = app.window?.rootViewController, let storyboard = root.storyboard else {
+        self._app = UIApplication.shared.delegate as! AppDelegate
+        guard let root = self._app.window?.rootViewController, let storyboard = root.storyboard else {
             return
         }
-        self.view.backgroundColor = UIColor(patternImage: app.imgTemporada )
+        self.view.backgroundColor = UIColor(patternImage: self._app.imgTemporada )
 
         _storyboard = storyboard
 
@@ -124,6 +125,7 @@ class InicialViewController: UIViewController {
     
     //Regresar a companias
     func backController() {
+        self._app.setInicial = false
         _ = self.navigationController?.popViewController(animated: true)
     }
     

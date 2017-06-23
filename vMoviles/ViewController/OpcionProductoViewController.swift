@@ -110,7 +110,7 @@ class OpcionProductoViewController: UIViewController, UIScrollViewDelegate {
             for index in 1...count {
                 
                 let doc = (result.row(at: UInt(index-1)).document)
-                let opcion = OpcionEstilo(opcion: doc?["opcion"] as! String, color: doc?["descripcion"] as! String, precio: Double(doc?["costo"] as! String)!, clave: doc?["clave"] as! String)
+                let opcion = OpcionEstilo(opcion: doc?["opcion"] as! String, color: doc?["descripcion"] as! String, precio: Double(doc?["lista"] as! String)!, clave: doc?["clave"] as! String)
                 
                 self._lstOpciones.append(opcion)
                 

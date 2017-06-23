@@ -118,7 +118,7 @@ class ProductoSearchViewController : UIViewController,  UITableViewDelegate, UIT
         let cell = tableView.dequeueReusableCell(withIdentifier: "productoListCellSearch", for: indexPath) as! productoTableViewCell
         
         let doc = productoRows![indexPath.row].document!
-        let costo = (doc["costo"] as! NSString).doubleValue
+        let costo = (doc["lista"] as! NSString).doubleValue
         cell.productoLabel.text = "\(doc["estilo"]!)  \(doc["opcion"]!) - \(doc["descripcion"]!) "
         cell.lblDetalle.text = "\(doc["linea"]!) - $ \(costo) "
         let clave = doc["clave"] as! String

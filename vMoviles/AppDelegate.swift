@@ -34,6 +34,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UISplitViewControllerDele
     var cveCompania: String!
     var config: Configuracion!
     var showMensaje = false
+    var setInicial = false
     
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplicationLaunchOptionsKey: Any]?) -> Bool {
         
@@ -273,13 +274,14 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UISplitViewControllerDele
     
     //Despliega la lista principal
     func showInicial() {
-        let storyboard = UIStoryboard(name: "Main", bundle: nil)
-        let controller = storyboard.instantiateInitialViewController()
-        window!.rootViewController = controller
-        //controller?.performSegue(withIdentifier: "segueCompania", sender: nil)
+        let storyBoard = UIStoryboard(name: "Main", bundle: nil)
+        let navController = storyBoard.instantiateInitialViewController()
+        self.setInicial = true
+        window!.rootViewController = navController
     }
     
     func showCompanias() {
+        self.setInicial = false
         let storyboard = UIStoryboard(name: "Main", bundle: nil)
         let controller = storyboard.instantiateInitialViewController()
         window!.rootViewController = controller
