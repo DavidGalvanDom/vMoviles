@@ -87,9 +87,7 @@ class PedidoProductoViewController: UIViewController, SearchProductoDelegate, Pr
         self._app = UIApplication.shared.delegate as! AppDelegate
         
         //Definir el Key ENTER
-        self.txtClave.delegate = self
-        self.txtOpcion.delegate = self
-        self.txtEstilo.delegate = self
+        self.GenerarEnterKey()
         
         self.txtClave.becomeFirstResponder()
         
@@ -160,6 +158,28 @@ class PedidoProductoViewController: UIViewController, SearchProductoDelegate, Pr
         self.lblC14.layer.borderWidth = 1
         self.lblC15.layer.cornerRadius = 6
         self.lblC15.layer.borderWidth = 1
+    }
+    
+    func GenerarEnterKey() {
+        self.txtClave.delegate = self
+        self.txtOpcion.delegate = self
+        self.txtEstilo.delegate = self
+        self.txtC1.delegate = self
+        self.txtC2.delegate = self
+        self.txtC3.delegate = self
+        self.txtC4.delegate = self
+        self.txtC5.delegate = self
+        self.txtC6.delegate = self
+        self.txtC7.delegate = self
+        self.txtC8.delegate = self
+        self.txtC9.delegate = self
+        self.txtC10.delegate = self
+        self.txtC11.delegate = self
+        self.txtC12.delegate = self
+        self.txtC13.delegate = self
+        self.txtC14.delegate = self
+        self.txtC15.delegate = self
+       
     }
     
     //Eventos para hacer el sumarizado de total de pares
@@ -538,7 +558,12 @@ class PedidoProductoViewController: UIViewController, SearchProductoDelegate, Pr
         
         claveProd = estilo
         claveProd = claveProd.leftPadding(toLength: 10, withPad: "0")
-        claveProd = claveProd + self.txtOpcion.text!.leftPadding(toLength: 2, withPad: "0")
+        
+        if(self.txtOpcion.text! == "") {
+            claveProd = claveProd + "01"
+        } else {
+            claveProd = claveProd + self.txtOpcion.text!.leftPadding(toLength: 2, withPad: "0")
+        }
         
         if self.BuscarProducto(claveProd: claveProd, tpc: self._listaPrecios) {
             self.SeleccionaSemana()
@@ -559,6 +584,63 @@ class PedidoProductoViewController: UIViewController, SearchProductoDelegate, Pr
             self.IniciaPrepack()
             self.CargaCorrida()
         }
+    }
+    
+    func SelectText (textField: UITextField)
+    {
+        textField.selectedTextRange = textField.textRange(from: textField.beginningOfDocument, to: textField.endOfDocument)
+    }
+    
+    func SimulaTab(textField: UITextField)  {
+        switch textField {
+        case self.txtC1:
+            self.txtC2.becomeFirstResponder()
+            self.SelectText(textField: self.txtC2)
+        case self.txtC2:
+            self.txtC3.becomeFirstResponder()
+            self.SelectText(textField: self.txtC3)
+        case self.txtC3:
+            self.txtC4.becomeFirstResponder()
+            self.SelectText(textField: self.txtC4)
+        case self.txtC4:
+            self.txtC5.becomeFirstResponder()
+            self.SelectText(textField: self.txtC5)
+        case self.txtC5:
+            self.txtC6.becomeFirstResponder()
+            self.SelectText(textField: self.txtC6)
+        case self.txtC6:
+            self.txtC7.becomeFirstResponder()
+            self.SelectText(textField: self.txtC7)
+        case self.txtC7:
+            self.txtC8.becomeFirstResponder()
+            self.SelectText(textField: self.txtC8)
+        case self.txtC8:
+            self.txtC9.becomeFirstResponder()
+            self.SelectText(textField: self.txtC9)
+        case self.txtC9:
+            self.txtC10.becomeFirstResponder()
+            self.SelectText(textField: self.txtC10)
+        case self.txtC10:
+            self.txtC11.becomeFirstResponder()
+            self.SelectText(textField: self.txtC11)
+        case self.txtC11:
+            self.txtC1.becomeFirstResponder()
+            self.SelectText(textField: self.txtC1)
+
+        default:
+            self.txtC8.becomeFirstResponder()
+        }
+    }
+    
+    func EntertxtClave() {
+        if (self.txtClave.text?.characters.count)! > 7 {
+            if self.BuscarProducto(claveProd: self.txtClave.text! as String,tpc: self._listaPrecios) {
+                self.SeleccionaSemana()
+                self.IniciaPrepack()
+                self.CargaCorrida()
+            }
+        }
+        
     }
     
     //Se carga toda la informacion del producto y se despliega la imagen
@@ -727,25 +809,19 @@ class PedidoProductoViewController: UIViewController, SearchProductoDelegate, Pr
     //Se captura el ENTER
     func textFieldShouldReturn(_ textField: UITextField) -> Bool {
         
-        if(textField == self.txtClave) {
-            if (self.txtClave.text?.characters.count)! > 7 {
-                if self.BuscarProducto(claveProd: self.txtClave.text! as String,tpc: self._listaPrecios) {
-                    self.SeleccionaSemana()
-                    self.IniciaPrepack()
-                    self.CargaCorrida()
-                }
-            }
-            textField.resignFirstResponder()
-        } else {
-            if(textField == self.txtEstilo) {
+        switch textField
+        {
+            case self.txtClave:
+                self.EntertxtClave()
+                textField.resignFirstResponder()
+            case self.txtEstilo:
                 self.BuscarPorEstilo(estilo: self.txtEstilo.text ?? "0")
-            } else {
+            case self.txtOpcion:
                 self.BuscarPorOpcion(opcion: self.txtOpcion.text ?? "0")
-            }
+        default:
+                self.SimulaTab(textField: textField)
         }
         
         return true
     }
-
-
 }

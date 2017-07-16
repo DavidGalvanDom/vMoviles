@@ -81,6 +81,8 @@ class PedidoDetalleViewController: UIViewController, SearchClienteDelegate, Sear
         
         if(self._pedido == nil) {
             self.IniciaNuevo()
+            self.txtTipoPedido.text = "O"
+            self.lblTipoPedido.text = "Ozono Normal"
         } else {
             self.IniciaEditar()
         }
