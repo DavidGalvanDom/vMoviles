@@ -37,38 +37,20 @@ class InicialViewController: UIViewController {
     //Se crean los opciones de navegacion
     func creaNavegador() {
         
+        let imageName = String(self._app.database.name) == "vmepi" ? "LogoEpisodio180x180.png" : "logo180x180.png"
         //Logo capa de ozono al centro
         let imageView = UIImageView(frame: CGRect(x: 0, y: 0, width: 100, height: 100))
         imageView.contentMode = .scaleAspectFit
-        let image = UIImage(named: "logo180x180.png")
+        
+        let image = UIImage(named: imageName)
         imageView.image = image
         navigationItem.titleView = imageView
-
-        // Toolbar Izquierdo
-        // badge label
-        let label = UILabel(frame: CGRect(x: -20, y: -11, width: 140, height: 40))
-        label.layer.borderColor = UIColor.clear.cgColor
-        label.layer.borderWidth = 2
-        label.layer.cornerRadius = label.bounds.size.height / 2
-        label.textAlignment = .center
-        label.layer.masksToBounds = true
-        label.font = UIFont(name: "SanFranciscoText-Light", size: 13)
-        label.textColor = .black
-        let app = UIApplication.shared.delegate as! AppDelegate
-        label.text = app.compania
-        
-        // boton que tiene el label
-        let btnCompania = UIButton(frame: CGRect(x: 0, y: 0, width: 18, height: 16))
-        btnCompania.addTarget(self, action: #selector(backController), for: .touchUpInside)
-        btnCompania.addSubview(label)
-        
-        let lblbuttonComapania = UIBarButtonItem(customView: btnCompania)
         
         let barCompania = UIBarButtonItem(image: UIImage(named:"icoCompania"), style: .plain, target: self, action: #selector(backController))
         barCompania.imageInsets = UIEdgeInsetsMake(5, 5, 5, 5)
         barCompania.tintColor = .black
         
-        self.navigationItem.leftBarButtonItems = [barCompania, lblbuttonComapania]
+        self.navigationItem.leftBarButtonItems = [barCompania]
         
         //Toolbar Derecho
         let barClientes = UIBarButtonItem(image: UIImage(named:"User2"), style: .done, target: self, action: #selector(onShowClientes))
@@ -94,15 +76,7 @@ class InicialViewController: UIViewController {
        
     //Split view de productos
     func onShowProductos () {
-       /* let detailViewController = _storyboard?.instantiateViewController(withIdentifier: "sbProductoDetalle")
-        
-        self.navigationController?.pushViewController(detailViewController!, animated: true)
-         */
-        
-        let app = UIApplication.shared.delegate as! AppDelegate
-        app.showProductos()
-
-        
+        self._app.showProductos()
     }
     
     // Pedidos
@@ -114,13 +88,10 @@ class InicialViewController: UIViewController {
     //Splitview de clietnes
     func onShowClientes() {
         
-       let app = UIApplication.shared.delegate as! AppDelegate
-        app.showClientes()
+       self._app.showClientes()
         
-      /*  let detailViewController = _storyboard?.instantiateViewController(withIdentifier: "sbClientesDetalle")
-        
-        self.navigationController?.pushViewController(detailViewController!, animated: true)
-    */
+      /* let detailViewController = _storyboard?.instantiateViewController(withIdentifier: "sbClientesDetalle")
+         self.navigationController?.pushViewController(detailViewController!, animated: true) */
     }
     
     //Regresar a companias

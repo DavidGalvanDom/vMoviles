@@ -15,6 +15,7 @@ class SemanasDatos
     init(_database: CBLDatabase!) {
         database = _database
     }
+    
     //Es solo un documento con los datos de la semana
     func CargarSemanas() ->  Dictionary<String, Any>  {
         var semanas: Dictionary<String, Any>  = [:]
@@ -33,4 +34,16 @@ class SemanasDatos
         return semanas
 
     }
+    
+    //Regresa el documento con la semana del proveedor  'sem-prov'
+    func CargarSemanasMaquila (prov: String) -> CBLDocument? {
+        
+        if database.existingDocument(withID: prov) != nil {
+            let doc = database.document(withID: prov)
+            return doc
+        } else {
+            return nil
+        }
+    }
+
 }

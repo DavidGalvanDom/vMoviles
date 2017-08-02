@@ -411,7 +411,7 @@ class PedidoProductoViewController: UIViewController, SearchProductoDelegate, Pr
         self.imagenProd.isUserInteractionEnabled = true
         self.imagenProd.layer.backgroundColor = UIColor.white.cgColor
         
-        self.SeleccionaSemana()
+        self.SeleccionaSemana(prov: _productoSelected.proveedor as String)
         self.IniciaPrepack()
         self.CargaCorrida()
     }
@@ -437,16 +437,30 @@ class PedidoProductoViewController: UIViewController, SearchProductoDelegate, Pr
         self.txtC15.text = "0"
     }
     
-    func SeleccionaSemana() {
+    func SeleccionaSemana(prov: String) {
         switch(self.txtTs.text!) {
         case "E":
             self.txtSemana.text = self._semanas["semanae"]  as? String
         case "S":
-            self.txtSemana.text = self._semanas["semanas"]  as? String
+            //Tipo de semana es Maquila
+            self.CargaSemanaMaquila(prov: prov)
+            //self.txtSemana.text = self._semanas["semanas"]  as? String
         case "R":
             self.txtSemana.text = self._semanas["semanar"]  as? String
         default:
             self.txtSemana.text = _productoSelected.semanaprod as String
+        }
+    }
+    
+    
+    //Se busca la semana en base al proveedor y  clave articulo
+    func CargaSemanaMaquila(prov: String)
+    {
+        let semDatos = SemanasDatos( _database: self._app.database)
+        let doc = semDatos.CargarSemanasMaquila(prov: ("semana-" + prov))
+        
+        if doc != nil {
+            self.txtSemana.text = doc?.properties?["semana"] as? String
         }
     }
     
@@ -512,6 +526,29 @@ class PedidoProductoViewController: UIViewController, SearchProductoDelegate, Pr
                 self.txtSemana.becomeFirstResponder()
                 return false
             }
+            
+            let anosemana = self.txtSemana.text
+            let indexSemana = anosemana?.index((anosemana?.startIndex)!, offsetBy: 4)
+            let semana =  anosemana?.substring(from: indexSemana!)
+            let ano = anosemana?.substring(to: indexSemana!)
+            
+            if (Int(ano!)! < 2017) {
+                Ui.showMessageDialog(onController: self,
+                                     withTitle: "Información",
+                                     withMessage: "La semana tiene que ser mayor.",
+                                     withError: nil)
+                self.txtSemana.becomeFirstResponder()
+                return false
+            }
+            
+            if( Int(semana!)! > 53 || Int(semana!)! < 1){
+                Ui.showMessageDialog(onController: self,
+                                     withTitle: "Información",
+                                     withMessage: "La semana esta fuera de rango.",
+                                     withError: nil)
+                self.txtSemana.becomeFirstResponder()
+                return false
+            }
         }
         
         return true
@@ -566,7 +603,7 @@ class PedidoProductoViewController: UIViewController, SearchProductoDelegate, Pr
         }
         
         if self.BuscarProducto(claveProd: claveProd, tpc: self._listaPrecios) {
-            self.SeleccionaSemana()
+            self.SeleccionaSemana(prov: self._productoSelected.proveedor as String)
             self.IniciaPrepack()
             self.CargaCorrida()
         }
@@ -580,7 +617,7 @@ class PedidoProductoViewController: UIViewController, SearchProductoDelegate, Pr
         claveProd = claveProd + opcion.leftPadding(toLength: 2, withPad: "0")
         
         if self.BuscarProducto(claveProd: claveProd, tpc: self._listaPrecios) {
-            self.SeleccionaSemana()
+            self.SeleccionaSemana(prov: self._productoSelected.proveedor as String)
             self.IniciaPrepack()
             self.CargaCorrida()
         }
@@ -635,7 +672,7 @@ class PedidoProductoViewController: UIViewController, SearchProductoDelegate, Pr
     func EntertxtClave() {
         if (self.txtClave.text?.characters.count)! > 7 {
             if self.BuscarProducto(claveProd: self.txtClave.text! as String,tpc: self._listaPrecios) {
-                self.SeleccionaSemana()
+                self.SeleccionaSemana(prov: self._productoSelected.proveedor as String)
                 self.IniciaPrepack()
                 self.CargaCorrida()
             }

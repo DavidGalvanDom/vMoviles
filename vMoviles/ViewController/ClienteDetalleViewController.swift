@@ -24,13 +24,14 @@ class ClienteDetalleViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        self.creaNavegador()
-        self.configureView()
         
         self._app = UIApplication.shared.delegate as! AppDelegate
         guard let root = self._app.window?.rootViewController, let storyboard = root.storyboard else {
             return
         }
+        
+        self.creaNavegador()
+        self.configureView()
         
         self._storyboard = storyboard
         self.tableView.delegate = self
@@ -147,9 +148,10 @@ class ClienteDetalleViewController: UIViewController {
     func creaNavegador() {
         
         //Logo capa de ozono al centro
+        let imageName = String(self._app.database.name) == "vmepi" ? "LogoEpisodio180x180.png" : "logo180x180.png"
         let imageView = UIImageView(frame: CGRect(x: 0, y: 0, width: 100, height: 100))
         imageView.contentMode = .scaleAspectFit
-        let image = UIImage(named: "logo180x180.png")
+        let image = UIImage(named: imageName)
         imageView.image = image
         navigationItem.titleView = imageView
         

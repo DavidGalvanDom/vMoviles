@@ -31,7 +31,8 @@ class ClienteViewController: UITableViewController,UISearchResultsUpdating {
         // Inicializa las vistas y querys couchbase lite:
         self.iniciaBaseDatos()
 
-       self.splitViewController?.maximumPrimaryColumnWidth = 320
+        self.splitViewController?.maximumPrimaryColumnWidth = 320
+        
     }
 
     override func didReceiveMemoryWarning() {

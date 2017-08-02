@@ -52,10 +52,14 @@ class CompaniasViewController: UIViewController  {
     func CargarImagenTemporada() {
         
         do {
-            try self._app.openDatabase(companias: ["vmozono","vmimages"])
-            self._app.imgTemporada  = ProductoDatos(_database: self._app.databaseImg).CargarImagen(clave: "temporada")
-        
-            self.view.backgroundColor = UIColor(patternImage:self._app.imgTemporada )
+            
+            if(self._app.imgTemporada == nil){
+               try self._app.openDatabase(companias: ["vmozono","vmimages"])
+               self._app.imgTemporada  = ProductoDatos(_database: self._app.databaseImg).CargarImagen(clave: "temporada")
+            }
+            
+             self.view.backgroundColor = UIColor(patternImage:self._app.imgTemporada )
+            
         } catch let error as NSError {
             Ui.showMessageDialog(onController: self, withTitle: "Error", withMessage: "No se pudo cargar la imagen de temporada", withError: error)
         }

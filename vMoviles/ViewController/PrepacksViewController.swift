@@ -224,21 +224,23 @@ class PrepacksViewController: UIViewController,UITableViewDelegate, UITableViewD
     //Se genera el encabezado de la corrida
     func AsignaCorrida(cell: prepackTableViewCell)
     {
-        cell.lblC1.text = self._corrida.c1 as String == "0" ? "" : self._corrida.c1 as String
-        cell.lblC2.text = self._corrida.c2 as String == "0" ? "" : self._corrida.c2 as String
-        cell.lblC3.text = self._corrida.c3 as String == "0" ? "" : self._corrida.c3 as String
-        cell.lblC4.text = self._corrida.c4 as String == "0" ? "" : self._corrida.c4 as String
-        cell.lblC5.text = self._corrida.c5 as String == "0" ? "" : self._corrida.c5 as String
-        cell.lblC6.text = self._corrida.c6 as String == "0" ? "" : self._corrida.c6 as String
-        cell.lblC7.text = self._corrida.c7 as String == "0" ? "" : self._corrida.c7 as String
-        cell.lblC8.text = self._corrida.c8 as String == "0" ? "" : self._corrida.c8 as String
-        cell.lblC9.text = self._corrida.c9 as String  == "0" ? "" : self._corrida.c9 as String
-        cell.lblC10.text = self._corrida.c10 as String == "0" ? "" : self._corrida.c10 as String
-        cell.lblC11.text = self._corrida.c11 as String == "0" ? "" : self._corrida.c11 as String
-        cell.lblC12.text = self._corrida.c12 as String == "0" ? "" : self._corrida.c12 as String
-        cell.lblC13.text = self._corrida.c13 as String == "0" ? "" : self._corrida.c13 as String
-        cell.lblC14.text = self._corrida.c14 as String == "0" ? "" : self._corrida.c14 as String
-        cell.lblC15.text = self._corrida.c15 as String == "0" ? "" : self._corrida.c15 as String
+        if(self._corrida != nil) {
+            cell.lblC1.text = self._corrida.c1 as String == "0" ? "" : self._corrida.c1 as String
+            cell.lblC2.text = self._corrida.c2 as String == "0" ? "" : self._corrida.c2 as String
+            cell.lblC3.text = self._corrida.c3 as String == "0" ? "" : self._corrida.c3 as String
+            cell.lblC4.text = self._corrida.c4 as String == "0" ? "" : self._corrida.c4 as String
+            cell.lblC5.text = self._corrida.c5 as String == "0" ? "" : self._corrida.c5 as String
+            cell.lblC6.text = self._corrida.c6 as String == "0" ? "" : self._corrida.c6 as String
+            cell.lblC7.text = self._corrida.c7 as String == "0" ? "" : self._corrida.c7 as String
+            cell.lblC8.text = self._corrida.c8 as String == "0" ? "" : self._corrida.c8 as String
+            cell.lblC9.text = self._corrida.c9 as String  == "0" ? "" : self._corrida.c9 as String
+            cell.lblC10.text = self._corrida.c10 as String == "0" ? "" : self._corrida.c10 as String
+            cell.lblC11.text = self._corrida.c11 as String == "0" ? "" : self._corrida.c11 as String
+            cell.lblC12.text = self._corrida.c12 as String == "0" ? "" : self._corrida.c12 as String
+            cell.lblC13.text = self._corrida.c13 as String == "0" ? "" : self._corrida.c13 as String
+            cell.lblC14.text = self._corrida.c14 as String == "0" ? "" : self._corrida.c14 as String
+            cell.lblC15.text = self._corrida.c15 as String == "0" ? "" : self._corrida.c15 as String
+        }
     }
     
     //Se asgina los prepack y los inventarios por renglon

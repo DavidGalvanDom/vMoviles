@@ -106,7 +106,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UISplitViewControllerDele
             try databaseImg.close()
         }
     }
-    
+
     func observeDatabaseChange(notification: Notification) {
         if(!(notification.userInfo?["external"] as! Bool)) {
             return;
@@ -155,7 +155,16 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UISplitViewControllerDele
             try closeDatabase()
             try openDatabase(companias: companias)
         } catch let error as NSError {
-            NSLog("No se puede cerrar la base de datos: %@", error)
+            
+            Ui.showMessageDialog(
+                onController: self.window!.rootViewController!,
+                withTitle: "Cerrar base de datos",
+                withMessage: "No se puede cerrar la base de datos: " + String(describing: error),
+                withError: nil,
+                onClose: {
+                    ///self.logout()
+            })
+            
         }
 
         syncError = nil

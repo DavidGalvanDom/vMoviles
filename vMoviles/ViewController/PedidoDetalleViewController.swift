@@ -184,37 +184,18 @@ class PedidoDetalleViewController: UIViewController, SearchClienteDelegate, Sear
     func creaNavegador() {
         
         //Logo capa de ozono al centro
+        let imageName = String(self._app.database.name) == "vmepi" ? "LogoEpisodio180x180.png" : "logo180x180.png"
         let imageView = UIImageView(frame: CGRect(x: 0, y: 0, width: 100, height: 100))
         imageView.contentMode = .scaleAspectFit
-        let image = UIImage(named: "logo180x180.png")
+        let image = UIImage(named: imageName)
         imageView.image = image
         navigationItem.titleView = imageView
-        
-        // Toolbar Izquierdo
-        // badge label
-        let label = UILabel(frame: CGRect(x: -20, y: -11, width: 140, height: 40))
-        label.layer.borderColor = UIColor.clear.cgColor
-        label.layer.borderWidth = 2
-        label.layer.cornerRadius = label.bounds.size.height / 2
-        label.textAlignment = .center
-        label.layer.masksToBounds = true
-        label.font = UIFont(name: "SanFranciscoText-Light", size: 13)
-        label.textColor = .black
-        let app = UIApplication.shared.delegate as! AppDelegate
-        label.text = app.compania
-        
-        // boton que tiene el label
-        let btnCompania = UIButton(frame: CGRect(x: 0, y: 0, width: 18, height: 16))
-        btnCompania.addTarget(self, action: #selector(backController), for: .touchUpInside)
-        btnCompania.addSubview(label)
-        
-        let lblbuttonComapania = UIBarButtonItem(customView: btnCompania)
         
         let barListaPedidos = UIBarButtonItem(image: UIImage(named:"Pedido2"), style: .plain, target: self, action: #selector(backController))
         barListaPedidos.imageInsets = UIEdgeInsetsMake(7, 5, 7, 5)
         barListaPedidos.tintColor = .gray
         
-        self.navigationItem.leftBarButtonItems = [barListaPedidos, lblbuttonComapania]
+        self.navigationItem.leftBarButtonItems = [barListaPedidos]
         
         //Toolbar Derecho
         let brRptProductos = UIBarButtonItem(image: UIImage(named:"rptProducto"), style: .plain, target: self, action: #selector(onRptProductos))
@@ -907,6 +888,7 @@ class PedidoDetalleViewController: UIViewController, SearchClienteDelegate, Sear
             vc.preferredContentSize = CGSize(width: 950, height: 550)
             vc.modalPresentationStyle = .formSheet
             vc.modalTransitionStyle = .crossDissolve
+            vc._compania = self._app.database.name == "vmepi" ? "Epi" : ""
             self._pedido.fechaFin = self.txtFechaFin.text
             self._pedido.fechaInicio = self.txtFechaIni.text
             self._pedido.fechaCancelacion = self.txtFechaCancelada.text

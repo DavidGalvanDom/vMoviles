@@ -13,7 +13,7 @@ import MessageUI
 class ReportePedidoViewController: UIViewController, MFMailComposeViewControllerDelegate {
 
     @IBOutlet weak var webView: UIWebView!
-    
+    var _compania: String = ""
     var _pedido: Pedido!
         
     override func viewDidLoad() {
@@ -29,7 +29,7 @@ class ReportePedidoViewController: UIViewController, MFMailComposeViewController
        var pares = 0
         
         do{
-            guard let filePath = Bundle.main.path(forResource: "rptPedido", ofType: "html")
+            guard let filePath = Bundle.main.path(forResource: "rptPedido" + self._compania , ofType: "html")
                 else {
                     // File Error
                     print ("Error al cargar la plantilla del Reporte Pedidos")
